@@ -1,0 +1,118 @@
+name: prismgo-test
+
+services:
+  mysql:
+    image: ${MYSQL_IMAGE:-mysql:8.4}
+    environment:
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-prismgo_test}
+      MYSQL_USER: ${MYSQL_USER:-prismgo}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-prismgo}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-PrismGo_Root123!}
+      TZ: ${TZ:-Asia/Shanghai}
+    ports:
+      - "127.0.0.1:${MYSQL_PORT:-3306}:3306"
+    volumes:
+      - mysql-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -uroot -p\"$${MYSQL_ROOT_PASSWORD}\" --silent"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+      start_period: 20s
+    restart: unless-stopped
+
+  postgres:
+    image: ${POSTGRES_IMAGE:-postgres:17}
+    environment:
+      POSTGRES_DB: ${POSTGRES_DATABASE:-prismgo_test}
+      POSTGRES_USER: ${POSTGRES_USER:-prismgo}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-prismgo}
+      TZ: ${TZ:-Asia/Shanghai}
+    ports:
+      - "127.0.0.1:${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U \"$${POSTGRES_USER}\" -d \"$${POSTGRES_DB}\""]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 10s
+    restart: unless-stopped
+
+  sqlserver:
+    image: ${SQLSERVER_IMAGE:-mcr.microsoft.com/mssql/server:2022-latest}
+    platform: ${SQLSERVER_PLATFORM:-linux/amd64}
+    environment:
+      ACCEPT_EULA: "Y"
+      MSSQL_PID: Developer
+      MSSQL_SA_PASSWORD: ${SQLSERVER_SA_PASSWORD:-PrismGo_Test123!}
+      TZ: ${TZ:-Asia/Shanghai}
+    ports:
+      - "127.0.0.1:${SQLSERVER_PORT:-1433}:1433"
+    volumes:
+      - sqlserver-data:/var/opt/mssql
+    healthcheck:
+      test: ["CMD-SHELL", "/opt/mssql-tools18/bin/sqlcmd -C -S 127.0.0.1 -U sa -P \"$${MSSQL_SA_PASSWORD}\" -Q \"SELECT 1\" -b -o /dev/null"]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+      start_period: 30s
+    restart: unless-stopped
+
+  sqlserver-init:
+    image: ${SQLSERVER_IMAGE:-mcr.microsoft.com/mssql/server:2022-latest}
+    platform: ${SQLSERVER_PLATFORM:-linux/amd64}
+    profiles: [tools]
+    depends_on:
+      sqlserver:
+        condition: service_healthy
+    environment:
+      SQLSERVER_DATABASE: ${SQLSERVER_DATABASE:-prismgo_test}
+      SQLSERVER_SA_PASSWORD: ${SQLSERVER_SA_PASSWORD:-PrismGo_Test123!}
+    volumes:
+      - ./sqlserver/init.sh:/usr/local/bin/prismgo-sqlserver-init:ro
+      - ./sqlserver/init.sql:/usr/local/share/prismgo/init.sql:ro
+    entrypoint: ["/bin/bash", "/usr/local/bin/prismgo-sqlserver-init"]
+    restart: "no"
+
+  redis:
+    image: ${REDIS_IMAGE:-redis:7.4-alpine}
+    command: ["redis-server", "--appendonly", "yes"]
+    ports:
+      - "127.0.0.1:${REDIS_PORT:-6379}:6379"
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    restart: unless-stopped
+
+  rabbitmq:
+    image: ${RABBITMQ_IMAGE:-rabbitmq:4.1-management}
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER:-prismgo}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD:-prismgo}
+      RABBITMQ_DEFAULT_VHOST: ${RABBITMQ_VHOST:-/}
+      TZ: ${TZ:-Asia/Shanghai}
+    ports:
+      - "127.0.0.1:${RABBITMQ_PORT:-5672}:5672"
+      - "127.0.0.1:${RABBITMQ_MANAGEMENT_PORT:-15672}:15672"
+    volumes:
+      - rabbitmq-data:/var/lib/rabbitmq
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+      start_period: 15s
+    restart: unless-stopped
+
+volumes:
+  mysql-data:
+  postgres-data:
+  sqlserver-data:
+  redis-data:
+  rabbitmq-data:
