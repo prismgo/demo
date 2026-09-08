@@ -37,6 +37,21 @@ go run ./dev list
 
 需要数据库、Redis 或队列等本地服务时，先按任务范围启动依赖，例如 `./dev/dev up mysql redis rabbitmq`；服务状态与连接变量通过 `./dev/dev status` 和 `./dev/dev env` 查看。
 
+## Demo 示例与测试
+
+- `app/demo/catalog/` 维护“文档章节 → 示例 → 测试”的覆盖目录；用 `go run ./dev demo:list` 查看全部条目，并可按功能、`--level`、`--status` 过滤或使用 `--json` 输出。
+- `app/demo/testing/` 提供隔离测试 Application，默认使用 SQLite、memory/file cache、sync queue、file session 和临时目录，不读取开发环境的 `.env`。
+- `app/models/`、`app/repositories/`、`app/services/` 与 `database/migrations/` 中的订单示例用于展示模型、仓储、事务和业务服务组合；当前以单元测试和场景测试为主要使用入口。
+
+默认验证不需要 Docker：
+
+```bash
+cd dev
+GOWORK=off go test . ./app/... ./bootstrap/... ./config/... ./database/... ./routes/...
+```
+
+真实集成测试按需通过 `PRISMGO_MYSQL_TEST_DSN`、`PRISMGO_REDIS_TEST_ADDR`、`PRISMGO_REDIS_TEST_URL` 或 `PRISMGO_RABBITMQ_TEST_URL` 启用；变量缺失时相关测试应明确跳过。
+
 ## 地图索引
 
 | 何时读取 | 文档 | 用于确认 |

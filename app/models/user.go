@@ -34,3 +34,6 @@ type User struct {
 	// DeletedAt records soft deletion without removing the row immediately.
 	DeletedAt *time.Time `json:"deleted_at,omitempty"`
 }
+
+// TableName keeps demo users compatible with the starter migration.
+func (User) TableName() string { return "users" }
