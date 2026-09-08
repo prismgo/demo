@@ -21,7 +21,7 @@
 ./dev/dev init
 ```
 
-该命令会创建根目录的 Agent 指令链接，克隆缺失的 `framework/` 与 `docs/` 仓库，将 `dev/.env.example` 复制为缺失的 `dev/.env`，创建或更新本地 `go.work`，并下载框架 Go 依赖。已有的 `dev/.env` 不会被覆盖。
+该命令会创建根目录的 Agent 指令链接，并把 `dev/.agents/skills/` 中的项目 skills（当前包含 `dev-harness-lite` 与 `code-review`）软链到根目录的 `.agents/skills/` 与 `.claude/skills/`；随后克隆缺失的 `framework/` 与 `docs/` 仓库，将 `dev/.env.example` 复制为缺失的 `dev/.env`，创建或更新本地 `go.work`，并下载框架 Go 依赖。已有文件和 `dev/.env` 不会被覆盖。
 
 初始化完成后，从项目根目录启动 Demo HTTP 服务器：
 

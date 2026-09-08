@@ -10,6 +10,7 @@ cp "${source_root}/dev" "${fixture_root}/workspace/dev/dev"
 cp "${source_root}/.dev/scripts/test-environment.sh" \
     "${fixture_root}/workspace/dev/.dev/scripts/test-environment.sh"
 cp "${source_root}/AGENTS.md" "${fixture_root}/workspace/dev/AGENTS.md"
+cp -R "${source_root}/.agents" "${fixture_root}/workspace/dev/.agents"
 printf 'keep me\n' >"${fixture_root}/workspace/AGENTS.md"
 
 cat >"${fixture_root}/bin/git" <<'EOF'

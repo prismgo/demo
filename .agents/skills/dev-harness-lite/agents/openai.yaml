@@ -1,0 +1,5 @@
+interface:
+  display_name: "PrismGo Dev Harness Lite"
+  short_description: "Run the guarded PrismGo S1–S4 development workflow"
+policy:
+  allow_implicit_invocation: false

@@ -4,17 +4,91 @@ set -euo pipefail
 dev_root="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 workspace_root="$(cd "${dev_root}/.." && pwd)"
 
-ensure_agent_link() {
+check_link_available() {
     local link_path="$1"
+    local target="$2"
 
-    if [[ -L "${link_path}" && "$(readlink "${link_path}")" == "dev/AGENTS.md" ]]; then
+    if [[ -L "${link_path}" && "$(readlink "${link_path}")" == "${target}" ]]; then
         return
     fi
     if [[ -e "${link_path}" || -L "${link_path}" ]]; then
         echo "Refusing to replace existing path: ${link_path}" >&2
         exit 1
     fi
-    ln -s "dev/AGENTS.md" "${link_path}"
+    check_parent_writable "${link_path}"
+}
+
+check_parent_writable() {
+    local path="$1"
+    local parent
+
+    parent="$(dirname "${path}")"
+    while [[ ! -e "${parent}" && ! -L "${parent}" ]]; do
+        parent="$(dirname "${parent}")"
+    done
+    if [[ ! -d "${parent}" || ! -w "${parent}" ]]; then
+        echo "Refusing to create path under non-writable parent: ${path}" >&2
+        exit 1
+    fi
+}
+
+check_directory_available() {
+    local directory_path="$1"
+
+    if [[ -d "${directory_path}" && ! -L "${directory_path}" ]]; then
+        return
+    fi
+    if [[ -e "${directory_path}" || -L "${directory_path}" ]]; then
+        echo "Refusing to replace existing path: ${directory_path}" >&2
+        exit 1
+    fi
+}
+
+ensure_link() {
+    local link_path="$1"
+    local target="$2"
+
+    if [[ -L "${link_path}" && "$(readlink "${link_path}")" == "${target}" ]]; then
+        return
+    fi
+    mkdir -p "$(dirname "${link_path}")"
+    ln -s "${target}" "${link_path}"
+}
+
+install_agent_files() {
+    local skills_source="${dev_root}/.agents/skills"
+    local skill_source skill_name skill_target
+
+    for skill_name in dev-harness-lite code-review; do
+        [[ -f "${skills_source}/${skill_name}/SKILL.md" ]] || {
+            echo "Missing bundled skill: ${skills_source}/${skill_name}" >&2
+            exit 1
+        }
+    done
+
+    check_directory_available "${workspace_root}/.agents"
+    check_directory_available "${workspace_root}/.agents/skills"
+    check_directory_available "${workspace_root}/.claude"
+    check_directory_available "${workspace_root}/.claude/skills"
+    check_link_available "${workspace_root}/AGENTS.md" "dev/AGENTS.md"
+    check_link_available "${workspace_root}/CLAUDE.md" "dev/AGENTS.md"
+    for skill_source in "${skills_source}"/*; do
+        [[ -d "${skill_source}" && -f "${skill_source}/SKILL.md" ]] || continue
+        skill_name="$(basename "${skill_source}")"
+        skill_target="../../dev/.agents/skills/${skill_name}"
+        check_link_available "${workspace_root}/.agents/skills/${skill_name}" "${skill_target}"
+        check_link_available "${workspace_root}/.claude/skills/${skill_name}" "${skill_target}"
+    done
+
+    ensure_link "${workspace_root}/AGENTS.md" "dev/AGENTS.md"
+    ensure_link "${workspace_root}/CLAUDE.md" "dev/AGENTS.md"
+    for skill_source in "${skills_source}"/*; do
+        [[ -d "${skill_source}" && -f "${skill_source}/SKILL.md" ]] || continue
+        skill_name="$(basename "${skill_source}")"
+        skill_target="../../dev/.agents/skills/${skill_name}"
+        ensure_link "${workspace_root}/.agents/skills/${skill_name}" "${skill_target}"
+        ensure_link "${workspace_root}/.claude/skills/${skill_name}" "${skill_target}"
+    done
 }
 
 ensure_repository() {
@@ -62,8 +136,11 @@ install_framework_dependencies() {
 }
 
 if [[ "${1:-}" == "init" ]]; then
-    ensure_agent_link "${workspace_root}/AGENTS.md"
-    ensure_agent_link "${workspace_root}/CLAUDE.md"
+    command -v flock >/dev/null || { echo "dev init requires flock" >&2; exit 1; }
+    mkdir -p "${dev_root}/.dev/_task"
+    exec 9>"${dev_root}/.dev/_task/init.lock"
+    flock -x 9
+    install_agent_files
     ensure_repository framework git@github.com:prismgo/framework.git
     ensure_repository docs git@github.com:prismgo/docs.git
     ensure_env_file
