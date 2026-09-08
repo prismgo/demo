@@ -151,6 +151,7 @@ SQLite:      ${sqlite_file}
 Redis:       127.0.0.1:${REDIS_PORT}
 RabbitMQ:    127.0.0.1:${RABBITMQ_PORT} (${RABBITMQ_USER}/${RABBITMQ_PASSWORD})
 RabbitMQ UI: http://127.0.0.1:${RABBITMQ_MANAGEMENT_PORT}
+Listen on:   ${BIND_ADDRESS} (LAN clients use this host's LAN IP and the same ports)
 Environment: ${runtime_env}
 EOF
 }
@@ -215,7 +216,7 @@ case "${command}" in
         ;;
     status)
         require_docker
-        compose ps
+        compose ps --all
         echo
         print_connections
         ;;

@@ -37,21 +37,21 @@
 
 ## 默认连接
 
-所有端口只监听 `127.0.0.1`，不能从局域网访问。
+所有容器端口默认监听 `0.0.0.0`。本机使用下表中的 `127.0.0.1` 连接；同一局域网内的设备将 `127.0.0.1` 替换为运行 Docker 的宿主机局域网 IP 即可。主机防火墙仍需允许对应端口。
 
 | 服务 | 地址 | 数据库/账号 |
 |---|---|---|
-| MySQL | `127.0.0.1:3306` | `prismgo_test`，`prismgo/prismgo` |
-| PostgreSQL | `127.0.0.1:5432` | `prismgo_test`，`prismgo/prismgo` |
-| SQL Server | `127.0.0.1:1433` | `prismgo_test`，`sa/PrismGo_Test123!` |
+| MySQL | `127.0.0.1:13306` | `prismgo_test`，`prismgo/prismgo` |
+| PostgreSQL | `127.0.0.1:15432` | `prismgo_test`，`prismgo/prismgo` |
+| SQL Server | `127.0.0.1:11433` | `prismgo_test`，`sa/PrismGo_Test123!` |
 | SQLite | `.dev/runtime/sqlite/prismgo_test.sqlite` | 文件数据库，无服务进程 |
-| Redis | `127.0.0.1:6379` | DB 0，无密码 |
-| RabbitMQ | `127.0.0.1:5672` | `prismgo/prismgo`，vhost `/` |
-| RabbitMQ 管理界面 | `http://127.0.0.1:15672` | `prismgo/prismgo` |
+| Redis | `127.0.0.1:16379` | DB 0，无密码 |
+| RabbitMQ | `127.0.0.1:15673` | `prismgo/prismgo`，vhost `/` |
+| RabbitMQ 管理界面 | `http://127.0.0.1:25673` | `prismgo/prismgo` |
 
-这些账号仅供本机测试，禁止用于共享或生产环境。
+这些账号只用于受信任局域网内的开发测试，禁止暴露到公网或用于生产环境。公共或不受信任网络下，应在 `.dev/docker/local.env` 设置 `BIND_ADDRESS=127.0.0.1`。
 
-端口冲突时：
+宿主机端口特意避开了各服务的标准端口。仍有端口冲突时：
 
 ```bash
 cp .dev/docker/local.env.example .dev/docker/local.env
