@@ -13,6 +13,30 @@
 | 文档同步 | `framework/` 功能变更时，同步更新 `docs/` 中的对应文档。 |
 | 分仓处理 | 根目录不是提交仓库；`dev/`、`framework/` 与 `docs/` 是三个独立 Git 仓库，检查和提交必须分别执行。 |
 
+## 开发命令
+
+在项目根目录执行初始化：
+
+```bash
+./dev/dev init
+```
+
+该命令会创建根目录的 Agent 指令链接，克隆缺失的 `framework/` 与 `docs/` 仓库，将 `dev/.env.example` 复制为缺失的 `dev/.env`，创建或更新本地 `go.work`，并下载框架 Go 依赖。已有的 `dev/.env` 不会被覆盖。
+
+初始化完成后，从项目根目录启动 Demo HTTP 服务器：
+
+```bash
+go run ./dev serve
+```
+
+查看所有可执行命令及参数入口：
+
+```bash
+go run ./dev list
+```
+
+需要数据库、Redis 或队列等本地服务时，先按任务范围启动依赖，例如 `./dev/dev up mysql redis rabbitmq`；服务状态与连接变量通过 `./dev/dev status` 和 `./dev/dev env` 查看。
+
 ## 地图索引
 
 | 何时读取 | 文档 | 用于确认 |

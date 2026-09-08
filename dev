@@ -28,11 +28,47 @@ ensure_repository() {
     git clone "${remote_url}" "${repository_path}"
 }
 
+ensure_env_file() {
+    local env_file="${dev_root}/.env"
+
+    if [[ -e "${env_file}" ]]; then
+        return
+    fi
+    cp "${dev_root}/.env.example" "${env_file}"
+}
+
+ensure_go_workspace() {
+    local workspace_file="${workspace_root}/go.work"
+
+    if [[ ! -e "${workspace_file}" ]]; then
+        (
+            cd "${workspace_root}"
+            go work init ./dev ./framework
+        )
+        return
+    fi
+
+    (
+        cd "${workspace_root}"
+        go work use ./dev ./framework
+    )
+}
+
+install_framework_dependencies() {
+    (
+        cd "${workspace_root}/framework"
+        go mod download
+    )
+}
+
 if [[ "${1:-}" == "init" ]]; then
     ensure_agent_link "${workspace_root}/AGENTS.md"
     ensure_agent_link "${workspace_root}/CLAUDE.md"
     ensure_repository framework git@github.com:prismgo/framework.git
     ensure_repository docs git@github.com:prismgo/docs.git
+    ensure_env_file
+    ensure_go_workspace
+    install_framework_dependencies
     exit 0
 fi
 

@@ -4,15 +4,32 @@ package main
 import (
 	"context"
 	"os"
+	"path/filepath"
 	"prismgo-demo/bootstrap"
 
 	"github.com/prismgo/framework/console"
 )
 
 func main() {
-	app := bootstrap.NewApplication()
+	app := bootstrap.NewApplication(localApplicationBasePath())
 
 	if err := app.HandleCommand(context.Background(), os.Args); err != nil {
 		console.Exit(err.Error())
 	}
+}
+
+// localApplicationBasePath keeps the demo rooted in dev whether commands are
+// run from the workspace root (`go run ./dev`) or from dev (`go run .`).
+func localApplicationBasePath() string {
+	workingDirectory, err := os.Getwd()
+	if err != nil {
+		return ""
+	}
+
+	devDirectory := filepath.Join(workingDirectory, "dev")
+	if _, err := os.Stat(filepath.Join(devDirectory, "go.mod")); err == nil {
+		return devDirectory
+	}
+
+	return ""
 }

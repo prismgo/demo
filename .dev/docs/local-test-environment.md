@@ -26,7 +26,7 @@
 
 | 命令 | 行为 |
 |---|---|
-| `./dev/dev init` | 创建根目录 Agent 指令链接，并克隆缺失的 `framework/`、`docs/` 仓库 |
+| `./dev/dev init` | 创建根目录 Agent 指令链接，克隆缺失仓库，初始化 `dev/.env` 和 `go.work`，并下载框架 Go 依赖 |
 | `./dev/dev up [service...]` | 启动全部或指定服务并等待健康 |
 | `./dev/dev status` | 查看容器状态、端口、账号和环境变量文件 |
 | `./dev/dev logs [service]` | 持续查看全部或指定服务日志 |
