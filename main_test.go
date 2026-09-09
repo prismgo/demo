@@ -8,11 +8,11 @@ import (
 
 func TestLocalApplicationBasePath(t *testing.T) {
 	workspace := t.TempDir()
-	devDirectory := filepath.Join(workspace, "dev")
-	if err := os.Mkdir(devDirectory, 0o755); err != nil {
-		t.Fatalf("mkdir dev: %v", err)
+	demoDirectory := filepath.Join(workspace, "demo")
+	if err := os.Mkdir(demoDirectory, 0o755); err != nil {
+		t.Fatalf("mkdir demo: %v", err)
 	}
-	if err := os.WriteFile(filepath.Join(devDirectory, "go.mod"), []byte("module example.test/dev\n"), 0o644); err != nil {
+	if err := os.WriteFile(filepath.Join(demoDirectory, "go.mod"), []byte("module example.test/demo\n"), 0o644); err != nil {
 		t.Fatalf("write go.mod: %v", err)
 	}
 
@@ -29,14 +29,14 @@ func TestLocalApplicationBasePath(t *testing.T) {
 	if err := os.Chdir(workspace); err != nil {
 		t.Fatalf("chdir workspace: %v", err)
 	}
-	if got := localApplicationBasePath(); got != devDirectory {
-		t.Fatalf("localApplicationBasePath() = %q, want %q", got, devDirectory)
+	if got := localApplicationBasePath(); got != demoDirectory {
+		t.Fatalf("localApplicationBasePath() = %q, want %q", got, demoDirectory)
 	}
 
-	if err := os.Chdir(devDirectory); err != nil {
-		t.Fatalf("chdir dev: %v", err)
+	if err := os.Chdir(demoDirectory); err != nil {
+		t.Fatalf("chdir demo: %v", err)
 	}
 	if got := localApplicationBasePath(); got != "" {
-		t.Fatalf("localApplicationBasePath() from dev = %q, want empty auto-detect path", got)
+		t.Fatalf("localApplicationBasePath() from demo = %q, want empty auto-detect path", got)
 	}
 }

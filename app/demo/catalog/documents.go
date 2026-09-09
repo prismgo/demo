@@ -9,7 +9,7 @@ import (
 )
 
 // FindDocsRoot walks upward from start and returns a sibling docs checkout when
-// available. A standalone dev checkout legitimately returns ok=false.
+// available. A standalone demo checkout legitimately returns ok=false.
 func FindDocsRoot(start string) (root string, ok bool) {
 	current, err := filepath.Abs(start)
 	if err != nil {

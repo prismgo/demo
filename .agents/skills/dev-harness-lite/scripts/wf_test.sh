@@ -5,15 +5,15 @@ source_skill="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 fixture="$(mktemp -d)"
 trap 'rm -rf "${fixture}"' EXIT
 
-skill="${fixture}/dev/.agents/skills/dev-harness-lite"
-mkdir -p "$(dirname "${skill}")" "${fixture}/dev/.dev"
+skill="${fixture}/demo/.agents/skills/dev-harness-lite"
+mkdir -p "$(dirname "${skill}")" "${fixture}/demo/.dev"
 cp -R "${source_skill}" "${skill}"
 wf="${skill}/scripts/wf.sh"
 wip_diff="${skill}/scripts/wipDiff.sh"
 
 output="$(bash "${wf}" lite-new cache-contract framework,docs codex --workspace normal --timing on --loop-mode context --loop-limit 500)"
 [[ "${output}" == *"0001-cache-contract.md"* ]]
-card="${fixture}/dev/.dev/_task/tasks/0001-cache-contract.md"
+card="${fixture}/demo/.dev/_task/tasks/0001-cache-contract.md"
 [[ -f "${card}" ]]
 grep -Fq 'repos: [framework, docs]' "${card}"
 grep -Fq 'stage: S1' "${card}"
@@ -24,9 +24,9 @@ grep -Fq 'attempts: -' "${card}"
 grep -Fq 'budget_used: 0' "${card}"
 grep -Fq 'pause_state: none' "${card}"
 
-if bash "${wf}" lite-new Bad_Slug dev >/dev/null 2>&1; then echo "invalid slug accepted" >&2; exit 1; fi
+if bash "${wf}" lite-new Bad_Slug demo >/dev/null 2>&1; then echo "invalid slug accepted" >&2; exit 1; fi
 if bash "${wf}" lite-new bad-repo framework,api >/dev/null 2>&1; then echo "invalid repo accepted" >&2; exit 1; fi
-if bash "${wf}" lite-new bad-mode dev --workspace other >/dev/null 2>&1; then echo "invalid workspace accepted" >&2; exit 1; fi
+if bash "${wf}" lite-new bad-mode demo --workspace other >/dev/null 2>&1; then echo "invalid workspace accepted" >&2; exit 1; fi
 
 printf '%s\n' '缓存读取遵循公开契约；非目标：不改数据库。' | bash "${wf}" fill 0001 需求描述 >/dev/null
 printf '%s\n' '无' | bash "${wf}" fill 0001 外部文档索引 >/dev/null
@@ -189,17 +189,17 @@ git -C "${fixture}/docs" switch main >/dev/null
 bash "${wf}" lite-merge 0001 >/dev/null
 grep -Fq 'merged_repos: [framework, docs]' "${card}"
 bash "${wf}" lite-archive 0001 >/dev/null
-archived="${fixture}/dev/.dev/_task/archive/0001-cache-contract.md"
+archived="${fixture}/demo/.dev/_task/archive/0001-cache-contract.md"
 [[ -f "${archived}" && ! -e "${card}" ]]
 grep -Fq 'status: done' "${archived}"
 grep -Fq '事件 ' "${archived}"
-[[ -f "${fixture}/dev/.dev/_task/archive/0001.assets/timing.jsonl" ]]
-grep -Fq '| 0001 | cache-contract | framework, docs | normal | S4 | 2/2 | done |' "${fixture}/dev/.dev/_task/board.md"
+[[ -f "${fixture}/demo/.dev/_task/archive/0001.assets/timing.jsonl" ]]
+grep -Fq '| 0001 | cache-contract | framework, docs | normal | S4 | 2/2 | done |' "${fixture}/demo/.dev/_task/board.md"
 bash "${wf}" board --check >/dev/null
 
 # Worktree delivery is not complete until the feature worktree is removed.
 bash "${wf}" lite-new worktree-flow framework codex --workspace worktree --timing off --loop-mode continuous >/dev/null
-card2="${fixture}/dev/.dev/_task/tasks/0002-worktree-flow.md"
+card2="${fixture}/demo/.dev/_task/tasks/0002-worktree-flow.md"
 printf '%s\n' '验证 worktree 交付门禁；非目标：不改公开 API。' | bash "${wf}" fill 0002 需求描述 >/dev/null
 printf '%s\n' '无' | bash "${wf}" fill 0002 外部文档索引 >/dev/null
 printf '%s\n' '通过 CLI seam 验证合并和清理顺序。' | bash "${wf}" fill 0002 'Agent 设计摘要' >/dev/null
@@ -227,17 +227,17 @@ if bash "${wf}" lite-archive 0002 >/dev/null 2>&1; then
 fi
 bash "${wf}" wtclean 0002 >/dev/null
 bash "${wf}" lite-archive 0002 >/dev/null
-[[ -f "${fixture}/dev/.dev/_task/archive/0002-worktree-flow.md" && ! -e "${wt}" ]]
-grep -Fq '不记录' "${fixture}/dev/.dev/_task/archive/0002-worktree-flow.md"
+[[ -f "${fixture}/demo/.dev/_task/archive/0002-worktree-flow.md" && ! -e "${wt}" ]]
+grep -Fq '不记录' "${fixture}/demo/.dev/_task/archive/0002-worktree-flow.md"
 
 pids=()
 for number in 1 2 3 4 5 6; do
-    bash "${wf}" lite-new "concurrent-${number}" dev codex --timing off --loop-mode continuous >/dev/null &
+    bash "${wf}" lite-new "concurrent-${number}" demo codex --timing off --loop-mode continuous >/dev/null &
     pids+=("$!")
 done
 for pid in "${pids[@]}"; do wait "${pid}"; done
-[[ "$(find "${fixture}/dev/.dev/_task/tasks" -maxdepth 1 -name '*.md' | wc -l | tr -d ' ')" == 6 ]]
-[[ "$(find "${fixture}/dev/.dev/_task/tasks" -maxdepth 1 -name '*.md' -printf '%f\n' | cut -d- -f1 | sort -u | wc -l | tr -d ' ')" == 6 ]]
+[[ "$(find "${fixture}/demo/.dev/_task/tasks" -maxdepth 1 -name '*.md' | wc -l | tr -d ' ')" == 6 ]]
+[[ "$(find "${fixture}/demo/.dev/_task/tasks" -maxdepth 1 -name '*.md' -printf '%f\n' | cut -d- -f1 | sort -u | wc -l | tr -d ' ')" == 6 ]]
 bash "${wf}" board --check >/dev/null
 
 echo "dev-harness-lite S1-S4 workflow tests: PASS"

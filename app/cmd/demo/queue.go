@@ -42,10 +42,10 @@ func (c *QueueCommand) Definition() *console.Definition {
 		"Run queue examples mapped to the Queue documentation",
 	)
 	definition.Examples = []string{
-		"go run ./dev demo:queue list",
-		"go run ./dev demo:queue basic --connection=sync",
-		"go run ./dev demo:queue basic --connection=redis",
-		"go run ./dev demo:queue basic --connection=rabbitmq",
+		"go run ./demo demo:queue list",
+		"go run ./demo demo:queue basic --connection=sync",
+		"go run ./demo demo:queue basic --connection=redis",
+		"go run ./demo demo:queue basic --connection=rabbitmq",
 	}
 	return definition
 }

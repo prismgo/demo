@@ -25,7 +25,7 @@ Whatever the user said is the fixed point — a commit SHA, branch name, tag, `m
 Choose the target from the request:
 
 - **Committed target** (default for branches and PRs): use `git diff <fixed-point>...HEAD` and note commits with `git log <fixed-point>..HEAD --oneline`.
-- **Working-tree/WIP target** (when explicitly requested): when the project provides a WIP patch helper, prefer it; PrismGo uses `bash dev/.agents/skills/dev-harness-lite/scripts/wipDiff.sh <repo> <fixed-point> /tmp/<name>.patch`. Otherwise use `git diff <fixed-point>` for tracked changes, list new files with `git ls-files --others --exclude-standard`, and include each new file with `git diff --no-index -- /dev/null <file>` (exit 1 means a non-empty patch, not failure). This mode includes committed, staged, unstaged, and untracked work without changing the real index.
+- **Working-tree/WIP target** (when explicitly requested): when the project provides a WIP patch helper, prefer it; PrismGo uses `bash demo/.agents/skills/dev-harness-lite/scripts/wipDiff.sh <repo> <fixed-point> /tmp/<name>.patch`. Otherwise use `git diff <fixed-point>` for tracked changes, list new files with `git ls-files --others --exclude-standard`, and include each new file with `git diff --no-index -- /dev/null <file>` (exit 1 means a non-empty patch, not failure). This mode includes committed, staged, unstaged, and untracked work without changing the real index.
 
 Confirm the complete selected change set is non-empty before spawning reviewers. A bad ref or empty combined diff fails here. Save a large combined patch under `/tmp` and pass its path instead of copying it through the parent context.
 

@@ -18,17 +18,17 @@ func main() {
 	}
 }
 
-// localApplicationBasePath keeps the demo rooted in dev whether commands are
-// run from the workspace root (`go run ./dev`) or from dev (`go run .`).
+// localApplicationBasePath keeps the demo rooted in demo whether commands are
+// run from the workspace root (`go run ./demo`) or from demo (`go run .`).
 func localApplicationBasePath() string {
 	workingDirectory, err := os.Getwd()
 	if err != nil {
 		return ""
 	}
 
-	devDirectory := filepath.Join(workingDirectory, "dev")
-	if _, err := os.Stat(filepath.Join(devDirectory, "go.mod")); err == nil {
-		return devDirectory
+	demoDirectory := filepath.Join(workingDirectory, "demo")
+	if _, err := os.Stat(filepath.Join(demoDirectory, "go.mod")); err == nil {
+		return demoDirectory
 	}
 
 	return ""

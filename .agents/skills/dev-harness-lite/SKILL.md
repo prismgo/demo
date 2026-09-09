@@ -6,25 +6,25 @@ description: PrismGo 小功能与简单 bug 的轻量开发闭环（手动触发
 # PrismGo 轻量开发闭环（lite）
 
 你是编排器。全程保持原有 `S0 → S1 → S2 → S3 → S4`；不得删减、合并或改名 S1–S4。
-路径基准是同时包含 `dev/`、`framework/`、`docs/` 的 PrismGo 工作区根。以下命令均从工作区根执行：
+路径基准是同时包含 `demo/`、`framework/`、`docs/` 的 PrismGo 工作区根。以下命令均从工作区根执行：
 
 ```bash
-W="bash dev/.agents/skills/dev-harness-lite/scripts/wf.sh"
-D="bash dev/.agents/skills/dev-harness-lite/scripts/wipDiff.sh"
+W="bash demo/.agents/skills/dev-harness-lite/scripts/wf.sh"
+D="bash demo/.agents/skills/dev-harness-lite/scripts/wipDiff.sh"
 ```
 
-只按任务需要读取 `dev/AGENTS.md` 的地图索引。查看或改动 `framework/` 前必须先读
+只按任务需要读取 `demo/AGENTS.md` 的地图索引。查看或改动 `framework/` 前必须先读
 `framework/AGENTS.md` 与 `framework/CODE_INDEX.md`；涉及外部服务再读
-`dev/.dev/docs/local-test-environment.md`；涉及文档再读 `dev/.dev/docs/documentation.md`；交付前读
-`dev/.dev/docs/verification.md`。
+`demo/.dev/docs/local-test-environment.md`；涉及文档再读 `demo/.dev/docs/documentation.md`；交付前读
+`demo/.dev/docs/verification.md`。
 
 **边界**：用户选了 lite 就按 lite 做完，不建议换别的 workflow。遇到多仓、公开契约、DB 迁移、金额、权限或
-并发状态机等敏感面，只用一句话提示风险，然后继续。修改归属始终是：Demo/联调工具在 `dev/`，框架实现在
+并发状态机等敏感面，只用一句话提示风险，然后继续。修改归属始终是：Demo/联调工具在 `demo/`，框架实现在
 `framework/`，框架文档在 `docs/`；根目录不是 Git 仓库。框架行为变化必须同步 `docs/`，并保持
-`dev/go.mod` 的本地 `replace github.com/prismgo/framework => ../framework`。
+`demo/go.mod` 的本地 `replace github.com/prismgo/framework => ../framework`。
 
 小卡只用于防失忆、防上下文漂移和保留关键决策，不是详细计划或证据档。不开卡仍争取单会话完成；开卡时以
-`dev/.dev/_task/` 内的卡为续点，不依赖聊天上下文。该目录是本地、gitignored 的 harness 状态，不进入业务提交。
+`demo/.dev/_task/` 内的卡为续点，不依赖聊天上下文。该目录是本地、gitignored 的 harness 状态，不进入业务提交。
 
 ## S0 启动：一次问完四项
 
@@ -44,7 +44,7 @@ D="bash dev/.agents/skills/dev-harness-lite/scripts/wipDiff.sh"
 若开小卡：
 
 ```bash
-$W lite-new <slug> <dev,framework,docs> <owner> --workspace <normal|worktree> \
+$W lite-new <slug> <demo,framework,docs> <owner> --workspace <normal|worktree> \
   --timing <on|off> --loop-mode <context|continuous> [--loop-limit 500]
 ```
 
@@ -56,7 +56,7 @@ $W lite-new <slug> <dev,framework,docs> <owner> --workspace <normal|worktree> \
 `.worktrees/lite-<slug>/<repo>`。上下文限制模式无卡可落盘时，暂停前把“已完成 / 下一步 / 未决问题 / 各仓分支”
 直接写进回复正文，供 compact 后续做。
 
-需要外部服务时，用 `./dev/dev status` 和对应连接变量做环境门禁；纯单元测试不启动 Docker。变量缺失的真实集成
+需要外部服务时，用 `./demo/dev status` 和对应连接变量做环境门禁；纯单元测试不启动 Docker。变量缺失的真实集成
 测试必须明确跳过，不能把依赖健康误报成框架验证通过。
 
 ## S1 澄清、DoD 与小卡定稿
@@ -94,7 +94,7 @@ $W fill <id> 决策
 只跑受影响包，所有单测都经过输出过滤器并以 pipeline 退出码为准：
 
 ```bash
-set -o pipefail; <包级测试命令> 2>&1 | bash dev/.agents/skills/dev-harness-lite/scripts/testFilter.sh
+set -o pipefail; <包级测试命令> 2>&1 | bash demo/.agents/skills/dev-harness-lite/scripts/testFilter.sh
 ```
 
 S2 禁止 `go test ./...` 等全量测试。主 agent、验收者和审查者的单测都走 filter；不绿不进 S3。
@@ -139,7 +139,7 @@ compact 或新会话后先 `$W status <id>`，只按未完成 Feature、最近�
 
 ## S4 提交、合并与归档
 
-先按 `dev/.dev/docs/verification.md` 对每个受影响仓执行最低验证；框架 Go 变更还要报告目标覆盖率和静态检查结果。
+先按 `demo/.dev/docs/verification.md` 对每个受影响仓执行最低验证；框架 Go 变更还要报告目标覆盖率和静态检查结果。
 验证 PASS、review 阻断项清零后，分别精确 `git add` 和提交，commit subject 以 `<slug>` 开头，不 push。三个仓是
 独立 Git 仓库，不在工作区根提交，也不把本地任务卡加入提交。
 
@@ -172,7 +172,7 @@ $W lite-archive <id>
 - **一次工具回合完成机械连招**：下一条命令不需要看上一条输出才能决定是否执行时，用 `&&` 串联；有退出码分支
   时不要硬串。可并行的只读检查、验证和 review 同批派发。
 - **并发安全**：所有 `wf.sh` 状态、看板和 Git 编排命令共用任务目录锁；并行验证可以同时跑，但状态更新仍由
-  `wf.sh` 串行落盘。`dev init` 也按工作区加锁，避免并发初始化留下半套链接。
+  `wf.sh` 串行落盘。`demo/dev init` 也按工作区加锁，避免并发初始化留下半套链接。
 - **渐进读取**：先 `rg`/`rg --files` 定位，再读命中附近；续做先 `status`，取卡片段用 `sect`，不整卡重读；
   框架入口先用 `CODE_INDEX.md`，避免扫仓。
 - **失败收敛**：同一轮把所有已知错误汇总后再修；复审只看增量；同一问题最多 3 轮。

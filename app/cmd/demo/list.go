@@ -24,10 +24,10 @@ func (c *ListCommand) Definition() *console.Definition {
 		"List documentation demos, verification levels, dependencies, and remaining gaps",
 	)
 	definition.Examples = []string{
-		"go run ./dev demo:list",
-		"go run ./dev demo:list cache",
-		"go run ./dev demo:list --status=planned",
-		"go run ./dev demo:list --level=integration --json",
+		"go run ./demo demo:list",
+		"go run ./demo demo:list cache",
+		"go run ./demo demo:list --status=planned",
+		"go run ./demo demo:list --level=integration --json",
 	}
 	return definition
 }

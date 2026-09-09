@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-dev_root="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-workspace_root="$(cd "${dev_root}/.." && pwd)"
+demo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+workspace_root="$(cd "${demo_root}/.." && pwd)"
 
 check_link_available() {
     local link_path="$1"
@@ -56,7 +56,7 @@ ensure_link() {
 }
 
 install_agent_files() {
-    local skills_source="${dev_root}/.agents/skills"
+    local skills_source="${demo_root}/.agents/skills"
     local skill_source skill_name skill_target
 
     for skill_name in dev-harness-lite code-review; do
@@ -70,22 +70,22 @@ install_agent_files() {
     check_directory_available "${workspace_root}/.agents/skills"
     check_directory_available "${workspace_root}/.claude"
     check_directory_available "${workspace_root}/.claude/skills"
-    check_link_available "${workspace_root}/AGENTS.md" "dev/AGENTS.md"
-    check_link_available "${workspace_root}/CLAUDE.md" "dev/AGENTS.md"
+    check_link_available "${workspace_root}/AGENTS.md" "demo/AGENTS.md"
+    check_link_available "${workspace_root}/CLAUDE.md" "demo/AGENTS.md"
     for skill_source in "${skills_source}"/*; do
         [[ -d "${skill_source}" && -f "${skill_source}/SKILL.md" ]] || continue
         skill_name="$(basename "${skill_source}")"
-        skill_target="../../dev/.agents/skills/${skill_name}"
+        skill_target="../../demo/.agents/skills/${skill_name}"
         check_link_available "${workspace_root}/.agents/skills/${skill_name}" "${skill_target}"
         check_link_available "${workspace_root}/.claude/skills/${skill_name}" "${skill_target}"
     done
 
-    ensure_link "${workspace_root}/AGENTS.md" "dev/AGENTS.md"
-    ensure_link "${workspace_root}/CLAUDE.md" "dev/AGENTS.md"
+    ensure_link "${workspace_root}/AGENTS.md" "demo/AGENTS.md"
+    ensure_link "${workspace_root}/CLAUDE.md" "demo/AGENTS.md"
     for skill_source in "${skills_source}"/*; do
         [[ -d "${skill_source}" && -f "${skill_source}/SKILL.md" ]] || continue
         skill_name="$(basename "${skill_source}")"
-        skill_target="../../dev/.agents/skills/${skill_name}"
+        skill_target="../../demo/.agents/skills/${skill_name}"
         ensure_link "${workspace_root}/.agents/skills/${skill_name}" "${skill_target}"
         ensure_link "${workspace_root}/.claude/skills/${skill_name}" "${skill_target}"
     done
@@ -103,12 +103,12 @@ ensure_repository() {
 }
 
 ensure_env_file() {
-    local env_file="${dev_root}/.env"
+    local env_file="${demo_root}/.env"
 
     if [[ -e "${env_file}" ]]; then
         return
     fi
-    cp "${dev_root}/.env.example" "${env_file}"
+    cp "${demo_root}/.env.example" "${env_file}"
 }
 
 ensure_go_workspace() {
@@ -117,14 +117,14 @@ ensure_go_workspace() {
     if [[ ! -e "${workspace_file}" ]]; then
         (
             cd "${workspace_root}"
-            go work init ./dev ./framework
+            go work init ./demo ./framework
         )
         return
     fi
 
     (
         cd "${workspace_root}"
-        go work use ./dev ./framework
+        go work use ./demo ./framework
     )
 }
 
@@ -136,9 +136,9 @@ install_framework_dependencies() {
 }
 
 if [[ "${1:-}" == "init" ]]; then
-    command -v flock >/dev/null || { echo "dev init requires flock" >&2; exit 1; }
-    mkdir -p "${dev_root}/.dev/_task"
-    exec 9>"${dev_root}/.dev/_task/init.lock"
+    command -v flock >/dev/null || { echo "demo dev init requires flock" >&2; exit 1; }
+    mkdir -p "${demo_root}/.dev/_task"
+    exec 9>"${demo_root}/.dev/_task/init.lock"
     flock -x 9
     install_agent_files
     ensure_repository framework git@github.com:prismgo/framework.git
@@ -149,4 +149,4 @@ if [[ "${1:-}" == "init" ]]; then
     exit 0
 fi
 
-exec "${dev_root}/.dev/scripts/test-environment.sh" "$@"
+exec "${demo_root}/.dev/scripts/test-environment.sh" "$@"

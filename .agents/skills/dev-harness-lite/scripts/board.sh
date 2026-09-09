@@ -2,8 +2,8 @@
 set -euo pipefail
 
 script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-dev_root="$(cd "${script_dir}/../../../.." && pwd)"
-state_root="${dev_root}/.dev/_task"
+demo_root="$(cd "${script_dir}/../../../.." && pwd)"
+state_root="${demo_root}/.dev/_task"
 board_file="${state_root}/board.md"
 recent_index="${state_root}/archive-recent"
 check_only=false

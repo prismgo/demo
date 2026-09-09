@@ -3,9 +3,9 @@ set -euo pipefail
 
 script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 skill_root="$(cd "${script_dir}/.." && pwd)"
-dev_root="$(cd "${skill_root}/../../.." && pwd)"
-workspace_root="$(cd "${dev_root}/.." && pwd)"
-state_root="${dev_root}/.dev/_task"
+demo_root="$(cd "${skill_root}/../../.." && pwd)"
+workspace_root="$(cd "${demo_root}/.." && pwd)"
+state_root="${demo_root}/.dev/_task"
 tasks_dir="${state_root}/tasks"
 archive_dir="${state_root}/archive"
 template="${skill_root}/templates/card.template.md"
@@ -37,7 +37,7 @@ PrismGo dev-harness-lite state helper
   wf.sh wtclean <id>
   wf.sh board [--check]
 
-State lives in dev/.dev/_task and is gitignored.
+State lives in demo/.dev/_task and is gitignored.
 EOF
 }
 
@@ -117,7 +117,7 @@ normalize_repos() {
     [[ ${#values[@]} -gt 0 ]] || die "at least one repo is required"
     for repo in "${values[@]}"; do
         repo="${repo//[[:space:]]/}"
-        case "${repo}" in dev|framework|docs) ;; *) die "unknown repo: ${repo}" ;; esac
+        case "${repo}" in demo|framework|docs) ;; *) die "unknown repo: ${repo}" ;; esac
         [[ "${seen}" == *",${repo},"* ]] && continue
         normalized="${normalized:+${normalized}, }${repo}"; seen+="${repo},"
     done
