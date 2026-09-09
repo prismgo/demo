@@ -1,3 +1,4 @@
+// Package schedule registers the demo application's scheduled tasks.
 package schedule
 
 import (
@@ -6,7 +7,7 @@ import (
 	"github.com/prismgo/framework/timer"
 )
 
-// Register declares application scheduled tasks.
+// Register adds the demo's scheduled tasks to s.
 func Register(s *timer.Schedule) {
 	s.Call(func(ctx context.Context) error {
 		if err := ctx.Err(); err != nil {

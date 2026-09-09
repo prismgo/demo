@@ -1,30 +1,31 @@
+// Package providers registers the demo application's services.
 package providers
 
 import (
 	"fmt"
 
+	"github.com/prismgo/framework/contracts/container"
+	"github.com/prismgo/framework/contracts/provider"
+	"gorm.io/gorm"
+
 	"prismgo-demo/app/repositories"
 	"prismgo-demo/app/services"
-
-	containercontract "github.com/prismgo/framework/contracts/container"
-	providercontract "github.com/prismgo/framework/contracts/provider"
-	"gorm.io/gorm"
 )
 
 // AppServiceProvider registers application-wide services.
 type AppServiceProvider struct{}
 
 // Register binds application services before the application boots.
-func (p AppServiceProvider) Register(app providercontract.Application) error {
+func (p AppServiceProvider) Register(app provider.Application) error {
 	c := app.Container()
 	bindings := []struct {
 		key     string
-		factory containercontract.Factory
+		factory container.Factory
 	}{
 		{repositories.UserRepositoryKey, databaseRepositoryFactory(repositories.NewUserRepository)},
 		{repositories.OrderRepositoryKey, databaseRepositoryFactory(repositories.NewOrderRepository)},
 		{repositories.ReceiptRepositoryKey, databaseRepositoryFactory(repositories.NewReceiptRepository)},
-		{services.OrderServiceKey, func(resolver containercontract.Resolver) (any, error) {
+		{services.OrderServiceKey, func(resolver container.Resolver) (any, error) {
 			raw, err := resolver.Make(repositories.OrderRepositoryKey)
 			if err != nil {
 				return nil, err
@@ -48,12 +49,12 @@ func (p AppServiceProvider) Register(app providercontract.Application) error {
 }
 
 // Boot runs after all providers have been registered.
-func (p AppServiceProvider) Boot(app providercontract.Application) error {
+func (p AppServiceProvider) Boot(app provider.Application) error {
 	return nil
 }
 
-func databaseRepositoryFactory[T any](build func(*gorm.DB) T) containercontract.Factory {
-	return func(resolver containercontract.Resolver) (any, error) {
+func databaseRepositoryFactory[T any](build func(*gorm.DB) T) container.Factory {
+	return func(resolver container.Resolver) (any, error) {
 		raw, err := resolver.Make("database.default")
 		if err != nil {
 			return nil, err

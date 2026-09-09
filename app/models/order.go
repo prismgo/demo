@@ -1,10 +1,13 @@
+// Package models defines the demo application's persisted domain records.
 package models
 
 import "time"
 
 const (
+	// OrderStatusPending marks an order awaiting payment.
 	OrderStatusPending = "pending"
-	OrderStatusPaid    = "paid"
+	// OrderStatusPaid marks a completed payment.
+	OrderStatusPaid = "paid"
 )
 
 // Order is the aggregate used by the documentation demo checkout flow.

@@ -5,13 +5,13 @@ import (
 	"errors"
 	"testing"
 
+	"github.com/prismgo/framework/database"
+	"gorm.io/gorm"
+
 	"prismgo-demo/app/demo/testing"
 	"prismgo-demo/app/models"
 	"prismgo-demo/app/repositories"
 	"prismgo-demo/app/services"
-
-	"github.com/prismgo/framework/database"
-	"gorm.io/gorm"
 )
 
 func TestOrderServiceCreateAndPay(t *testing.T) {
@@ -54,7 +54,7 @@ func TestOrderServiceValidatesTotalAndMissingOrder(t *testing.T) {
 	demotest.NewApplication(t, demotest.Options{})
 	db := database.Resolve()
 	if err := db.AutoMigrate(&models.Order{}); err != nil {
-		t.Fatal(err)
+		t.Fatalf("migrate order model: %v", err)
 	}
 	service := services.NewOrderService(repositories.NewOrderRepository(db))
 	if _, err := service.Create(context.Background(), 1, 0); !errors.Is(err, services.ErrInvalidOrderTotal) {

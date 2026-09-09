@@ -9,6 +9,8 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/prismgo/framework/foundation"
+
+	// Load the configuration defaults read by WelcomeController.Show.
 	_ "prismgo-demo/config"
 )
 

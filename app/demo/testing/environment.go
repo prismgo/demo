@@ -10,11 +10,16 @@ import (
 type Service string
 
 const (
-	ServiceMySQL     Service = "mysql"
-	ServiceSQLite    Service = "sqlite"
+	// ServiceMySQL identifies a MySQL integration dependency.
+	ServiceMySQL Service = "mysql"
+	// ServiceSQLite identifies a SQLite integration dependency.
+	ServiceSQLite Service = "sqlite"
+	// ServiceRedisAddr identifies a Redis address dependency.
 	ServiceRedisAddr Service = "redis-addr"
-	ServiceRedisURL  Service = "redis-url"
-	ServiceRabbitMQ  Service = "rabbitmq"
+	// ServiceRedisURL identifies a Redis URL dependency.
+	ServiceRedisURL Service = "redis-url"
+	// ServiceRabbitMQ identifies a RabbitMQ integration dependency.
+	ServiceRabbitMQ Service = "rabbitmq"
 )
 
 var serviceEnvironment = map[Service]string{

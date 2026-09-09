@@ -7,10 +7,12 @@ import (
 	"path/filepath"
 	"testing"
 
-	"prismgo-demo/bootstrap"
-	_ "prismgo-demo/config"
-
 	"github.com/prismgo/framework/foundation"
+
+	"prismgo-demo/bootstrap"
+
+	// Load the demo's configuration defaults before booting the test application.
+	_ "prismgo-demo/config"
 )
 
 // Options selects hermetic framework drivers. Empty fields use local defaults.
@@ -27,7 +29,7 @@ func NewApplication(t testing.TB, options Options) *foundation.Application {
 	t.Helper()
 	options = withDefaults(options)
 	if err := validateHermeticOptions(options); err != nil {
-		t.Fatal(err)
+		t.Fatalf("validate hermetic application options: %v", err)
 	}
 
 	basePath := t.TempDir()

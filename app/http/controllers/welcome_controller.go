@@ -1,10 +1,12 @@
+// Package controllers contains the demo application's HTTP controllers.
 package controllers
 
 import (
 	"net/http"
-	"prismgo-demo/config"
 
 	"github.com/gin-gonic/gin"
+
+	"prismgo-demo/config"
 )
 
 // WelcomeController handles the default API landing endpoint.

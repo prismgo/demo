@@ -34,7 +34,7 @@ func TestNewApplicationUsesHermeticDefaults(t *testing.T) {
 
 func TestValidateHermeticOptions(t *testing.T) {
 	if err := validateHermeticOptions(withDefaults(Options{})); err != nil {
-		t.Fatal(err)
+		t.Fatalf("validate default hermetic options: %v", err)
 	}
 	if err := validateHermeticOptions(Options{Database: "mysql", Cache: "memory", Queue: "sync", Session: "file"}); err == nil {
 		t.Fatal("mysql unexpectedly accepted as hermetic")

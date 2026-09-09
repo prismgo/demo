@@ -57,6 +57,7 @@ GOWORK=off go test . ./app/... ./bootstrap/... ./config/... ./database/... ./rou
 | 何时读取 | 文档 | 用于确认 |
 |---|---|---|
 | 任务开始时无法确定应修改 Demo、框架还是文档，或需要处理本地依赖与 Git 状态时 | [`dev/.dev/docs/workspace.md`](dev/.dev/docs/workspace.md) | 三个仓库的职责边界、本地联调方式和独立仓库约束 |
+| 准备编写、修改或审查 Go 代码时 | [`dev/.dev/docs/go-style.md`](dev/.dev/docs/go-style.md) | Go 命名、导入、API、错误处理、并发、测试及变更纪律 |
 | 准备查看、搜索、修改或验证 `framework/` 内任何内容时，必须先读 | [`framework/AGENTS.md`](framework/AGENTS.md) | 框架仓库的铁律，以及架构、Go 开发、测试和交付细则的进一步索引 |
 | 开发或排查框架能力，需要从工作区角度判断入口、代码层次或 Demo 联调方式时 | [`dev/.dev/docs/framework-development.md`](dev/.dev/docs/framework-development.md) | 框架常用入口、三层结构、源码修改边界及 `CODE_INDEX.md` 使用要求 |
 | 修改或测试数据库、Redis、缓存、队列、Horizon 等依赖外部服务的能力时 | [`dev/.dev/docs/local-test-environment.md`](dev/.dev/docs/local-test-environment.md) | `./dev/dev` 启停方式、测试连接变量、真实集成测试和 Skip 判定规则 |

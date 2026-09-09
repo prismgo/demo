@@ -1,3 +1,4 @@
+// Package middleware contains reusable demo HTTP middleware.
 package middleware
 
 import "github.com/gin-gonic/gin"
