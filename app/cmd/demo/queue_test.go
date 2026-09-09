@@ -1,0 +1,76 @@
+package demo
+
+import (
+	"bytes"
+	"context"
+	"strings"
+	"testing"
+
+	qdemo "prismgo-demo/app/demo/queue"
+)
+
+func TestQueueDemoListShowsDocumentedScenariosAndConnections(t *testing.T) {
+	command := NewQueueCommand()
+	var output bytes.Buffer
+	input := demoInput{arguments: map[string]string{"case": "list"}}
+
+	if err := command.Handle(commandContext(command, input, &output)); err != nil {
+		t.Fatalf("handle demo:queue list: %v", err)
+	}
+
+	for _, expected := range []string{
+		"basic",
+		"Creating Jobs",
+		"implemented",
+		"sync,redis,rabbitmq",
+		"planned",
+		"rabbitmq",
+		"RabbitMQ Configuration",
+	} {
+		if !strings.Contains(output.String(), expected) {
+			t.Fatalf("output does not contain %q:\n%s", expected, output.String())
+		}
+	}
+}
+
+func TestQueueDemoRunsSelectedScenario(t *testing.T) {
+	command := newQueueCommand(func(_ context.Context, caseName, connection string) (qdemo.Result, error) {
+		return qdemo.Result{
+			Case: caseName, Connection: connection, Queue: "demo-basic", JobID: "job-123", Processed: true,
+		}, nil
+	})
+	var output bytes.Buffer
+	input := demoInput{
+		arguments: map[string]string{"case": "basic"},
+		options:   map[string]string{"connection": "redis"},
+	}
+
+	if err := command.Handle(commandContext(command, input, &output)); err != nil {
+		t.Fatalf("handle demo:queue basic: %v", err)
+	}
+	for _, expected := range []string{"basic", "redis", "demo-basic", "job-123", "processed"} {
+		if !strings.Contains(output.String(), expected) {
+			t.Fatalf("output does not contain %q:\n%s", expected, output.String())
+		}
+	}
+}
+
+func TestQueueDemoRejectsUnsupportedScenarioConnection(t *testing.T) {
+	called := false
+	command := newQueueCommand(func(context.Context, string, string) (qdemo.Result, error) {
+		called = true
+		return qdemo.Result{}, nil
+	})
+	input := demoInput{
+		arguments: map[string]string{"case": "middleware"},
+		options:   map[string]string{"connection": "redis"},
+	}
+
+	err := command.Handle(commandContext(command, input, &bytes.Buffer{}))
+	if err == nil || !strings.Contains(err.Error(), "supports sync") {
+		t.Fatalf("unsupported connection error = %v", err)
+	}
+	if called {
+		t.Fatal("scenario runner should not be called for an unsupported connection")
+	}
+}

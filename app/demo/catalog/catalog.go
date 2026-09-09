@@ -11,9 +11,13 @@ import (
 type Level string
 
 const (
-	LevelCompile     Level = "compile"
-	LevelHermetic    Level = "hermetic"
-	LevelScenario    Level = "scenario"
+	// LevelCompile verifies that an example compiles.
+	LevelCompile Level = "compile"
+	// LevelHermetic verifies an example without external services.
+	LevelHermetic Level = "hermetic"
+	// LevelScenario verifies an application-level scenario.
+	LevelScenario Level = "scenario"
+	// LevelIntegration verifies an example against external services.
 	LevelIntegration Level = "integration"
 )
 
@@ -21,9 +25,12 @@ const (
 type Status string
 
 const (
+	// StatusImplemented marks delivered coverage.
 	StatusImplemented Status = "implemented"
-	StatusPlanned     Status = "planned"
-	StatusManual      Status = "manual"
+	// StatusPlanned marks coverage that has not been implemented.
+	StatusPlanned Status = "planned"
+	// StatusManual marks coverage verified outside the automated catalog.
+	StatusManual Status = "manual"
 )
 
 // Entry maps one documentation topic to its demo and verification target.
@@ -66,7 +73,26 @@ var Entries = []Entry{
 	manualEntry("lens", "Installation", "安装", "Installation", "Lens workflow verification", "TestLensWorkflow", LevelIntegration, "validated by the Lens toolchain rather than an application command"),
 	entry("lifecycle", "Lifecycle overview", "生命周期概览", "Lifecycle Overview", "demo:lifecycle list", "list", "TestLifecycleDemo", LevelHermetic, StatusPlanned),
 	entry("logger", "Writing log messages", "编写日志消息", "Writing Log Messages", "demo:logger list", "list", "TestLoggerDemo", LevelHermetic, StatusPlanned),
-	entry("queue", "Creating jobs", "创建任务", "Creating Jobs", "demo:queue list", "list", "TestQueueDemo", LevelHermetic, StatusPlanned),
+	entry("queue", "Creating jobs", "创建任务", "Creating Jobs", "demo:queue basic --connection=sync", "basic-sync", "TestBasicScenarioDispatchesAndProcessesSyncJob", LevelHermetic, StatusImplemented),
+	entry("queue", "Creating jobs", "创建任务", "Creating Jobs", "demo:queue basic --connection=redis", "basic-redis", "TestQueueDemoBasicWithRealRedis", LevelIntegration, StatusImplemented, "redis"),
+	entry("queue", "Creating jobs", "创建任务", "Creating Jobs", "demo:queue basic --connection=rabbitmq", "basic-rabbitmq", "TestQueueDemoBasicWithRealRabbitMQ", LevelIntegration, StatusImplemented, "rabbitmq"),
+	entry("queue", "Job strategies", "任务策略接口", "Job Strategy Interfaces", "demo:queue strategies", "strategies", "TestQueueDemoStrategies", LevelHermetic, StatusImplemented),
+	entry("queue", "Unique jobs", "唯一任务", "Unique Jobs", "demo:queue unique", "unique", "TestQueueDemoUnique", LevelHermetic, StatusImplemented),
+	entry("queue", "Debounced jobs", "防抖任务", "Debounced Jobs", "demo:queue debounce --connection=redis", "debounce", "TestQueueDemoDebounce", LevelIntegration, StatusImplemented, "redis", "rabbitmq"),
+	entry("queue", "Job middleware", "任务中间件", "Job Middleware", "demo:queue middleware", "middleware", "TestQueueDemoMiddleware", LevelHermetic, StatusImplemented),
+	entry("queue", "Dispatching jobs", "分发任务", "Dispatching Jobs", "demo:queue dispatch --connection=redis", "dispatch", "TestQueueDemoDispatch", LevelIntegration, StatusImplemented, "redis", "rabbitmq"),
+	entry("queue", "Job chaining", "任务链", "Job Chaining", "demo:queue chain --connection=redis", "chain", "TestQueueDemoChain", LevelIntegration, StatusImplemented, "redis", "rabbitmq"),
+	entry("queue", "Job batching", "任务批处理", "Job Batching", "demo:queue batch --connection=redis", "batch", "TestQueueDemoBatch", LevelIntegration, StatusImplemented, "redis", "rabbitmq"),
+	entry("queue", "Running workers", "运行队列 Worker", "Running The Queue Worker", "demo:queue worker --connection=redis", "worker", "TestQueueDemoWorker", LevelIntegration, StatusImplemented, "redis", "rabbitmq"),
+	entry("queue", "Failed jobs", "处理失败任务", "Dealing With Failed Jobs", "demo:queue failure", "failure", "TestQueueDemoFailure", LevelIntegration, StatusPlanned, "redis", "rabbitmq"),
+	entry("queue", "Failed job commands", "清理失败任务", "Dealing With Failed Jobs", "demo:queue failed-commands", "failed-commands", "TestQueueDemoFailedCommands", LevelScenario, StatusPlanned),
+	entry("queue", "Worker restart", "Worker 与部署", "Queue Workers and Deployment", "demo:queue restart", "restart", "TestQueueDemoRestart", LevelIntegration, StatusPlanned, "redis", "rabbitmq"),
+	entry("queue", "Lifecycle events", "生命周期事件", "Lifecycle Events", "demo:queue events", "events", "TestQueueDemoEvents", LevelIntegration, StatusPlanned, "redis", "rabbitmq"),
+	entry("queue", "Encrypted payloads", "加密 Payload", "Encrypted Payloads", "demo:queue encryption", "encryption", "TestQueueDemoEncryption", LevelHermetic, StatusPlanned),
+	entry("queue", "Custom drivers", "自定义驱动", "Custom Drivers", "demo:queue custom-driver", "custom-driver", "TestQueueDemoCustomDriver", LevelHermetic, StatusPlanned),
+	entry("queue", "Error constants", "错误常量", "Error Constants", "demo:queue errors", "errors", "TestQueueDemoErrors", LevelHermetic, StatusPlanned),
+	entry("queue", "Redis connection", "Redis 连接", "Redis Connection", "demo:queue redis --connection=redis", "redis", "TestQueueDemoRedisBoundaries", LevelIntegration, StatusPlanned, "redis"),
+	entry("queue", "RabbitMQ configuration", "RabbitMQ 配置", "RabbitMQ Configuration", "demo:queue rabbitmq --connection=rabbitmq", "rabbitmq", "TestQueueDemoRabbitMQBoundaries", LevelIntegration, StatusPlanned, "rabbitmq"),
 	entry("ratelimit", "Feature overview", "功能概览", "Feature Overview", "demo:ratelimit list", "list", "TestRateLimitDemo", LevelScenario, StatusPlanned),
 	entry("redis", "Interacting with Redis", "与 Redis 交互", "Interacting With Redis", "demo:redis list", "list", "TestRedisWithRealServer", LevelIntegration, StatusPlanned, "redis"),
 	entry("route", "Quick start", "快速开始", "Quick Start", "demo:route list", "list", "TestRouteDemo", LevelScenario, StatusPlanned),
@@ -95,7 +121,10 @@ func manualEntry(feature, section, headingZH, headingEN, example, test string, l
 
 // All returns a copy sorted by feature and case.
 func All() []Entry {
-	result := append([]Entry(nil), Entries...)
+	result := make([]Entry, len(Entries))
+	for i, item := range Entries {
+		result[i] = cloneEntry(item)
+	}
 	sort.Slice(result, func(i, j int) bool {
 		if result[i].Feature == result[j].Feature {
 			return result[i].Case < result[j].Case
@@ -128,10 +157,15 @@ func Filter(feature string, level Level, status Status) []Entry {
 func Find(feature, caseName string) (Entry, bool) {
 	for _, item := range Entries {
 		if item.Feature == feature && item.Case == caseName {
-			return item, true
+			return cloneEntry(item), true
 		}
 	}
 	return Entry{}, false
+}
+
+func cloneEntry(item Entry) Entry {
+	item.Requirements = append([]string(nil), item.Requirements...)
+	return item
 }
 
 // Validate checks catalog completeness and uniqueness without accessing docs.

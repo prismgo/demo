@@ -1,3 +1,4 @@
+// Package demo implements documentation-backed demo commands.
 package demo
 
 import (
@@ -5,9 +6,9 @@ import (
 	"fmt"
 	"strings"
 
-	"prismgo-demo/app/demo/catalog"
-
 	"github.com/prismgo/framework/console"
+
+	"prismgo-demo/app/demo/catalog"
 )
 
 // ListCommand renders the documentation-to-demo coverage catalog.
@@ -16,6 +17,7 @@ type ListCommand struct{}
 // NewListCommand creates the demo discovery command.
 func NewListCommand() *ListCommand { return &ListCommand{} }
 
+// Definition describes the demo:list command.
 func (c *ListCommand) Definition() *console.Definition {
 	definition := console.MustDefinition(
 		"demo:list {feature? : Filter by feature} {--level= : compile, hermetic, scenario, integration} {--status= : implemented, planned, manual} {--json : Output JSON}",
@@ -30,6 +32,7 @@ func (c *ListCommand) Definition() *console.Definition {
 	return definition
 }
 
+// Handle lists catalog entries matching the command filters.
 func (c *ListCommand) Handle(ctx console.CommandContext) error {
 	level := catalog.Level(strings.TrimSpace(ctx.Input().Option("level")))
 	if level != "" && !contains([]catalog.Level{catalog.LevelCompile, catalog.LevelHermetic, catalog.LevelScenario, catalog.LevelIntegration}, level) {
