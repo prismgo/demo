@@ -105,11 +105,23 @@ func Run(ctx context.Context, manager *queue.Manager, caseName, connection strin
 	if caseName == "failed-commands" {
 		return runFailedCommands(ctx, manager, connection)
 	}
+	if caseName == "failed-command-paths" {
+		return runFailedCleanupCommandPaths(ctx, manager, connection)
+	}
+	if caseName == "failed-retry" {
+		return runFailedRetryCommand(ctx, manager, connection)
+	}
 	if caseName == "restart" {
 		return runRestart(ctx, manager, connection)
 	}
 	if caseName == "events" {
 		return runEvents(ctx, manager, connection)
+	}
+	if caseName == "failed-event" {
+		return runFailedEvent(ctx, manager, connection)
+	}
+	if caseName == "batch-events" {
+		return runBatchEvents(ctx, manager, connection)
 	}
 	if caseName == "encryption" {
 		return runEncryption(ctx, connection)

@@ -303,6 +303,64 @@ func TestQueueDemoFailure(t *testing.T) {
 	}
 }
 
+func TestQueueDemoFailedRetryCommand(t *testing.T) {
+	for _, connection := range []string{"redis", "rabbitmq"} {
+		t.Run(connection, func(t *testing.T) {
+			manager := newRealQueueManager(t, connection)
+			result, err := qdemo.Run(context.Background(), manager, "failed-retry", connection)
+			if err != nil {
+				t.Fatalf("run failed retry command on %s: %v", connection, err)
+			}
+			for _, expected := range []string{"queue:retry:requeued", "retry:failed-callback", "retry:handled"} {
+				if !hasIntegrationStep(result.Steps, expected) {
+					t.Fatalf("failed retry command steps on %s missing %q: %v", connection, expected, result.Steps)
+				}
+			}
+			if countIntegrationStep(result.Steps, "retry:attempt") != 2 {
+				t.Fatalf("failed retry command attempts on %s = %v, want two attempts", connection, result.Steps)
+			}
+		})
+	}
+}
+
+func TestQueueDemoFailedEvent(t *testing.T) {
+	for _, connection := range []string{"redis", "rabbitmq"} {
+		t.Run(connection, func(t *testing.T) {
+			manager := newRealQueueManager(t, connection)
+			result, err := qdemo.Run(context.Background(), manager, "failed-event", connection)
+			if err != nil {
+				t.Fatalf("run failed event on %s: %v", connection, err)
+			}
+			want := "queue.job_failed,payload:job-id,payload:error,callback:invoked"
+			if got := strings.Join(result.Steps, ","); got != want {
+				t.Fatalf("failed event steps on %s = %q, want %q", connection, got, want)
+			}
+			if !result.Processed || result.JobID == "" || !strings.HasPrefix(result.Queue, "demo-failed-event-") {
+				t.Fatalf("failed event result on %s = %#v, want processed result with job ID", connection, result)
+			}
+		})
+	}
+}
+
+func TestQueueDemoBatchEvents(t *testing.T) {
+	for _, connection := range []string{"redis", "rabbitmq"} {
+		t.Run(connection, func(t *testing.T) {
+			manager := newRealQueueManager(t, connection)
+			result, err := qdemo.Run(context.Background(), manager, "batch-events", connection)
+			if err != nil {
+				t.Fatalf("run batch events on %s: %v", connection, err)
+			}
+			want := "queue.batch_created,queue.batch_updated,queue.batch_finished,queue.batch_cancelled"
+			if got := strings.Join(result.Steps, ","); got != want {
+				t.Fatalf("batch event steps on %s = %q, want %q", connection, got, want)
+			}
+			if !result.Processed || result.JobID == "" || !strings.HasPrefix(result.Queue, "demo-batch-events-") {
+				t.Fatalf("batch event result on %s = %#v, want processed result with batch ID", connection, result)
+			}
+		})
+	}
+}
+
 func TestQueueDemoRestart(t *testing.T) {
 	for _, connection := range []string{"redis", "rabbitmq"} {
 		t.Run(connection, func(t *testing.T) {

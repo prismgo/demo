@@ -219,6 +219,28 @@ func TestQueueDemoFailedCommands(t *testing.T) {
 	}
 }
 
+func TestQueueDemoFailedCleanupCommandPaths(t *testing.T) {
+	manager := newSyncQueueManager(t)
+	registry := container.NewContainer()
+	if err := registry.Instance("queue.manager", manager); err != nil {
+		t.Fatalf("register sync queue manager: %v", err)
+	}
+	container.SetProvider(func() *container.Container { return registry })
+	t.Cleanup(func() { container.SetProvider(nil) })
+
+	result, err := Run(context.Background(), manager, "failed-command-paths", "sync")
+	if err != nil {
+		t.Fatalf("run failed cleanup command paths: %v", err)
+	}
+	want := []string{"queue:failed:listed", "queue:forget:deleted", "queue:flush:emptied"}
+	if got := strings.Join(result.Steps, ","); got != strings.Join(want, ",") {
+		t.Fatalf("failed cleanup command steps = %q, want %q", got, strings.Join(want, ","))
+	}
+	if !result.Processed || result.JobID != "job-one" || result.Queue != "demo-failed-cleanup" {
+		t.Fatalf("failed cleanup command result = %#v, want processed job-one result", result)
+	}
+}
+
 func TestQueueDemoDriverPrerequisites(t *testing.T) {
 	assertConfigurationScenario(t, "driver-prerequisites", []string{
 		"sync:none", "redis:PRISMGO_REDIS_TEST_URL", "rabbitmq:PRISMGO_RABBITMQ_TEST_URL",

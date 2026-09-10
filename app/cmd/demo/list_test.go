@@ -22,8 +22,8 @@ func TestDemoListCommandShowsFeatureOverview(t *testing.T) {
 	for _, expected := range []string{
 		"PrismGo Framework: v0.2.2 (local workspace)",
 		"Feature", "Description", "Since", "Progress", "Remaining", "Status",
-		"Queues, jobs, and workers", "34/59", "in progress",
-		"Modules: 29 | Implemented: 35/87 | Planned: 49 | Manual: 3",
+		"Queues, jobs, and workers", "38/59", "in progress",
+		"Modules: 29 | Implemented: 39/87 | Planned: 45 | Manual: 3",
 		"go run ./demo demo:show <feature>",
 	} {
 		if !strings.Contains(output.String(), expected) {
@@ -111,8 +111,8 @@ func TestDemoShowCommandJSONAndFilters(t *testing.T) {
 	if err := json.Unmarshal(output.Bytes(), &result); err != nil {
 		t.Fatalf("decode JSON: %v\n%s", err, output.String())
 	}
-	if result.Framework != "v0.2.2" || len(result.Entries) != 19 {
-		t.Fatalf("detail output framework/entries = %q/%d, want v0.2.2/19", result.Framework, len(result.Entries))
+	if result.Framework != "v0.2.2" || len(result.Entries) != 16 {
+		t.Fatalf("detail output framework/entries = %q/%d, want v0.2.2/16", result.Framework, len(result.Entries))
 	}
 	for _, item := range result.Entries {
 		if item.Level != catalog.LevelIntegration || item.Status != catalog.StatusPlanned || item.Since != catalog.SinceInitial {
@@ -132,9 +132,9 @@ func TestDemoShowCommandShowsFeatureDetails(t *testing.T) {
 		t.Fatalf("handle demo:show queue: %v", err)
 	}
 	for _, expected := range []string{
-		"Module: queue — 34/59 implemented — in progress",
+		"Module: queue — 38/59 implemented — in progress",
 		"Case", "Section", "Since", "Example", "Level", "Requires", "Status",
-		"basic-sync", "v0.1.0", "Entries: 34 | Implemented: 34 | Planned: 0 | Manual: 0",
+		"basic-sync", "v0.1.0", "Entries: 38 | Implemented: 38 | Planned: 0 | Manual: 0",
 	} {
 		if !strings.Contains(output.String(), expected) {
 			t.Fatalf("detail output does not contain %q:\n%s", expected, output.String())

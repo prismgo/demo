@@ -41,7 +41,7 @@ The Demo project has four main responsibilities:
 
 ## Catalog Progress Map
 
-The catalog currently covers **29 modules and 87 entries**: 35 implemented, 49 planned, and 3 manually verified. The table below is a snapshot taken when this README was updated. `app/demo/catalog/` is the single source of truth; use `demo:list` for live progress.
+The catalog currently covers **29 modules and 87 entries**: 39 implemented, 45 planned, and 3 manually verified. The table below is a snapshot taken when this README was updated. `app/demo/catalog/` is the single source of truth; use `demo:list` for live progress.
 
 | Module | Coverage | Progress | Remaining | Status |
 |---|---|---:|---:|---|
@@ -63,7 +63,7 @@ The catalog currently covers **29 modules and 87 entries**: 35 implemented, 49 p
 | `lens` | Lens development workflow | 0/1 | — | Manual |
 | `lifecycle` | Application bootstrap and shutdown | 0/1 | 1 | Planned |
 | `logger` | Multi-channel application logging | 0/1 | 1 | Planned |
-| `queue` | Queues, jobs, and workers | 34/59 | 25 | In progress |
+| `queue` | Queues, jobs, and workers | 38/59 | 21 | In progress |
 | `ratelimit` | Request and action rate limiting | 0/1 | 1 | Planned |
 | `redis` | Redis connections and operations | 0/1 | 1 | Planned |
 | `route` | HTTP route registration | 0/1 | 1 | Planned |
