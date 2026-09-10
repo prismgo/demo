@@ -11,6 +11,7 @@ import (
 func CommandFactories() []console.CommandFactory {
 	return []console.CommandFactory{
 		func() console.Command { return demo.NewListCommand() },
+		func() console.Command { return demo.NewShowCommand() },
 		func() console.Command { return demo.NewQueueCommand() },
 	}
 }

@@ -48,7 +48,7 @@ go run ./demo list
 
 ## Demo 示例与测试
 
-- `app/demo/catalog/` 维护“文档章节 → 示例 → 测试”的覆盖目录；用 `go run ./demo demo:list` 查看全部条目，并可按功能、`--level`、`--status` 过滤或使用 `--json` 输出。
+- `app/demo/catalog/` 维护“Framework 版本 → 功能模块 → 文档章节 → 示例 → 测试”的覆盖目录；用 `go run ./demo demo:list` 查看模块进度总览，用 `go run ./demo demo:show <feature>` 查看子功能详情，并可按 `--level`、`--status` 过滤或使用 `--json` 输出。
 - `app/demo/testing/` 提供隔离测试 Application，默认使用 SQLite、memory/file cache、sync queue、file session 和临时目录，不读取开发环境的 `.env`。
 - `app/models/`、`app/repositories/`、`app/services/` 与 `database/migrations/` 中的订单示例用于展示模型、仓储、事务和业务服务组合；当前以单元测试和场景测试为主要使用入口。
 

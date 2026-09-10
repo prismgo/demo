@@ -13,60 +13,231 @@ import (
 	"prismgo-demo/app/demo/catalog"
 )
 
-func TestDemoListCommand(t *testing.T) {
+func TestDemoListCommandShowsFeatureOverview(t *testing.T) {
 	command := NewListCommand()
 	var output bytes.Buffer
-	ctx := commandContext(command, demoInput{arguments: map[string]string{"feature": "cache"}}, &output)
-	if err := command.Handle(ctx); err != nil {
+	if err := command.Handle(commandContext(command, demoInput{}, &output)); err != nil {
 		t.Fatalf("handle demo:list: %v", err)
 	}
-	for _, expected := range []string{"cache", "demo:cache list", "planned", "Coverage entries: 1"} {
+	for _, expected := range []string{
+		"PrismGo Framework: v0.2.2 (local workspace)",
+		"Feature", "Description", "Since", "Progress", "Remaining", "Status",
+		"Queues, jobs, and workers", "20/59", "in progress",
+		"Modules: 29 | Implemented: 21/87 | Planned: 63 | Manual: 3",
+		"go run ./demo demo:show <feature>",
+	} {
 		if !strings.Contains(output.String(), expected) {
 			t.Fatalf("output does not contain %q:\n%s", expected, output.String())
 		}
 	}
+	if strings.Contains(output.String(), "demo:queue basic") {
+		t.Fatalf("overview unexpectedly contains entry details:\n%s", output.String())
+	}
 }
 
-func TestDemoListCommandJSONAndFilters(t *testing.T) {
+func TestDemoListCommandJSONAndFeatureStatusFilter(t *testing.T) {
 	command := NewListCommand()
+	var output bytes.Buffer
+	input := demoInput{
+		options: map[string]string{"status": "in-progress"},
+		bools:   map[string]bool{"json": true},
+	}
+	if err := command.Handle(commandContext(command, input, &output)); err != nil {
+		t.Fatalf("handle filtered demo:list: %v", err)
+	}
+	var result overviewOutput
+	if err := json.Unmarshal(output.Bytes(), &result); err != nil {
+		t.Fatalf("decode JSON: %v\n%s", err, output.String())
+	}
+	if result.Framework != "v0.2.2" {
+		t.Fatalf("framework = %q, want v0.2.2", result.Framework)
+	}
+	if len(result.Features) != 1 || result.Features[0].Feature != "queue" || result.Features[0].Status != catalog.FeatureStatusInProgress {
+		t.Fatalf("features = %#v, want queue in progress", result.Features)
+	}
+	if strings.Contains(output.String(), "\x1b[") {
+		t.Fatalf("JSON contains ANSI decoration: %q", output.String())
+	}
+}
+
+func TestDemoListCommandColorsFeatureStatuses(t *testing.T) {
+	command := NewListCommand()
+	var output bytes.Buffer
+	ioo := console.NewIOWithOutputOptions(
+		strings.NewReader(""), &output, &output, console.OutputOptions{ANSI: true},
+	)
+	ctx := commandContextWithIO(command, demoInput{}, ioo)
+	if err := command.Handle(ctx); err != nil {
+		t.Fatalf("handle ANSI demo:list: %v", err)
+	}
+	for _, expected := range []string{
+		"\x1b[32mimplemented\x1b[0m",
+		"\x1b[32mcommands\x1b[0m",
+		"\x1b[33min progress\x1b[0m",
+		"\x1b[33mqueue\x1b[0m",
+		"\x1b[39mcache\x1b[0m",
+	} {
+		if !strings.Contains(output.String(), expected) {
+			t.Fatalf("ANSI output does not contain %q:\n%q", expected, output.String())
+		}
+	}
+}
+
+func TestDemoListCommandPreservesFeatureDetailShortcut(t *testing.T) {
+	command := NewListCommand()
+	var output bytes.Buffer
+	input := demoInput{arguments: map[string]string{"feature": "cache"}}
+	if err := command.Handle(commandContext(command, input, &output)); err != nil {
+		t.Fatalf("handle demo:list cache: %v", err)
+	}
+	for _, expected := range []string{"Module: cache", "demo:cache list", "Entries: 1"} {
+		if !strings.Contains(output.String(), expected) {
+			t.Fatalf("detail shortcut output does not contain %q:\n%s", expected, output.String())
+		}
+	}
+}
+
+func TestDemoShowCommandJSONAndFilters(t *testing.T) {
+	command := NewShowCommand()
 	var output bytes.Buffer
 	input := demoInput{
 		options: map[string]string{"level": "integration", "status": "planned"},
 		bools:   map[string]bool{"json": true},
 	}
 	if err := command.Handle(commandContext(command, input, &output)); err != nil {
-		t.Fatalf("handle filtered demo:list: %v", err)
+		t.Fatalf("handle filtered demo:show: %v", err)
 	}
-	var entries []catalog.Entry
-	if err := json.Unmarshal(output.Bytes(), &entries); err != nil {
+	var result detailOutput
+	if err := json.Unmarshal(output.Bytes(), &result); err != nil {
 		t.Fatalf("decode JSON: %v\n%s", err, output.String())
 	}
-	if len(entries) != 27 {
-		t.Fatalf("integration planned entries = %d, want 27", len(entries))
+	if result.Framework != "v0.2.2" || len(result.Entries) != 27 {
+		t.Fatalf("detail output framework/entries = %q/%d, want v0.2.2/27", result.Framework, len(result.Entries))
 	}
-	for _, item := range entries {
-		if item.Level != catalog.LevelIntegration || item.Status != catalog.StatusPlanned {
+	for _, item := range result.Entries {
+		if item.Level != catalog.LevelIntegration || item.Status != catalog.StatusPlanned || item.Since != catalog.SinceInitial {
 			t.Fatalf("unexpected filtered item: %#v", item)
 		}
 	}
 }
 
-func TestDemoListCommandRejectsUnknownFilter(t *testing.T) {
-	command := NewListCommand()
-	for _, input := range []demoInput{
-		{options: map[string]string{"level": "remote"}},
-		{options: map[string]string{"status": "done"}},
+func TestDemoShowCommandShowsFeatureDetails(t *testing.T) {
+	command := NewShowCommand()
+	var output bytes.Buffer
+	input := demoInput{
+		arguments: map[string]string{"feature": "queue"},
+		options:   map[string]string{"status": "implemented"},
+	}
+	if err := command.Handle(commandContext(command, input, &output)); err != nil {
+		t.Fatalf("handle demo:show queue: %v", err)
+	}
+	for _, expected := range []string{
+		"Module: queue — 20/59 implemented — in progress",
+		"Case", "Section", "Since", "Example", "Level", "Requires", "Status",
+		"basic-sync", "v0.1.0", "Entries: 20 | Implemented: 20 | Planned: 0 | Manual: 0",
 	} {
-		if err := command.Handle(commandContext(command, input, io.Discard)); err == nil {
-			t.Fatal("Handle() error = nil")
+		if !strings.Contains(output.String(), expected) {
+			t.Fatalf("detail output does not contain %q:\n%s", expected, output.String())
 		}
 	}
 }
 
+func TestDemoShowCommandColorsModuleAndCases(t *testing.T) {
+	command := NewShowCommand()
+	var output bytes.Buffer
+	input := demoInput{
+		arguments: map[string]string{"feature": "queue"},
+		options:   map[string]string{"status": "implemented"},
+	}
+	ioo := console.NewIOWithOutputOptions(
+		strings.NewReader(""), &output, &output, console.OutputOptions{ANSI: true},
+	)
+	if err := command.Handle(commandContextWithIO(command, input, ioo)); err != nil {
+		t.Fatalf("handle ANSI demo:show queue: %v", err)
+	}
+	for _, expected := range []string{
+		"\x1b[33mqueue\x1b[0m",
+		"\x1b[32mbasic-sync\x1b[0m",
+		"\x1b[32mimplemented\x1b[0m",
+	} {
+		if !strings.Contains(output.String(), expected) {
+			t.Fatalf("ANSI detail output does not contain %q:\n%q", expected, output.String())
+		}
+	}
+}
+
+func TestDemoShowCommandIncludesFeatureWhenShowingAllEntries(t *testing.T) {
+	command := NewShowCommand()
+	var output bytes.Buffer
+	input := demoInput{options: map[string]string{"status": "manual"}}
+	if err := command.Handle(commandContext(command, input, &output)); err != nil {
+		t.Fatalf("handle demo:show manual entries: %v", err)
+	}
+	for _, expected := range []string{"Feature", "Case", "installation", "manual", "Entries: 3"} {
+		if !strings.Contains(output.String(), expected) {
+			t.Fatalf("all-detail output does not contain %q:\n%s", expected, output.String())
+		}
+	}
+}
+
+func TestDemoShowCommandReportsEmptyFilteredFeature(t *testing.T) {
+	command := NewShowCommand()
+	var output bytes.Buffer
+	input := demoInput{
+		arguments: map[string]string{"feature": "cache"},
+		options:   map[string]string{"status": "implemented"},
+	}
+	if err := command.Handle(commandContext(command, input, &output)); err != nil {
+		t.Fatalf("handle empty demo:show result: %v", err)
+	}
+	if !strings.Contains(output.String(), "No documentation demos matched the selected filters.") {
+		t.Fatalf("empty result warning missing:\n%s", output.String())
+	}
+}
+
+func TestUnknownFeatureMessage(t *testing.T) {
+	tests := []struct {
+		name string
+		want string
+	}{
+		{name: "queu", want: `did you mean "queue"`},
+		{name: "missing", want: "run demo:list"},
+	}
+	for _, test := range tests {
+		if got := unknownFeatureMessage(test.name); !strings.Contains(got, test.want) {
+			t.Fatalf("unknownFeatureMessage(%q) = %q, want substring %q", test.name, got, test.want)
+		}
+	}
+}
+
+func TestDemoCatalogCommandsRejectUnknownFiltersAndFeatures(t *testing.T) {
+	tests := []struct {
+		name    string
+		command console.Command
+		input   demoInput
+	}{
+		{name: "list level", command: NewListCommand(), input: demoInput{options: map[string]string{"level": "integration"}}},
+		{name: "list status", command: NewListCommand(), input: demoInput{options: map[string]string{"status": "done"}}},
+		{name: "show level", command: NewShowCommand(), input: demoInput{options: map[string]string{"level": "remote"}}},
+		{name: "show status", command: NewShowCommand(), input: demoInput{options: map[string]string{"status": "done"}}},
+		{name: "show feature", command: NewShowCommand(), input: demoInput{arguments: map[string]string{"feature": "queu"}}},
+	}
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			if err := test.command.Handle(commandContext(test.command, test.input, io.Discard)); err == nil {
+				t.Fatal("Handle() error = nil")
+			}
+		})
+	}
+}
+
 func commandContext(command console.Command, input console.Input, output io.Writer) console.CommandContext {
+	return commandContextWithIO(command, input, console.NewIO(strings.NewReader(""), output, output))
+}
+
+func commandContextWithIO(command console.Command, input console.Input, ioo console.IO) console.CommandContext {
 	return console.NewCommandContext(
-		context.Background(), command, *command.Definition(), input,
-		console.NewIO(strings.NewReader(""), output, output), nil, nil,
+		context.Background(), command, *command.Definition(), input, ioo, nil, nil,
 	)
 }
 

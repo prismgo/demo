@@ -18,6 +18,12 @@ func TestCatalogEntries(t *testing.T) {
 	if item, ok := Find("commands", "list"); !ok || item.Status != StatusImplemented {
 		t.Fatalf("implemented demo:list entry = %#v, %v", item, ok)
 	}
+	if item, ok := Find("queue", "basic-sync"); !ok || item.Since != SinceInitial {
+		t.Fatalf("implemented queue version = %#v, %v; want %s", item, ok, SinceInitial)
+	}
+	if item, ok := Find("queue", "batch-events"); !ok || item.Since != SinceInitial {
+		t.Fatalf("planned demo framework version = %#v, %v; want %s", item, ok, SinceInitial)
+	}
 	if got := Filter("redis", LevelIntegration, StatusPlanned); len(got) != 1 {
 		t.Fatalf("redis integration filter returned %d entries, want 1", len(got))
 	}
@@ -29,6 +35,54 @@ func TestCatalogEntries(t *testing.T) {
 	}
 }
 
+func TestCatalogFeatureSummaries(t *testing.T) {
+	summaries := Summaries()
+	if len(summaries) != 29 {
+		t.Fatalf("Summaries() returned %d features, want 29", len(summaries))
+	}
+
+	queue, ok := SummaryFor("queue")
+	if !ok {
+		t.Fatal("SummaryFor(queue) found = false")
+	}
+	if queue.Implemented != 20 || queue.Planned != 39 || queue.Manual != 0 || queue.Total != 59 || queue.Remaining != 39 {
+		t.Fatalf("queue summary = %#v, want implemented=20 planned=39 manual=0 total=59 remaining=39", queue)
+	}
+	if queue.Status != FeatureStatusInProgress || queue.Since != SinceInitial {
+		t.Fatalf("queue status/since = %q/%q, want %q/%q", queue.Status, queue.Since, FeatureStatusInProgress, SinceInitial)
+	}
+
+	commands, ok := SummaryFor("commands")
+	if !ok || commands.Status != FeatureStatusImplemented {
+		t.Fatalf("commands summary = %#v, %v; want implemented", commands, ok)
+	}
+	installation, ok := SummaryFor("installation")
+	if !ok || installation.Status != FeatureStatusManual || installation.Remaining != 0 {
+		t.Fatalf("installation summary = %#v, %v; want manual with no remaining planned entries", installation, ok)
+	}
+}
+
+func TestFeatureStatus(t *testing.T) {
+	tests := []struct {
+		name    string
+		summary Summary
+		want    FeatureStatus
+	}{
+		{name: "implemented", summary: Summary{Implemented: 2, Total: 2}, want: FeatureStatusImplemented},
+		{name: "in progress", summary: Summary{Implemented: 1, Planned: 1, Total: 2}, want: FeatureStatusInProgress},
+		{name: "planned", summary: Summary{Planned: 2, Total: 2}, want: FeatureStatusPlanned},
+		{name: "manual", summary: Summary{Manual: 2, Total: 2}, want: FeatureStatusManual},
+		{name: "empty", summary: Summary{}, want: FeatureStatusPlanned},
+	}
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			if got := featureStatus(test.summary); got != test.want {
+				t.Fatalf("featureStatus(%#v) = %q, want %q", test.summary, got, test.want)
+			}
+		})
+	}
+}
+
 func TestCatalogValidationRejectsInvalidEntries(t *testing.T) {
 	valid := All()[0]
 	tests := []struct {
@@ -36,6 +90,8 @@ func TestCatalogValidationRejectsInvalidEntries(t *testing.T) {
 		items []Entry
 	}{
 		{name: "empty", items: []Entry{{}}},
+		{name: "since", items: []Entry{func() Entry { item := valid; item.Since = ""; return item }()}},
+		{name: "feature metadata", items: []Entry{func() Entry { item := valid; item.Feature = "missing"; return item }()}},
 		{name: "level", items: []Entry{func() Entry { item := valid; item.Level = "unknown"; return item }()}},
 		{name: "status", items: []Entry{func() Entry { item := valid; item.Status = "unknown"; return item }()}},
 		{name: "duplicate", items: []Entry{valid, valid}},
