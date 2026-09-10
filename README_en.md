@@ -19,9 +19,9 @@
 
 ---
 
-## What Is the Demo Project?
+## Introduction
 
-This repository is not the PrismGo framework source. It is PrismGo's **runnable example application, local integration entry point, and feature-coverage verification ground**. A local `replace` in `go.mod` points directly to the sibling `framework/` source, so framework changes can be demonstrated and tested immediately in a realistic application structure.
+PrismGo Demo is the framework's **runnable example and local integration project**. A local `replace` in `go.mod` points directly to the sibling `framework/` source.
 
 The Demo project has four main responsibilities:
 
