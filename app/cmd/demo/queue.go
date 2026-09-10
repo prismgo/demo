@@ -20,7 +20,7 @@ type QueueCommand struct {
 
 // NewQueueCommand creates the queue demo command.
 func NewQueueCommand() *QueueCommand {
-	return newQueueCommand(func(ctx context.Context, caseName, connection string) (qdemo.Result, error) {
+	return newQueueCommand(func(ctx context.Context, caseName, connection string) (result qdemo.Result, err error) {
 		cfg := queue.BuildConfig()
 		cfg.Default = connection
 		if err := queueDemoConfigError(caseName, cfg); err != nil {
@@ -30,7 +30,11 @@ func NewQueueCommand() *QueueCommand {
 		if err != nil {
 			return qdemo.Result{}, err
 		}
-		defer manager.Close()
+		defer func() {
+			if closeErr := manager.Close(); err == nil && closeErr != nil {
+				err = fmt.Errorf("queue demo close manager: %w", closeErr)
+			}
+		}()
 		return qdemo.Run(ctx, manager, caseName, connection)
 	})
 }
@@ -88,10 +92,20 @@ func (c *QueueCommand) Definition() *console.Definition {
 		"go run ./demo demo:queue poison-event --connection=redis",
 		"go run ./demo demo:queue infrastructure-events --connection=rabbitmq",
 		"go run ./demo demo:queue encryption",
+		"go run ./demo demo:queue encryption-missing-key",
 		"go run ./demo demo:queue custom-driver",
+		"go run ./demo demo:queue custom-queue-contract",
+		"go run ./demo demo:queue custom-reserved-job",
+		"go run ./demo demo:queue custom-pop-session",
+		"go run ./demo demo:queue custom-consumer-intent",
 		"go run ./demo demo:queue errors",
+		"go run ./demo demo:queue job-errors",
+		"go run ./demo demo:queue connection-errors",
+		"go run ./demo demo:queue poison-errors --connection=redis",
+		"go run ./demo demo:queue rabbitmq-errors --connection=rabbitmq",
 		"go run ./demo demo:queue redis --connection=redis",
 		"go run ./demo demo:queue rabbitmq --connection=rabbitmq",
+		"go run ./demo demo:queue bulk --connection=redis",
 	}
 	return definition
 }

@@ -45,10 +45,20 @@ var scenarios = []Scenario{
 	{Name: "poison-event", Section: "Lifecycle Events", Status: "implemented", Connections: []string{"redis"}, Requires: []string{"redis"}},
 	{Name: "infrastructure-events", Section: "Lifecycle Events", Status: "implemented", Connections: []string{"rabbitmq"}, Requires: []string{"rabbitmq"}},
 	{Name: "encryption", Section: "Encrypted Payloads", Status: "implemented", Connections: []string{"sync"}},
+	{Name: "encryption-missing-key", Section: "Encrypted Payloads", Status: "implemented", Connections: []string{"sync"}},
 	{Name: "custom-driver", Section: "Custom Drivers", Status: "implemented", Connections: []string{"sync"}},
+	{Name: "custom-queue-contract", Section: "Queue — Transport Connection", Status: "implemented", Connections: []string{"sync"}},
+	{Name: "custom-reserved-job", Section: "ReservedJob — Held Job", Status: "implemented", Connections: []string{"sync"}},
+	{Name: "custom-pop-session", Section: "Optional Interfaces", Status: "implemented", Connections: []string{"sync"}},
+	{Name: "custom-consumer-intent", Section: "Optional Interfaces", Status: "implemented", Connections: []string{"sync"}},
 	{Name: "errors", Section: "Error Constants", Status: "implemented", Connections: []string{"sync"}},
+	{Name: "job-errors", Section: "Error Constants", Status: "implemented", Connections: []string{"sync"}},
+	{Name: "connection-errors", Section: "Error Constants", Status: "implemented", Connections: []string{"sync"}},
+	{Name: "poison-errors", Section: "Error Constants", Status: "implemented", Connections: []string{"redis", "rabbitmq"}, Requires: []string{"redis", "rabbitmq"}},
+	{Name: "rabbitmq-errors", Section: "Error Constants", Status: "implemented", Connections: []string{"rabbitmq"}, Requires: []string{"rabbitmq"}},
 	{Name: "redis", Section: "Redis Connection", Status: "implemented", Connections: []string{"redis"}, Requires: []string{"redis"}},
 	{Name: "rabbitmq", Section: "RabbitMQ Configuration", Status: "implemented", Connections: []string{"rabbitmq"}, Requires: []string{"rabbitmq"}},
+	{Name: "bulk", Section: "Built-in Connection Capability Matrix", Status: "implemented", Connections: []string{"redis", "rabbitmq"}, Requires: []string{"redis", "rabbitmq"}},
 }
 
 // Scenarios returns a copy of the queue demo catalog in presentation order.

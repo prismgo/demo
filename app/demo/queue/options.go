@@ -16,7 +16,7 @@ import (
 	jobs "prismgo-demo/app/jobs/queuedemo"
 )
 
-func runStrategyEnvelope(ctx context.Context, connection string) (Result, error) {
+func runStrategyEnvelope(ctx context.Context, connection string) (result Result, err error) {
 	if connection != "sync" {
 		return Result{}, fmt.Errorf("queue demo strategy-envelope is hermetic and selected with sync, got %s", connection)
 	}
@@ -24,7 +24,11 @@ func runStrategyEnvelope(ctx context.Context, connection string) (Result, error)
 	if err != nil {
 		return Result{}, err
 	}
-	defer manager.Close()
+	defer func() {
+		if closeErr := manager.Close(); err == nil && closeErr != nil {
+			err = fmt.Errorf("queue demo strategy-envelope close manager: %w", closeErr)
+		}
+	}()
 
 	runID := time.Now().UnixNano()
 	queueName := fmt.Sprintf("demo-strategy-envelope-%d", runID)
@@ -70,7 +74,7 @@ func runStrategyEnvelope(ctx context.Context, connection string) (Result, error)
 	return Result{Case: "strategy-envelope", Connection: connection, Queue: queueName, JobID: jobID, Processed: true, Steps: steps}, nil
 }
 
-func runUniqueDispatchOptions(ctx context.Context, connection string) (Result, error) {
+func runUniqueDispatchOptions(ctx context.Context, connection string) (result Result, err error) {
 	if connection != "sync" {
 		return Result{}, fmt.Errorf("queue demo unique-options is hermetic and selected with sync, got %s", connection)
 	}
@@ -78,12 +82,20 @@ func runUniqueDispatchOptions(ctx context.Context, connection string) (Result, e
 	if err != nil {
 		return Result{}, err
 	}
-	defer manager.Close()
+	defer func() {
+		if closeErr := manager.Close(); err == nil && closeErr != nil {
+			err = fmt.Errorf("queue demo unique-options close manager: %w", closeErr)
+		}
+	}()
 	cacheManager, err := newDemoMemoryCache("unique-options")
 	if err != nil {
 		return Result{}, err
 	}
-	defer cacheManager.Close()
+	defer func() {
+		if closeErr := cacheManager.Close(); err == nil && closeErr != nil {
+			err = fmt.Errorf("queue demo unique-options close cache: %w", closeErr)
+		}
+	}()
 
 	runID := time.Now().UnixNano()
 	queueName := fmt.Sprintf("demo-unique-options-%d", runID)
@@ -178,7 +190,7 @@ func runDebounceDispatchOptions(ctx context.Context, manager *queue.Manager, con
 	return Result{Case: "debounce-options", Connection: connection, Queue: queueName, JobID: jobID, Processed: true, Steps: steps}, nil
 }
 
-func runOverlapReleasePolicy(ctx context.Context, connection string) (Result, error) {
+func runOverlapReleasePolicy(ctx context.Context, connection string) (result Result, err error) {
 	if connection != "sync" {
 		return Result{}, fmt.Errorf("queue demo overlap-release is hermetic and selected with sync, got %s", connection)
 	}
@@ -188,7 +200,11 @@ func runOverlapReleasePolicy(ctx context.Context, connection string) (Result, er
 	if err != nil {
 		return Result{}, err
 	}
-	defer cacheManager.Close()
+	defer func() {
+		if closeErr := cacheManager.Close(); err == nil && closeErr != nil {
+			err = fmt.Errorf("queue demo overlap-release close cache: %w", closeErr)
+		}
+	}()
 	store := cacheManager.Default()
 	started := make(chan struct{})
 	release := make(chan struct{})

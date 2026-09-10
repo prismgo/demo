@@ -51,12 +51,16 @@ func ValidateDocuments(docsRoot string, entries []Entry) error {
 	return nil
 }
 
-func documentHasHeading(path, wanted string) (bool, error) {
+func documentHasHeading(path, wanted string) (found bool, err error) {
 	file, err := os.Open(path)
 	if err != nil {
 		return false, err
 	}
-	defer file.Close()
+	defer func() {
+		if closeErr := file.Close(); err == nil && closeErr != nil {
+			err = fmt.Errorf("close catalog document: %w", closeErr)
+		}
+	}()
 
 	scanner := bufio.NewScanner(file)
 	for scanner.Scan() {

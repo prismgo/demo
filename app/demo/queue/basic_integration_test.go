@@ -376,6 +376,61 @@ func TestQueueDemoPoisonEnvelopeEvent(t *testing.T) {
 	}
 }
 
+func TestQueueDemoPoisonErrors(t *testing.T) {
+	for _, connection := range []string{"redis", "rabbitmq"} {
+		t.Run(connection, func(t *testing.T) {
+			manager := newRealQueueManager(t, connection)
+			result, err := qdemo.Run(context.Background(), manager, "poison-errors", connection)
+			if err != nil {
+				t.Fatalf("run poison errors on %s: %v", connection, err)
+			}
+			if !hasIntegrationStep(result.Steps, "poison-envelope:matched") {
+				t.Fatalf("poison error steps on %s = %v, want poison sentinel match", connection, result.Steps)
+			}
+			if !result.Processed || result.JobID != "" || !strings.HasPrefix(result.Queue, "demo-poison-errors-") {
+				t.Fatalf("poison error result on %s = %#v, want processed result without job ID", connection, result)
+			}
+		})
+	}
+}
+
+func TestQueueDemoRabbitMQErrors(t *testing.T) {
+	manager := newRealRabbitMQQueueManager(t)
+	result, err := qdemo.Run(context.Background(), manager, "rabbitmq-errors", "rabbitmq")
+	if err != nil {
+		t.Fatalf("run RabbitMQ errors: %v", err)
+	}
+	want := strings.Join([]string{
+		"transport:connected", "dial-failed:matched", "topology-missing:matched", "publish-nacked:matched",
+		"publish-timeout:matched", "confirm-closed:matched", "publish-unrouted:matched", "release-republish-failed:matched",
+	}, ",")
+	if got := strings.Join(result.Steps, ","); got != want {
+		t.Fatalf("RabbitMQ error steps = %q, want %q", got, want)
+	}
+	if !result.Processed || result.JobID != "" || !strings.HasPrefix(result.Queue, "demo-rabbitmq-errors-") {
+		t.Fatalf("RabbitMQ error result = %#v, want processed result without job ID", result)
+	}
+}
+
+func TestQueueDemoBulkTransport(t *testing.T) {
+	for _, connection := range []string{"redis", "rabbitmq"} {
+		t.Run(connection, func(t *testing.T) {
+			manager := newRealQueueManager(t, connection)
+			result, err := qdemo.Run(context.Background(), manager, "bulk", connection)
+			if err != nil {
+				t.Fatalf("run bulk transport on %s: %v", connection, err)
+			}
+			want := "bulk:accepted=3,size:3,bulk:one,bulk:two,bulk:three,progress:3/3"
+			if got := strings.Join(result.Steps, ","); got != want {
+				t.Fatalf("bulk transport steps on %s = %q, want %q", connection, got, want)
+			}
+			if !result.Processed || result.JobID == "" || !strings.HasPrefix(result.Queue, "demo-bulk-") {
+				t.Fatalf("bulk transport result on %s = %#v, want processed batch result", connection, result)
+			}
+		})
+	}
+}
+
 func TestQueueDemoInfrastructureEvents(t *testing.T) {
 	manager := newRealRabbitMQQueueManager(t)
 	result, err := qdemo.Run(context.Background(), manager, "infrastructure-events", "rabbitmq")

@@ -292,6 +292,22 @@ func TestQueueDemoEncryption(t *testing.T) {
 	}
 }
 
+func TestQueueDemoEncryptionMissingKey(t *testing.T) {
+	manager := newSyncQueueManager(t)
+
+	result, err := Run(context.Background(), manager, "encryption-missing-key", "sync")
+	if err != nil {
+		t.Fatalf("run missing encryption key queue scenario: %v", err)
+	}
+	want := []string{"app-key:rejected", "dispatch:rejected", "transport:empty"}
+	if got := strings.Join(result.Steps, ","); got != strings.Join(want, ",") {
+		t.Fatalf("missing encryption key steps = %q, want %q", got, strings.Join(want, ","))
+	}
+	if !result.Processed || result.JobID != "" || result.Queue != "demo-encryption-missing-key" {
+		t.Fatalf("missing encryption key result = %#v, want processed rejection without job ID", result)
+	}
+}
+
 func TestQueueDemoCustomDriver(t *testing.T) {
 	manager := newSyncQueueManager(t)
 
@@ -308,6 +324,70 @@ func TestQueueDemoCustomDriver(t *testing.T) {
 	}
 }
 
+func TestQueueDemoCustomQueueContract(t *testing.T) {
+	manager := newSyncQueueManager(t)
+
+	result, err := Run(context.Background(), manager, "custom-queue-contract", "sync")
+	if err != nil {
+		t.Fatalf("run custom queue contract scenario: %v", err)
+	}
+	want := "push:accepted,later:accepted,bulk:accepted=2,pop:priority,clear:size=0,close:released"
+	if got := strings.Join(result.Steps, ","); got != want {
+		t.Fatalf("custom queue contract steps = %q, want %q", got, want)
+	}
+	if !result.Processed || result.JobID == "" || result.Queue != "high" {
+		t.Fatalf("custom queue contract result = %#v, want processed high-priority job", result)
+	}
+}
+
+func TestQueueDemoCustomReservedJob(t *testing.T) {
+	manager := newSyncQueueManager(t)
+
+	result, err := Run(context.Background(), manager, "custom-reserved-job", "sync")
+	if err != nil {
+		t.Fatalf("run custom reserved job scenario: %v", err)
+	}
+	want := "metadata:read,payload:copied,attempts:1,release:2s,attempts:2,delete:acknowledged"
+	if got := strings.Join(result.Steps, ","); got != want {
+		t.Fatalf("custom reserved job steps = %q, want %q", got, want)
+	}
+	if !result.Processed || result.JobID == "" || result.Queue != "jobs" {
+		t.Fatalf("custom reserved job result = %#v, want processed jobs result", result)
+	}
+}
+
+func TestQueueDemoCustomPopSession(t *testing.T) {
+	manager := newSyncQueueManager(t)
+
+	result, err := Run(context.Background(), manager, "custom-pop-session", "sync")
+	if err != nil {
+		t.Fatalf("run custom pop session scenario: %v", err)
+	}
+	want := "session:created,session:pop,job:handled,session:closed"
+	if got := strings.Join(result.Steps, ","); got != want {
+		t.Fatalf("custom pop session steps = %q, want %q", got, want)
+	}
+	if !result.Processed || result.JobID == "" || !strings.HasPrefix(result.Queue, "demo-custom-pop-session-") {
+		t.Fatalf("custom pop session result = %#v, want processed result with job ID", result)
+	}
+}
+
+func TestQueueDemoCustomConsumerIntent(t *testing.T) {
+	manager := newSyncQueueManager(t)
+
+	result, err := Run(context.Background(), manager, "custom-consumer-intent", "sync")
+	if err != nil {
+		t.Fatalf("run custom consumer intent scenario: %v", err)
+	}
+	want := "intent:acquired,queues:received,job:handled,intent:released"
+	if got := strings.Join(result.Steps, ","); got != want {
+		t.Fatalf("custom consumer intent steps = %q, want %q", got, want)
+	}
+	if !result.Processed || result.JobID == "" || !strings.HasPrefix(result.Queue, "demo-custom-consumer-intent-") {
+		t.Fatalf("custom consumer intent result = %#v, want processed result with job ID", result)
+	}
+}
+
 func TestQueueDemoErrors(t *testing.T) {
 	manager := newSyncQueueManager(t)
 
@@ -321,6 +401,38 @@ func TestQueueDemoErrors(t *testing.T) {
 	}
 	if !result.Processed || result.JobID != "" || result.Queue != "demo-errors" {
 		t.Fatalf("unexpected result: %#v", result)
+	}
+}
+
+func TestQueueDemoJobStateErrors(t *testing.T) {
+	manager := newSyncQueueManager(t)
+
+	result, err := Run(context.Background(), manager, "job-errors", "sync")
+	if err != nil {
+		t.Fatalf("run queue job state errors scenario: %v", err)
+	}
+	want := "duplicate:matched,skipped:matched,batch-cancelled:matched"
+	if got := strings.Join(result.Steps, ","); got != want {
+		t.Fatalf("job error steps = %q, want %q", got, want)
+	}
+	if !result.Processed || result.JobID != "" || result.Queue != "demo-job-errors" {
+		t.Fatalf("job error result = %#v, want processed result without job ID", result)
+	}
+}
+
+func TestQueueDemoConnectionErrors(t *testing.T) {
+	manager := newSyncQueueManager(t)
+
+	result, err := Run(context.Background(), manager, "connection-errors", "sync")
+	if err != nil {
+		t.Fatalf("run queue connection errors scenario: %v", err)
+	}
+	want := "connection-closed:matched,unsupported-operation:matched,unsupported-retry-after:matched"
+	if got := strings.Join(result.Steps, ","); got != want {
+		t.Fatalf("connection error steps = %q, want %q", got, want)
+	}
+	if !result.Processed || result.JobID != "" || result.Queue != "demo-connection-errors" {
+		t.Fatalf("connection error result = %#v, want processed result without job ID", result)
 	}
 }
 

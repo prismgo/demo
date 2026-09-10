@@ -21,7 +21,7 @@ import (
 
 const demoEncryptionSecret = "queue-demo-sensitive-value"
 
-func runEncryption(ctx context.Context, connection string) (Result, error) {
+func runEncryption(ctx context.Context, connection string) (result Result, err error) {
 	if connection != "sync" {
 		return Result{}, fmt.Errorf("queue demo encryption uses an inspecting in-memory transport, got %s", connection)
 	}
@@ -44,7 +44,11 @@ func runEncryption(ctx context.Context, connection string) (Result, error) {
 	if err != nil {
 		return Result{}, fmt.Errorf("queue demo encryption manager: %w", err)
 	}
-	defer manager.Close()
+	defer func() {
+		if closeErr := manager.Close(); err == nil && closeErr != nil {
+			err = fmt.Errorf("queue demo encryption close manager: %w", closeErr)
+		}
+	}()
 
 	runID := time.Now().UnixNano()
 	traceID := fmt.Sprintf("encryption-%d", runID)
@@ -86,7 +90,7 @@ func runEncryption(ctx context.Context, connection string) (Result, error) {
 	return Result{Case: "encryption", Connection: connection, Queue: queueName, JobID: jobID, Processed: true, Steps: steps}, nil
 }
 
-func runCustomDriver(ctx context.Context, connection string) (Result, error) {
+func runCustomDriver(ctx context.Context, connection string) (result Result, err error) {
 	if connection != "sync" {
 		return Result{}, fmt.Errorf("queue demo custom-driver is hermetic and selected with sync, got %s", connection)
 	}
@@ -102,7 +106,11 @@ func runCustomDriver(ctx context.Context, connection string) (Result, error) {
 	if err != nil {
 		return Result{}, fmt.Errorf("queue demo custom-driver manager: %w", err)
 	}
-	defer manager.Close()
+	defer func() {
+		if closeErr := manager.Close(); err == nil && closeErr != nil {
+			err = fmt.Errorf("queue demo custom-driver close manager: %w", closeErr)
+		}
+	}()
 
 	runID := time.Now().UnixNano()
 	traceID := fmt.Sprintf("custom-%d", runID)

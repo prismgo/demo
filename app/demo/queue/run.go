@@ -132,17 +132,47 @@ func Run(ctx context.Context, manager *queue.Manager, caseName, connection strin
 	if caseName == "encryption" {
 		return runEncryption(ctx, connection)
 	}
+	if caseName == "encryption-missing-key" {
+		return runEncryptionMissingKey(ctx, connection)
+	}
 	if caseName == "custom-driver" {
 		return runCustomDriver(ctx, connection)
 	}
+	if caseName == "custom-queue-contract" {
+		return runCustomQueueContract(ctx, connection)
+	}
+	if caseName == "custom-reserved-job" {
+		return runCustomReservedJob(ctx, connection)
+	}
+	if caseName == "custom-pop-session" {
+		return runCustomPopSession(ctx, connection)
+	}
+	if caseName == "custom-consumer-intent" {
+		return runCustomConsumerIntent(ctx, connection)
+	}
 	if caseName == "errors" {
 		return runErrors(ctx, manager, connection)
+	}
+	if caseName == "job-errors" {
+		return runJobStateErrors(ctx, connection)
+	}
+	if caseName == "connection-errors" {
+		return runConnectionErrors(ctx, connection)
+	}
+	if caseName == "poison-errors" {
+		return runPoisonErrors(ctx, manager, connection)
+	}
+	if caseName == "rabbitmq-errors" {
+		return runRabbitMQErrors(ctx, manager, connection)
 	}
 	if caseName == "redis" {
 		return runRedisBoundaries(ctx, manager, connection)
 	}
 	if caseName == "rabbitmq" {
 		return runRabbitMQBoundaries(ctx, manager, connection)
+	}
+	if caseName == "bulk" {
+		return runBulkTransport(ctx, manager, connection)
 	}
 	if caseName != "basic" {
 		return Result{}, fmt.Errorf("queue demo: unknown scenario %q", caseName)
