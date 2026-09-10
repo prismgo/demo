@@ -167,6 +167,41 @@ func TestQueueDemoFailedCommands(t *testing.T) {
 	}
 }
 
+func TestQueueDemoDriverPrerequisites(t *testing.T) {
+	assertConfigurationScenario(t, "driver-prerequisites", []string{
+		"sync:none", "redis:PRISMGO_REDIS_TEST_URL", "rabbitmq:PRISMGO_RABBITMQ_TEST_URL",
+	})
+}
+
+func TestQueueDemoConfiguration(t *testing.T) {
+	assertConfigurationScenario(t, "config", []string{
+		"default:sync", "connections:sync,redis,rabbitmq", "state:failed,batching,restart",
+	})
+}
+
+func TestQueueDemoPayloadEncoding(t *testing.T) {
+	assertConfigurationScenario(t, "payload-encoding", []string{"explicit:json", "inherited:msgpack"})
+}
+
+func TestQueueDemoSyncConnectionConfiguration(t *testing.T) {
+	assertConfigurationScenario(t, "sync-connection", []string{"queue:configured", "sync:handled"})
+}
+
+func assertConfigurationScenario(t *testing.T, name string, want []string) {
+	t.Helper()
+	manager := newSyncQueueManager(t)
+	result, err := Run(context.Background(), manager, name, "sync")
+	if err != nil {
+		t.Fatalf("run %s queue scenario: %v", name, err)
+	}
+	if got, expected := strings.Join(result.Steps, ","), strings.Join(want, ","); got != expected {
+		t.Fatalf("%s steps = %q, want %q", name, got, expected)
+	}
+	if !result.Processed || result.Case != name || result.Connection != "sync" {
+		t.Fatalf("%s result = %#v, want processed sync result", name, result)
+	}
+}
+
 func TestQueueDemoEncryption(t *testing.T) {
 	manager := newSyncQueueManager(t)
 

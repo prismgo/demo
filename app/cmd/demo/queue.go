@@ -3,6 +3,7 @@ package demo
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"strings"
 
@@ -22,6 +23,9 @@ func NewQueueCommand() *QueueCommand {
 	return newQueueCommand(func(ctx context.Context, caseName, connection string) (qdemo.Result, error) {
 		cfg := queue.BuildConfig()
 		cfg.Default = connection
+		if err := queueDemoConfigError(caseName, cfg); err != nil {
+			return qdemo.Result{}, err
+		}
 		manager, err := queue.NewManager(cfg, queue.DefaultRegistry())
 		if err != nil {
 			return qdemo.Result{}, err
@@ -29,6 +33,24 @@ func NewQueueCommand() *QueueCommand {
 		defer manager.Close()
 		return qdemo.Run(ctx, manager, caseName, connection)
 	})
+}
+
+func queueDemoConfigError(caseName string, cfg queue.Config) error {
+	switch caseName {
+	case "failed-store":
+		if !strings.EqualFold(strings.TrimSpace(cfg.Failed.Driver), "redis") {
+			return errors.New("queue demo failed-store requires QUEUE_FAILED_DRIVER=redis")
+		}
+	case "batch-store":
+		if !strings.EqualFold(strings.TrimSpace(cfg.Batching.Driver), "redis") {
+			return errors.New("queue demo batch-store requires QUEUE_BATCHING_DRIVER=redis")
+		}
+	case "restart-store":
+		if strings.TrimSpace(cfg.Restart.Cache) == "" {
+			return errors.New("queue demo restart-store requires QUEUE_RESTART_CACHE to name a Redis-backed cache store")
+		}
+	}
+	return nil
 }
 
 func newQueueCommand(run func(context.Context, string, string) (qdemo.Result, error)) *QueueCommand {
@@ -43,6 +65,8 @@ func (c *QueueCommand) Definition() *console.Definition {
 	)
 	definition.Examples = []string{
 		"go run ./demo demo:queue list",
+		"go run ./demo demo:queue config",
+		"go run ./demo demo:queue failed-store --connection=redis",
 		"go run ./demo demo:queue basic --connection=sync",
 		"go run ./demo demo:queue basic --connection=redis",
 		"go run ./demo demo:queue basic --connection=rabbitmq",

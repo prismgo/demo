@@ -137,6 +137,135 @@ func runFailedCommands(ctx context.Context, manager *queue.Manager, connection s
 	return Result{Case: "failed-commands", Connection: connection, Queue: "demo-failed", JobID: items[0].JobID, Processed: true, Steps: steps}, nil
 }
 
+func runFailedStore(ctx context.Context, manager *queue.Manager, connection string) (Result, error) {
+	if connection != "redis" {
+		return Result{}, fmt.Errorf("queue demo failed-store requires redis, got %s", connection)
+	}
+	id := fmt.Sprintf("demo-failed-store-%d", time.Now().UnixNano())
+	jobID := fmt.Sprintf("demo-job-%d", time.Now().UnixNano())
+	store := manager.Failed()
+	failed := payload.FailedJob{
+		ID: id, JobID: jobID, Connection: connection, Queue: "demo-failed-store",
+		JobName: "OperationsJob", Error: "demonstration failure", FailedAt: time.Now(),
+	}
+	if err := store.Record(ctx, failed); err != nil {
+		return Result{}, fmt.Errorf("queue demo failed store record: %w", err)
+	}
+	found, err := store.Find(ctx, id)
+	if err != nil {
+		return Result{}, fmt.Errorf("queue demo failed store find: %w", err)
+	}
+	if found.JobID != jobID {
+		return Result{}, fmt.Errorf("queue demo failed store job ID = %q, want %q", found.JobID, jobID)
+	}
+	if err := store.Forget(ctx, id); err != nil {
+		return Result{}, fmt.Errorf("queue demo failed store forget: %w", err)
+	}
+	if _, err := store.Find(ctx, id); !errors.Is(err, queue.ErrEmpty) {
+		return Result{}, fmt.Errorf("queue demo failed store forgotten record: got %v, want %w", err, queue.ErrEmpty)
+	}
+	return Result{
+		Case: "failed-store", Connection: connection, Queue: failed.Queue, JobID: jobID,
+		Processed: true, Steps: []string{"recorded", "found", "forgotten"},
+	}, nil
+}
+
+func runBatchStore(ctx context.Context, manager *queue.Manager, connection string) (Result, error) {
+	if connection != "redis" {
+		return Result{}, fmt.Errorf("queue demo batch-store requires redis, got %s", connection)
+	}
+	traceID := fmt.Sprintf("batch-store-%d", time.Now().UnixNano())
+	queueName := fmt.Sprintf("demo-batch-store-%d", time.Now().UnixNano())
+	status, err := manager.Batch(
+		&jobs.OperationsJob{TraceID: traceID, Label: "batch-store"},
+	).Name("queue-demo-state-store").Options(
+		queue.OnConnection(connection), queue.OnQueue(queueName),
+	).Dispatch(ctx)
+	if err != nil {
+		return Result{}, fmt.Errorf("queue demo batch store create: %w", err)
+	}
+	stored, err := manager.BatchStatus(ctx, status.ID)
+	if err != nil {
+		return Result{}, fmt.Errorf("queue demo batch store read: %w", err)
+	}
+	if stored.ID != status.ID || stored.Name != "queue-demo-state-store" || stored.Total != 1 {
+		return Result{}, fmt.Errorf("queue demo batch store status = %#v, want created batch %q", stored, status.ID)
+	}
+	if err := manager.CancelBatch(ctx, status.ID); err != nil {
+		return Result{}, fmt.Errorf("queue demo batch store cancel: %w", err)
+	}
+	cancelled, err := manager.BatchStatus(ctx, status.ID)
+	if err != nil {
+		return Result{}, fmt.Errorf("queue demo batch store read cancelled: %w", err)
+	}
+	if !cancelled.Cancelled {
+		return Result{}, fmt.Errorf("queue demo batch store cancelled = false, want true")
+	}
+	if err := clearRedisQueue(ctx, manager, connection, queueName); err != nil {
+		return Result{}, err
+	}
+	return Result{
+		Case: "batch-store", Connection: connection, Queue: queueName, JobID: status.ID,
+		Processed: true, Steps: []string{"created", "read", "cancelled"},
+	}, nil
+}
+
+func runRestartStore(ctx context.Context, manager *queue.Manager, connection string) (Result, error) {
+	if connection != "redis" {
+		return Result{}, fmt.Errorf("queue demo restart-store requires redis, got %s", connection)
+	}
+	traceID := fmt.Sprintf("restart-store-%d", time.Now().UnixNano())
+	queueName := fmt.Sprintf("demo-restart-store-%d", time.Now().UnixNano())
+	jobs.ResetTrace(traceID)
+	jobs.PrepareGate(traceID)
+	defer jobs.ReleaseGate(traceID)
+	defer jobs.TakeTrace(traceID)
+	jobID, err := manager.Dispatch(ctx, &jobs.OperationsJob{TraceID: traceID, Label: "restart-store", Block: true},
+		queue.OnConnection(connection), queue.OnQueue(queueName))
+	if err != nil {
+		return Result{}, fmt.Errorf("queue demo restart store dispatch: %w", err)
+	}
+	workerCtx, cancelWorker := context.WithCancel(ctx)
+	workerDone := make(chan error, 1)
+	go func() {
+		workerDone <- queue.NewWorker(manager).Work(workerCtx, queue.WorkerOptions{
+			Connection: connection, Queues: []string{queueName}, StopWhenEmpty: true, Sleep: 5 * time.Millisecond,
+		})
+	}()
+	workerStopped := false
+	defer func() {
+		cancelWorker()
+		if !workerStopped {
+			<-workerDone
+		}
+	}()
+	if err := jobs.WaitGateStarted(ctx, traceID); err != nil {
+		return Result{}, fmt.Errorf("queue demo restart store wait: %w", err)
+	}
+	if err := manager.RequestRestart(ctx); err != nil {
+		return Result{}, fmt.Errorf("queue demo restart store request: %w", err)
+	}
+	jobs.ReleaseGate(traceID)
+	select {
+	case err := <-workerDone:
+		workerStopped = true
+		if err != nil {
+			return Result{}, fmt.Errorf("queue demo restart store worker: %w", err)
+		}
+	case <-ctx.Done():
+		return Result{}, ctx.Err()
+	case <-time.After(5 * time.Second):
+		return Result{}, fmt.Errorf("queue demo restart store worker did not observe signal")
+	}
+	if err := clearRedisQueue(ctx, manager, connection, queueName); err != nil {
+		return Result{}, err
+	}
+	return Result{
+		Case: "restart-store", Connection: connection, Queue: queueName, JobID: jobID,
+		Processed: true, Steps: []string{"requested", "worker-observed"},
+	}, nil
+}
+
 func runRestart(ctx context.Context, manager *queue.Manager, connection string) (Result, error) {
 	if connection != "redis" && connection != "rabbitmq" {
 		return Result{}, fmt.Errorf("queue demo restart requires redis or rabbitmq, got %s", connection)

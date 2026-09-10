@@ -24,14 +24,22 @@ func TestCatalogEntries(t *testing.T) {
 	if item, ok := Find("queue", "batch-events"); !ok || item.Since != SinceInitial {
 		t.Fatalf("planned demo framework version = %#v, %v; want %s", item, ok, SinceInitial)
 	}
+	for _, slug := range []string{
+		"driver-prerequisites", "config", "payload-encoding", "sync-connection",
+		"failed-store", "batch-store", "restart-store",
+	} {
+		if item, ok := Find("queue", slug); !ok || item.Status != StatusImplemented {
+			t.Fatalf("queue configuration entry %q = %#v, %v; want implemented", slug, item, ok)
+		}
+	}
 	if got := Filter("redis", LevelIntegration, StatusPlanned); len(got) != 1 {
 		t.Fatalf("redis integration filter returned %d entries, want 1", len(got))
 	}
-	if got := Filter("queue", "", StatusImplemented); len(got) != 20 {
-		t.Fatalf("implemented queue entries = %d, want 20", len(got))
+	if got := Filter("queue", "", StatusImplemented); len(got) != 27 {
+		t.Fatalf("implemented queue entries = %d, want 27", len(got))
 	}
-	if got := Filter("queue", "", StatusPlanned); len(got) != 39 {
-		t.Fatalf("planned queue entries = %d, want 39", len(got))
+	if got := Filter("queue", "", StatusPlanned); len(got) != 32 {
+		t.Fatalf("planned queue entries = %d, want 32", len(got))
 	}
 }
 
@@ -45,8 +53,8 @@ func TestCatalogFeatureSummaries(t *testing.T) {
 	if !ok {
 		t.Fatal("SummaryFor(queue) found = false")
 	}
-	if queue.Implemented != 20 || queue.Planned != 39 || queue.Manual != 0 || queue.Total != 59 || queue.Remaining != 39 {
-		t.Fatalf("queue summary = %#v, want implemented=20 planned=39 manual=0 total=59 remaining=39", queue)
+	if queue.Implemented != 27 || queue.Planned != 32 || queue.Manual != 0 || queue.Total != 59 || queue.Remaining != 32 {
+		t.Fatalf("queue summary = %#v, want implemented=27 planned=32 manual=0 total=59 remaining=32", queue)
 	}
 	if queue.Status != FeatureStatusInProgress || queue.Since != SinceInitial {
 		t.Fatalf("queue status/since = %q/%q, want %q/%q", queue.Status, queue.Since, FeatureStatusInProgress, SinceInitial)

@@ -33,6 +33,27 @@ func Run(ctx context.Context, manager *queue.Manager, caseName, connection strin
 	if connection == "" {
 		connection = "sync"
 	}
+	if caseName == "driver-prerequisites" {
+		return runDriverPrerequisites(connection), nil
+	}
+	if caseName == "config" {
+		return runConfiguration(connection)
+	}
+	if caseName == "payload-encoding" {
+		return runPayloadEncoding(connection)
+	}
+	if caseName == "sync-connection" {
+		return runSyncConnection(ctx, manager, connection)
+	}
+	if caseName == "failed-store" {
+		return runFailedStore(ctx, manager, connection)
+	}
+	if caseName == "batch-store" {
+		return runBatchStore(ctx, manager, connection)
+	}
+	if caseName == "restart-store" {
+		return runRestartStore(ctx, manager, connection)
+	}
 	if caseName == "strategies" {
 		return runStrategies(ctx, manager, connection)
 	}

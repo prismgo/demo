@@ -11,6 +11,13 @@ type Scenario struct {
 }
 
 var scenarios = []Scenario{
+	{Name: "driver-prerequisites", Section: "Driver Prerequisites", Status: "implemented", Connections: []string{"sync"}},
+	{Name: "config", Section: "Config File", Status: "implemented", Connections: []string{"sync"}},
+	{Name: "payload-encoding", Section: "Global", Status: "implemented", Connections: []string{"sync"}},
+	{Name: "sync-connection", Section: "Sync Connection", Status: "implemented", Connections: []string{"sync"}},
+	{Name: "failed-store", Section: "Failed Jobs Store", Status: "implemented", Connections: []string{"redis"}, Requires: []string{"redis"}},
+	{Name: "batch-store", Section: "Batching Store", Status: "implemented", Connections: []string{"redis"}, Requires: []string{"redis"}},
+	{Name: "restart-store", Section: "Restart Store", Status: "implemented", Connections: []string{"redis"}, Requires: []string{"redis"}},
 	{Name: "basic", Section: "Creating Jobs", Status: "implemented", Connections: []string{"sync", "redis", "rabbitmq"}},
 	{Name: "strategies", Section: "Job Strategy Interfaces", Status: "implemented", Connections: []string{"sync"}},
 	{Name: "unique", Section: "Unique Jobs", Status: "implemented", Connections: []string{"sync", "redis"}, Requires: []string{"redis"}},

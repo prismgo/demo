@@ -15,7 +15,7 @@ import (
 	goredis "github.com/redis/go-redis/v9"
 
 	qdemo "prismgo-demo/app/demo/queue"
-	"prismgo-demo/app/demo/testing"
+	demotest "prismgo-demo/app/demo/testing"
 )
 
 func TestQueueDemoBasicWithRealRedis(t *testing.T) {
@@ -257,6 +257,33 @@ func TestQueueDemoEvents(t *testing.T) {
 	}
 }
 
+func TestQueueDemoFailedStoreConfiguration(t *testing.T) {
+	assertRedisStateStore(t, "failed-store", []string{"recorded", "found", "forgotten"})
+}
+
+func TestQueueDemoBatchStoreConfiguration(t *testing.T) {
+	assertRedisStateStore(t, "batch-store", []string{"created", "read", "cancelled"})
+}
+
+func TestQueueDemoRestartStoreConfiguration(t *testing.T) {
+	assertRedisStateStore(t, "restart-store", []string{"requested", "worker-observed"})
+}
+
+func assertRedisStateStore(t *testing.T, name string, want []string) {
+	t.Helper()
+	manager := newRealRedisQueueManager(t)
+	result, err := qdemo.Run(context.Background(), manager, name, "redis")
+	if err != nil {
+		t.Fatalf("run %s scenario: %v", name, err)
+	}
+	if got, expected := strings.Join(result.Steps, ","), strings.Join(want, ","); got != expected {
+		t.Fatalf("%s steps = %q, want %q", name, got, expected)
+	}
+	if !result.Processed || result.JobID == "" {
+		t.Fatalf("%s result = %#v, want processed result with job ID", name, result)
+	}
+}
+
 func TestQueueDemoRedisBoundaries(t *testing.T) {
 	manager := newRealRedisQueueManager(t)
 	result, err := qdemo.Run(context.Background(), manager, "redis", "redis")
@@ -372,6 +399,15 @@ func newRealRedisQueueManager(t *testing.T) *queue.Manager {
 	t.Cleanup(func() { _ = redisManager.Close(context.Background()) })
 	manager, err := queue.NewManager(queue.Config{
 		Default: "redis",
+		Failed: queue.StateStoreConfig{
+			Driver: "redis", Store: "default", Prefix: fmt.Sprintf("prismgo_demo_failed_%d", time.Now().UnixNano()), TTL: time.Minute,
+		},
+		Batching: queue.StateStoreConfig{
+			Driver: "redis", Store: "default", Prefix: fmt.Sprintf("prismgo_demo_batch_%d", time.Now().UnixNano()), TTL: time.Minute,
+		},
+		Restart: queue.RestartConfig{
+			Cache: "queue-demo", Key: fmt.Sprintf("prismgo:demo:restart:%d", time.Now().UnixNano()),
+		},
 		Connections: map[string]queue.ConnectionConfig{
 			"redis": {Driver: "redis", Queue: "queue-demo", Prefix: fmt.Sprintf("prismgo_demo_%d", time.Now().UnixNano()), Options: map[string]any{"connection": "default"}},
 		},

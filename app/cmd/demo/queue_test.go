@@ -6,6 +6,8 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/prismgo/framework/queue"
+
 	qdemo "prismgo-demo/app/demo/queue"
 )
 
@@ -72,5 +74,39 @@ func TestQueueDemoRejectsUnsupportedScenarioConnection(t *testing.T) {
 	}
 	if called {
 		t.Fatal("scenario runner should not be called for an unsupported connection")
+	}
+}
+
+func TestQueueDemoStateStoreConfigurationErrors(t *testing.T) {
+	tests := []struct {
+		name     string
+		caseName string
+		config   queue.Config
+		want     string
+	}{
+		{name: "failed store", caseName: "failed-store", config: queue.Config{}, want: "QUEUE_FAILED_DRIVER=redis"},
+		{name: "batch store", caseName: "batch-store", config: queue.Config{}, want: "QUEUE_BATCHING_DRIVER=redis"},
+		{name: "restart store", caseName: "restart-store", config: queue.Config{}, want: "QUEUE_RESTART_CACHE"},
+	}
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			err := queueDemoConfigError(test.caseName, test.config)
+			if err == nil || !strings.Contains(err.Error(), test.want) {
+				t.Fatalf("queueDemoConfigError(%q) = %v, want error containing %q", test.caseName, err, test.want)
+			}
+		})
+	}
+}
+
+func TestQueueDemoAcceptsConfiguredStateStores(t *testing.T) {
+	cfg := queue.Config{
+		Failed:   queue.StateStoreConfig{Driver: " Redis "},
+		Batching: queue.StateStoreConfig{Driver: "redis"},
+		Restart:  queue.RestartConfig{Cache: "redis"},
+	}
+	for _, caseName := range []string{"failed-store", "batch-store", "restart-store"} {
+		if err := queueDemoConfigError(caseName, cfg); err != nil {
+			t.Fatalf("queueDemoConfigError(%q) = %v, want nil for configured store", caseName, err)
+		}
 	}
 }
