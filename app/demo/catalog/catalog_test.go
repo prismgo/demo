@@ -12,8 +12,8 @@ func TestCatalogEntries(t *testing.T) {
 	if err := Validate(entries); err != nil {
 		t.Fatalf("validate catalog entries: %v", err)
 	}
-	if len(entries) != 209 {
-		t.Fatalf("catalog has %d entries, want 209", len(entries))
+	if len(entries) != 247 {
+		t.Fatalf("catalog has %d entries, want 247", len(entries))
 	}
 	if item, ok := Find("commands", "list"); !ok || item.Status != StatusImplemented {
 		t.Fatalf("implemented demo:list entry = %#v, %v", item, ok)
@@ -36,6 +36,18 @@ func TestCatalogEntries(t *testing.T) {
 	} {
 		if item, ok := Find("queue", slug); !ok || item.Status != StatusImplemented {
 			t.Fatalf("queue configuration entry %q = %#v, %v; want implemented", slug, item, ok)
+		}
+	}
+	for _, slug := range []string{
+		"architecture", "config", "provider", "short-keys", "nested-keys", "json-keys", "key-conflicts", "namespaces",
+		"translator", "facade", "missing-default", "locale-argument", "has", "has-for-locale", "get-map",
+		"replacements", "replacement-case", "stringable", "plural-pipe", "plural-intervals", "plural-replacements", "plural-count",
+		"locale", "locale-validation", "fallback", "fallback-validation", "locale-resolver", "namespace-overrides",
+		"add-lines", "add-lines-precedence", "missing-handler", "group-paths", "json-paths", "custom-loader",
+		"translator-contract", "loader-contract", "selector-contract", "reset", "isolated",
+	} {
+		if item, ok := Find("translation", slug); !ok || item.Status != StatusPlanned {
+			t.Fatalf("translation catalog entry %q = %#v, %v; want planned", slug, item, ok)
 		}
 	}
 	for _, slug := range []string{
@@ -121,6 +133,17 @@ func TestCatalogFeatureSummaries(t *testing.T) {
 	}
 	if filesystem.Status != FeatureStatusPlanned || filesystem.Since != SinceInitial {
 		t.Fatalf("filesystem status/since = %q/%q, want %q/%q", filesystem.Status, filesystem.Since, FeatureStatusPlanned, SinceInitial)
+	}
+
+	translation, ok := SummaryFor("translation")
+	if !ok {
+		t.Fatal("SummaryFor(translation) found = false")
+	}
+	if translation.Implemented != 0 || translation.Planned != 39 || translation.Manual != 0 || translation.Total != 39 || translation.Remaining != 39 {
+		t.Fatalf("translation summary = %#v, want implemented=0 planned=39 manual=0 total=39 remaining=39", translation)
+	}
+	if translation.Status != FeatureStatusPlanned || translation.Since != SinceInitial {
+		t.Fatalf("translation status/since = %q/%q, want %q/%q", translation.Status, translation.Since, FeatureStatusPlanned, SinceInitial)
 	}
 
 	commands, ok := SummaryFor("commands")
