@@ -88,22 +88,49 @@ go run ./demo demo:list --json
 
 ## 本地开发工作区与 `dev` 脚本
 
-PrismGo 本地开发采用三仓并列结构。工作区根目录只负责组织仓库和共享配置，本身不是 Git 仓库；`demo/`、`framework/`、`docs/` 各自拥有独立的 Git 历史。
+PrismGo 本地开发采用三仓并列结构。**`demo/`、`framework/`、`docs/` 位于同一个工作区根目录下，互不嵌套**；三个目录各自是独立 Git 仓库，工作区根目录本身不是 Git 仓库。
 
-```mermaid
-flowchart TB
-    workspace["PrismGo 本地工作区<br/>非 Git 仓库"]
-    demo["demo/<br/>示例应用 · Catalog · 联调工具"]
-    framework["framework/<br/>框架源码 · 框架测试"]
-    docs["docs/<br/>中英文用户文档"]
+### 安装与初始化
 
-    workspace --> demo
-    workspace --> framework
-    workspace --> docs
-    demo -. "go.mod replace ../framework" .-> framework
-    demo -. "Catalog 映射文档章节" .-> docs
-    framework -. "功能变更同步文档" .-> docs
+初始化需要 Go 1.25+、Git、GitHub SSH 访问权限和 `flock`。如需启动数据库、Redis 或 RabbitMQ，还需要 Docker Engine 与 Compose v2。
+
+先创建一个空的工作区目录，只克隆 Demo 仓库；目录名必须是 `demo`：
+
+```bash
+mkdir workspace
+cd workspace
+git clone git@github.com:prismgo/demo.git demo
+./demo/dev init
 ```
+
+`init` 会自动完成剩余工作：
+
+1. 将缺失的 `framework/` 和 `docs/` 克隆到 `demo/` 的同级目录。
+2. 在缺失时创建 `demo/.env`，已有文件不会被覆盖。
+3. 创建或更新 `go.work`，加入 `demo/` 和 `framework/`。
+4. 创建工作区 Agent 指令与项目 skill 链接。
+5. 下载 Framework 的 Go 依赖。
+
+### 三仓目录结构
+
+`./demo/dev init` 执行完成后，目录结构如下：
+
+```text
+workspace/                           # 工作区根目录（名称自定，不是 Git 仓库）
+├── demo/                            # 仓库 1：示例、Catalog、联调工具
+│   ├── .git/
+│   ├── dev                          # 工作区管理入口
+│   └── go.mod                       # replace framework => ../framework
+├── framework/                       # 仓库 2：框架源码与测试
+│   └── .git/
+├── docs/                            # 仓库 3：中英文用户文档
+│   └── .git/
+├── go.work                          # 同时加载 demo/ 与 framework/
+├── AGENTS.md -> demo/AGENTS.md
+└── CLAUDE.md -> demo/AGENTS.md
+```
+
+其中 `demo/go.mod` 通过 `../framework` 使用本地框架源码；Catalog 再把 Demo 示例和测试映射到 `docs/` 的文档章节。修改和提交必须进入对应仓库分别进行。
 
 | 仓库 | 修改内容 | 不应放入 |
 |---|---|---|
@@ -111,14 +138,15 @@ flowchart TB
 | `framework/` | 框架实现、公开 API、组件与框架测试 | Demo 专属业务示例 |
 | `docs/` | 面向使用者的中英文指南与 API 说明 | 框架或 Demo 实现代码 |
 
-所有 `dev` 命令都建议从工作区根目录运行。首次准备工作区：
+初始化后可检查环境、查看 Catalog，并启动 Demo HTTP 服务：
 
 ```bash
-./demo/dev init
-./demo/dev doctor
+./demo/dev doctor              # 需要 Docker；检查依赖与 Compose 配置
+go run ./demo demo:list        # 查看功能覆盖进度
+go run ./demo serve            # 启动 Demo HTTP 服务
 ```
 
-`init` 会创建工作区 Agent 指令与 skill 链接、克隆缺失的 `framework/` 和 `docs/` 仓库、在缺失时创建 `demo/.env`、维护包含 `demo/` 与 `framework/` 的 `go.work`，并下载框架依赖。它不会覆盖已有仓库或已有的 `demo/.env`。`doctor` 用于检查 Docker、Compose 等前置条件并验证 Compose 配置。
+不需要外部服务时可以跳过 `doctor` 和 `dev up`，直接运行 Catalog、Demo 或默认测试。
 
 ### 常用 `dev` 命令
 

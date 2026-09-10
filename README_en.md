@@ -89,22 +89,49 @@ Status meanings: `Implemented` means every entry in the module is complete; `In 
 
 ## Local Development Workspace and the `dev` Script
 
-PrismGo local development uses three sibling repositories. The workspace root only organizes repositories and shared configuration; it is not itself a Git repository. `demo/`, `framework/`, and `docs/` each have independent Git history.
+PrismGo local development uses three sibling repositories. **`demo/`, `framework/`, and `docs/` live directly under the same workspace root and are not nested inside one another.** Each directory is an independent Git repository; the workspace root itself is not a Git repository.
 
-```mermaid
-flowchart TB
-    workspace["PrismGo local workspace<br/>not a Git repository"]
-    demo["demo/<br/>example app · Catalog · integration tools"]
-    framework["framework/<br/>framework source · framework tests"]
-    docs["docs/<br/>Chinese and English user documentation"]
+### Installation and Initialization
 
-    workspace --> demo
-    workspace --> framework
-    workspace --> docs
-    demo -. "go.mod replace ../framework" .-> framework
-    demo -. "Catalog maps documentation sections" .-> docs
-    framework -. "feature changes update docs" .-> docs
+Initialization requires Go 1.25+, Git, GitHub SSH access, and `flock`. Docker Engine and Compose v2 are also required when running databases, Redis, or RabbitMQ.
+
+Create an empty workspace directory and clone only the Demo repository. Its directory name must be `demo`:
+
+```bash
+mkdir workspace
+cd workspace
+git clone git@github.com:prismgo/demo.git demo
+./demo/dev init
 ```
+
+`init` automatically completes the remaining setup:
+
+1. Clone missing `framework/` and `docs/` repositories alongside `demo/`.
+2. Create `demo/.env` when absent without overwriting an existing file.
+3. Create or update `go.work` with `demo/` and `framework/`.
+4. Create workspace Agent-instruction and project-skill links.
+5. Download the Framework's Go dependencies.
+
+### Three-Repository Directory Layout
+
+After `./demo/dev init` completes, the directory layout is:
+
+```text
+workspace/                           # Workspace root (any name; not a Git repository)
+├── demo/                            # Repository 1: examples, Catalog, integration tools
+│   ├── .git/
+│   ├── dev                          # Workspace management entry point
+│   └── go.mod                       # replace framework => ../framework
+├── framework/                       # Repository 2: framework source and tests
+│   └── .git/
+├── docs/                            # Repository 3: Chinese and English user docs
+│   └── .git/
+├── go.work                          # Loads both demo/ and framework/
+├── AGENTS.md -> demo/AGENTS.md
+└── CLAUDE.md -> demo/AGENTS.md
+```
+
+`demo/go.mod` uses the local framework source through `../framework`. The Catalog then maps Demo examples and tests to documentation sections in `docs/`. Changes and commits must be made separately in the corresponding repository.
 
 | Repository | What belongs here | What does not belong here |
 |---|---|---|
@@ -112,14 +139,15 @@ flowchart TB
 | `framework/` | Framework implementations, public APIs, components, and framework tests | Demo-specific business examples |
 | `docs/` | Chinese and English user guides and API documentation | Framework or Demo implementation code |
 
-Run all `dev` commands from the workspace root. Prepare a workspace for the first time with:
+After initialization, inspect the environment, view the Catalog, and start the Demo HTTP server:
 
 ```bash
-./demo/dev init
-./demo/dev doctor
+./demo/dev doctor              # Requires Docker; checks dependencies and Compose config
+go run ./demo demo:list        # Show feature coverage progress
+go run ./demo serve            # Start the Demo HTTP server
 ```
 
-`init` creates workspace Agent-instruction and skill links, clones missing `framework/` and `docs/` repositories, creates `demo/.env` when absent, maintains a `go.work` containing `demo/` and `framework/`, and downloads framework dependencies. It does not overwrite existing repositories or an existing `demo/.env`. `doctor` checks prerequisites such as Docker and Compose and validates the Compose configuration.
+If no external services are needed, skip `doctor` and `dev up` and run the Catalog, Demo, or default tests directly.
 
 ### Common `dev` Commands
 
