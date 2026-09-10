@@ -1,5 +1,5 @@
 <p align="center">
-  <img src=".github/assets/logo.png" width="250">
+  <img src=".dev/assets/logo.png" width="250">
 </p>
 
 <div align="center">
@@ -18,386 +18,144 @@
 
 ---
 
-## 这是什么？
+## Demo 项目是什么？
 
-PrismGo 是一个由 AI Agent 全自动开发的 **Laravel 风格的 Go 语言 Web 框架**，Laravel 设计哲学贯穿始终，与 Go 社区主流编码风格自然融合。如果你熟悉 Laravel 的开发体验——Facade、ServiceProvider、Artisan 命令、缓存系统、Eloquent ORM 风格、事件系统、队列任务、日志系统——那么你会在 PrismGo 里找到一模一样的感觉。
+这个仓库不是 PrismGo 框架源码，而是 PrismGo 的**可运行示例应用、本地联调入口与功能覆盖验证场**。它通过 `go.mod` 中的本地 `replace` 直接使用同级 `framework/` 源码，让框架改动可以立即在真实应用结构中演示和测试。
 
-我们希望让 Go 开发者不必在 "高性能" 和 "高开发效率" 之间做选择。PrismGo 使用 Go 生态中最成熟的底层组件（[Gin](https://github.com/gin-gonic/gin)、[GORM](https://github.com/go-gorm/gorm)、[Redis](https://github.com/redis/go-redis)、[Viper](https://github.com/spf13/viper)、[Logrus](https://github.com/sirupsen/logrus)、[Cobra](https://github.com/spf13/cobra)），再用 Laravel 的设计哲学把它们组织成一整套开箱即用的 Web 工具箱。
+Demo 项目主要承担四件事：
 
-> **一句话定位：让你用 Go 的语法，享受 Laravel 的开发体验。**
+- **展示用法**：以路由、命令、模型、仓储、事务、队列任务和定时任务等真实应用代码展示框架组合方式。
+- **维护覆盖目录**：Catalog 将“Framework 版本 → 功能模块 → 文档章节 → 示例 → 测试”串成可查询的进度地图。
+- **隔离验证**：默认测试 Application 使用 SQLite、内存/文件驱动和临时目录，不依赖开发环境的 `.env`。
+- **本地联调**：`./dev` 统一初始化工作区，并按需管理 MySQL、PostgreSQL、SQL Server、Redis 和 RabbitMQ。
 
----
+| 路径 | 作用 |
+|---|---|
+| `app/demo/catalog/` | Catalog 数据、模块进度和文档映射 |
+| `app/demo/` | 可执行的功能示例与场景测试 |
+| `app/models/`、`app/repositories/`、`app/services/` | 订单领域的模型、仓储和业务服务示例 |
+| `app/demo/testing/` | 与本地开发环境隔离的测试 Application |
+| `database/migrations/` | Demo 数据表迁移 |
+| `.dev/`、`dev` | 工作区初始化、本地依赖和联调工具 |
 
-## 为什么选择 PrismGo？
+## Catalog 进度地图
 
-| | 裸用 Gin/GORM | PrismGo |
+Catalog 当前覆盖 **29 个模块、87 个条目**：已实现 28 个、计划中 56 个、手工验证 3 个。以下是 README 更新时的快照；`app/demo/catalog/` 是唯一数据源，实时进度以 `demo:list` 输出为准。
+
+| 模块 | 覆盖范围 | 进度 | 剩余 | 状态 |
+|---|---|---:|---:|---|
+| `cache` | 缓存存储、标签与锁 | 0/1 | 1 | 计划中 |
+| `commands` | Console 命令发现 | 1/1 | 0 | 已实现 |
+| `config` | 环境与应用配置 | 0/1 | 1 | 计划中 |
+| `console` | Artisan 风格命令与终端 IO | 0/1 | 1 | 计划中 |
+| `container` | 依赖绑定与解析 | 0/1 | 1 | 计划中 |
+| `cookie` | Cookie 值与排队写入 | 0/1 | 1 | 计划中 |
+| `database` | 数据库连接与连接池 | 0/1 | 1 | 计划中 |
+| `encryption` | 应用数据加密 | 0/1 | 1 | 计划中 |
+| `event` | 同步、异步与队列事件 | 0/1 | 1 | 计划中 |
+| `exception` | 异常报告与渲染 | 0/1 | 1 | 计划中 |
+| `facade` | 框架 Facade 访问 | 0/1 | 1 | 计划中 |
+| `filesystem` | 本地、公共与云文件系统 | 0/1 | 1 | 计划中 |
+| `horizon` | 队列监控与 Worker 管理 | 0/1 | 1 | 计划中 |
+| `http-server` | HTTP 服务启动与生命周期 | 0/1 | 1 | 计划中 |
+| `installation` | 应用安装流程 | 0/1 | — | 手工验证 |
+| `lens` | Lens 开发流程 | 0/1 | — | 手工验证 |
+| `lifecycle` | 应用启动与关闭 | 0/1 | 1 | 计划中 |
+| `logger` | 多通道应用日志 | 0/1 | 1 | 计划中 |
+| `queue` | 队列、任务与 Worker | 27/59 | 32 | 进行中 |
+| `ratelimit` | 请求与操作限流 | 0/1 | 1 | 计划中 |
+| `redis` | Redis 连接与操作 | 0/1 | 1 | 计划中 |
+| `route` | HTTP 路由注册 | 0/1 | 1 | 计划中 |
+| `schema` | 数据库 Schema 与迁移构建器 | 0/1 | 1 | 计划中 |
+| `service-provider` | Service Provider 注册与生命周期 | 0/1 | 1 | 计划中 |
+| `session` | 服务端 Session 存储 | 0/1 | 1 | 计划中 |
+| `starter` | 生成应用的起始模板 | 0/1 | — | 手工验证 |
+| `support` | 通用框架辅助函数 | 0/1 | 1 | 计划中 |
+| `timer` | 定时任务定义 | 0/1 | 1 | 计划中 |
+| `translation` | 应用翻译与复数处理 | 0/1 | 1 | 计划中 |
+
+在工作区根目录查看实时地图与条目明细：
+
+```bash
+go run ./demo demo:list
+go run ./demo demo:show queue
+go run ./demo demo:show queue --status=planned
+go run ./demo demo:show queue --level=integration
+go run ./demo demo:list --json
+```
+
+状态含义：`已实现` 表示模块全部条目已落地；`进行中` 表示部分条目已落地；`计划中` 表示尚无已实现条目；`手工验证` 表示由安装器、Lens 等外部流程验证，因此不计入“剩余”数量。
+
+## 本地开发工作区与 `dev` 脚本
+
+PrismGo 本地开发采用三仓并列结构。工作区根目录只负责组织仓库和共享配置，本身不是 Git 仓库；`demo/`、`framework/`、`docs/` 各自拥有独立的 Git 历史。
+
+```mermaid
+flowchart TB
+    workspace["PrismGo 本地工作区<br/>非 Git 仓库"]
+    demo["demo/<br/>示例应用 · Catalog · 联调工具"]
+    framework["framework/<br/>框架源码 · 框架测试"]
+    docs["docs/<br/>中英文用户文档"]
+
+    workspace --> demo
+    workspace --> framework
+    workspace --> docs
+    demo -. "go.mod replace ../framework" .-> framework
+    demo -. "Catalog 映射文档章节" .-> docs
+    framework -. "功能变更同步文档" .-> docs
+```
+
+| 仓库 | 修改内容 | 不应放入 |
 |---|---|---|
-| **路由** | 手写 Gin Router | `route.Get("/users/{id}")` 命名路由、资源路由、分组 |
-| **命令** | 裸写 main/flag | Artisan 风格 CLI：`go run . serve` `go run . migrate` |
-| **配置** | 到处 viper.Get | `config.GetString("app.name")` 点路径统一读取 |
-| **日志** | logrus 裸用 | 多通道日志：`logger.Channel("error").Error(...)` |
-| **缓存** | 自己封装 Redis | `cache.Remember(ctx, key, ttl, callback)` |
-| **事件** | 无 | `event.Dispatch(ctx, OrderPaid{ID: 1001})` + listener |
-| **队列** | 自建 worker | `queue.Dispatch(ctx, job)` Redis/RabbitMQ 开箱即用 |
-| **迁移** | 手写 SQL | Schema Blueprint：`$table->String("name")` |
-| **资源管理** | 各自 Close | 统一应用生命周期，启动注册、退出释放 |
+| `demo/` | Demo、Catalog、场景测试、本地依赖与开发工具 | 框架公开 API 的真实实现 |
+| `framework/` | 框架实现、公开 API、组件与框架测试 | Demo 专属业务示例 |
+| `docs/` | 面向使用者的中英文指南与 API 说明 | 框架或 Demo 实现代码 |
 
-核心优势就一个：**你知道想做什么，框架帮你做掉样板代码。**
-
----
-
-## 快速开始
-
-### 安装
-
-安装 PrismGo 安装器
-```bash
-go install github.com/prismgo/installer/cmd/prismgo@latest
-```
-
-创建应用
-
-```
-prismgo new github.com/acme/myapp
-```
-
-启动 web 服务器
-```
-cd myapp
-go run . serve
-```
-
-打开浏览器访问 `http://localhost:8080/api`
-
-### 本地测试环境
-
-在本工作区开发框架时，可一键启动 MySQL、PostgreSQL、SQL Server、Redis 和 RabbitMQ，并准备 SQLite 测试文件：
+所有 `dev` 命令都建议从工作区根目录运行。首次准备工作区：
 
 ```bash
-./dev up
+./demo/dev init
+./demo/dev doctor
 ```
 
-查看状态或停止环境：
+`init` 会创建工作区 Agent 指令与 skill 链接、克隆缺失的 `framework/` 和 `docs/` 仓库、在缺失时创建 `demo/.env`、维护包含 `demo/` 与 `framework/` 的 `go.work`，并下载框架依赖。它不会覆盖已有仓库或已有的 `demo/.env`。`doctor` 用于检查 Docker、Compose 等前置条件并验证 Compose 配置。
+
+### 常用 `dev` 命令
+
+| 命令 | 用法 |
+|---|---|
+| `./demo/dev help` | 查看命令列表和可用服务名 |
+| `./demo/dev up [service...]` | 启动全部或指定依赖，并等待健康检查 |
+| `./demo/dev status` | 查看服务健康状态、本地端口和连接信息 |
+| `./demo/dev logs [service]` | 持续查看全部或指定服务的日志 |
+| `./demo/dev env` | 重新生成并输出 `demo/.dev/runtime/test.env` |
+| `./demo/dev test [go-test-args]` | 启动依赖，并在 `framework/` 中运行指定集成测试 |
+| `./demo/dev down` | 停止服务但保留本地数据 |
+| `./demo/dev reset [--yes]` | 删除全部本地测试数据并重建环境；请谨慎使用 |
+
+可选服务名为 `mysql`、`postgres`、`sqlserver`、`redis`、`rabbitmq` 和 `sqlite`。通常只启动当前任务需要的依赖：
 
 ```bash
-./dev status
-./dev down
+./demo/dev up mysql redis
+./demo/dev status
+./demo/dev logs redis
 ```
 
-完整的服务地址、测试变量和 Agent 使用规则见 [本地测试环境说明](.dev/docs/local-test-environment.md)。
-
-### 最小可运行示例
-
-```go
-package main
-
-import (
-    "context"
-    "os"
-
-    "github.com/prismgo/framework/foundation"
-    "github.com/prismgo/framework/route"
-)
-
-func main() {
-    app := foundation.Configure().
-        WithRouting(func(r route.Registrar) {
-            r.Get("/", func(c *gin.Context) {
-                c.JSON(200, gin.H{"message": "Hello PrismGo!"})
-            })
-        }).
-        Create()
-
-    if err := app.HandleCommand(context.Background(), os.Args); err != nil {
-        console.Exit(err.Error())
-    }
-}
-```
+加载脚本生成的测试连接变量，或直接通过统一入口运行框架集成测试：
 
 ```bash
-go run . serve --port=8000
+./demo/dev env
+source demo/.dev/runtime/test.env
+
+./demo/dev test ./queue/... ./horizon/...
+./demo/dev down
 ```
 
-打开 `http://localhost:8000`，看到 `{"message": "Hello PrismGo!"}`。
-
----
-
-## 核心特性一览
-
-## 🎭 Facade：像调全局函数一样调用服务
-
-```go
-cache.Put(ctx, "key", value, ttl)           // 缓存
-logger.Channel("error").Error("failed")     // 日志
-event.Dispatch(ctx, ev)                      // 事件
-queue.Dispatch(ctx, job)                     // 队列
-db := database.Resolve()                    // 数据库
-```
-
-和 Laravel Facade 一样方便，底层通过 Application 容器管理生命周期，没有全局变量污染和初始化顺序问题。
-
----
-
-## 🧩 Provider 驱动架构
-
-PrismGo 采用和 Laravel 一模一样的 ServiceProvider 模式来组织功能：
-
-```go
-type CacheServiceProvider struct{}
-
-func (p *CacheServiceProvider) Register(app provider.Application) error {
-    app.Container().Singleton("cache.manager", func() (any, error) {
-        return cache.NewManager()
-    }, container.WithCloser(func(m *Manager) error {
-        return m.Close()
-    }))
-    return nil
-}
-
-func (p *CacheServiceProvider) Boot(app provider.Application) error {
-    return nil
-}
-```
-
-每个功能模块通过 Provider 注册、懒加载、释放资源。你只需要在 `bootstrap/app.go` 中声明：
-
-```go
-foundation.Configure().
-    WithProviders(
-        &cache.ServiceProvider{},
-        &queue.ServiceProvider{},
-        &filesystem.ServiceProvider{},
-    )
-```
-
-框架会自动按依赖顺序加载，并在退出时逆序释放所有资源。
-
----
-
-### 🎨 Laravel 风格路由
-
-```go
-route.Prefix("/api").Middleware(auth).Group(func(r route.Registrar) {
-    r.Get("/users", userController.Index).Name("users.index")
-    r.Post("/users", userController.Store).Name("users.store")
-    r.Get("/users/{id}", userController.Show).Name("users.show")
-})
-```
-
-命名路由、分组嵌套、中间件、参数约束 —— 和 Laravel Router 一样的写法。
-
----
-
-### 🖥 Artisan 风格命令行
+Demo 自身的默认测试使用隔离驱动，不需要启动 Docker：
 
 ```bash
-go run . serve --port=8051          # 启动 HTTP 服务
-go run . migrate                    # 数据库迁移
-go run . db:seed                    # 数据填充
-go run . queue --queue=default      # 启动队列消费者
-go run . cron                       # 启动定时任务
+cd demo
+GOWORK=off go test . ./app/... ./bootstrap/... ./config/... ./database/... ./routes/...
 ```
 
-注册自定义命令和 Laravel 一样简单。定义命令只需实现 `Definition()` 和 `Handle()` 两个方法：
-
-```go
-// app/cmd/report_daily.go
-type DailyReportCommand struct{}
-
-func (c *DailyReportCommand) Definition() *console.Definition {
-    return console.MustDefinition(
-        "report:daily {date? : 报表日期，默认今天} {--e|email= : 发送到指定邮箱}",
-        "生成每日营业报表",
-    )
-}
-
-func (c *DailyReportCommand) Handle(ctx console.CommandContext) error {
-    date := ctx.Input().Argument("date")
-    email := ctx.Input().Option("email")
-    // 业务逻辑...
-    ctx.IO().Success("日报已生成：%s", date)
-    return nil
-}
-```
-
-注册：
-
-```go
-// bootstrap/app.go
-foundation.Configure().
-    WithRouting(func(r *foundation.Routing) {
-        r.Commands(
-            func() console.Command { return NewDailyReportCommand() },
-        )
-    })
-```
-
-`MustDefinition` 接受一段 Artisan 风格的签名 DSL，自动解析参数类型、必填/可选、短选项别名，零手写 Cobra 绑定代码。
-
----
-
-### ⏱ 定时任务
-
-```go
-schedule.Command("report:daily --force").DailyAt("08:00")
-schedule.Command("cache:clean").EveryThirtyMinutes()
-```
-
-在 `cron` 命令中启动，一行配置即可。
-
----
-
-### 📦 事件系统
-
-```go
-event.ListenFunc("order.paid", func(ctx context.Context, e event.Event) error {
-    order := e.(*OrderPaid)
-    notification.Send(ctx, order.UserID, "您的订单已支付")
-    return nil
-})
-
-event.Dispatch(ctx, &OrderPaid{ID: order.ID})
-```
-
-同步、异步 goroutine、队列监听器三种模式随心切换。
-
----
-
-### ⏳ 队列任务
-
-只需要实现一个接口：
-
-```go
-type SendEmailJob struct {
-    To      string
-    Subject string
-    Body    string
-}
-
-func (j *SendEmailJob) Handle(ctx context.Context) error {
-    return mailer.Send(ctx, j.To, j.Subject, j.Body)
-}
-
-queue.Dispatch(ctx, &SendEmailJob{
-    To: "user@example.com", Subject: "Welcome", Body: "...",
-})
-```
-
-支持重试、超时、唯一任务、批次、链式任务，驱动支持 Redis / RabbitMQ / Sync。
-
----
-
-### 🗃 缓存系统
-
-```go
-cache.Put(ctx, "user:1", user, 10*time.Minute)
-
-user, err := cache.Get[User](ctx, "user:1")
-
-user, err := cache.Remember(ctx, "stats:daily", 1*time.Hour, func() (*Stats, error) {
-    return computeStats(ctx)
-})
-```
-
-驱动支持 memory / redis / file / failover，还有 `Tags`、`Flexible`（stale-while-revalidate）、`Lock`（分布式锁）、`Memo`（请求级记忆化）等高级功能。
-
----
-
-### 📁 文件系统
-
-```go
-disk := filesystem.Disk("public")
-
-disk.PutFileAs(ctx, "avatars", uploadedFile, "user_123.jpg")
-
-url := disk.URL("avatars/user_123.jpg")
-```
-
-统一 Disk 抽象，支持 local / public / 阿里云 OSS，切换驱动只需改配置。
-
----
-
-### 📝 多通道日志
-
-```go
-logger.Channel("daily").WithFields(logrus.Fields{
-    "user_id": userID,
-}).Info("用户登录成功")
-
-logger.Channel("error").WithError(err).Error("订单同步失败")
-```
-
-支持 stack / single / daily / stderr / null 多种驱动，通道按需懒加载，构造失败时自动回退默认通道，不会因为日志系统故障影响业务可用性。
-
----
-
-### 🗄 数据库 & Schema 迁移
-
-用 Blueprint 写迁移，而不是手写 SQL：
-
-```go
-schema.Bind(db).Create("orders", func(table *schema.Blueprint) {
-    table.ID()
-    table.String("order_no", 32).Unique()
-    table.UnsignedBigInteger("user_id")
-    table.Decimal("amount", 10, 2)
-    table.Timestamps()
-    table.SoftDeletes()
-})
-```
-
-GORM 作为底层 ORM，ElasticSearch 风格的查询：
-
-```go
-db.Where("status = ?", "paid").Order("created_at desc").Find(&orders)
-```
-
----
-
-### 📊 速率限制
-
-```go
-ratelimit.For("api").Limit(60).PerMinute()
-```
-
-中间件直接挂载，共享缓存存储，支持自定义超限响应。
-
----
-
-## 文档
-
-- [github.com/prismgo/docs](https://github.com/prismgo/docs)
-
----
-
-## 组件全景图
-
-| 组件 | 做什么 | 怎么用 |
-|---|---|---|
-| `cache` | 缓存管理器：memory/redis/file/failover | `cache.Remember(ctx, key, ttl, fn)` |
-| `config` | `.env` 加载、点路径配置读取 | `config.GetString("app.name")` |
-| `console` | Artisan 风格命令模型、IO、表格输出 | `console.NewDefinition("cmd:name")` |
-| `container` | 服务容器：绑定、解析、单例、实例管理 | `app.Container().Bind("key", factory)` |
-| `cookie` | Cookie 值对象、队列写入 | `cookie.New("name", "val").HttpOnly()` |
-| `database` | GORM 连接管理、连接池 | `database.Resolve()` |
-| `database/schema` | Blueprint 风格迁移 DSL | `schema.Bind(db).Create("table", fn)` |
-| `encryption` | 加密与解密：密钥配置、字符串加密器 | `encryption.EncryptString("value")` |
-| `event` | 事件总线：同步/异步/队列 | `event.Dispatch(ctx, ev)` |
-| `exception` | 统一异常处理器，Report + Render + 日志级别映射 | `exception.Report(ctx, err, fields)` |
-| `filesystem` | 文件系统抽象：local/public/OSS | `filesystem.Disk("public").Put(...)` |
-| `foundation` | 应用启动、Provider 注册、生命周期、资源关闭 | `foundation.NewApplication()` |
-| `horizon` | 队列监控面板，worker 管理、任务指标、Dashboard | `go run . horizon` |
-| `kernel` | CLI Kernel，命令注册、调度、互调 | `kernel.RegisterLazy("xxx", factory)` |
-| `logger` | 多通道日志：stack/single/daily/stderr/null | `logger.Channel("daily").Info("msg")` |
-| `queue` | 任务队列：Redis/RabbitMQ/Sync | `queue.Dispatch(ctx, job)` |
-| `ratelimit` | 固定窗口限流 | `ratelimit.For("api").PerMinute(60)` |
-| `route` | Gin 之上的 Laravel 风格路由声明 | `route.Get("/", handler).Name("home")` |
-| `session` | 服务端 session，file 驱动 | `session.Put(ctx, "key", value)` |
-| `support` | 通用辅助函数：路径解析、值判断、类型转换、环境判断 | `support.StoragePath(...)` / `support.IsProduction()` |
-| `timer` | 定时调度器 | `schedule.Command("x").Daily()` |
-
----
-
-## License
-
-MIT
+完整的服务地址、环境变量、安全提示和排障方法见[本地测试环境说明](.dev/docs/local-test-environment.md)。

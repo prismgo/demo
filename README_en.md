@@ -1,5 +1,5 @@
 <p align="center">
-  <img src=".github/assets/logo.png" width="250">
+  <img src=".dev/assets/logo.png" width="250">
 </p>
 
 
@@ -19,388 +19,144 @@
 
 ---
 
-## What Is It?
+## What Is the Demo Project?
 
-PrismGo is a **Laravel-style Go web framework** developed fully by AI agents. It carries Laravel's design philosophy throughout while fitting naturally into mainstream Go coding practices. If you are familiar with Laravel's developer experience - Facades, ServiceProviders, Artisan commands, cache systems, Eloquent-style ORM, events, queued jobs, and logging - you will find the same feel in PrismGo.
+This repository is not the PrismGo framework source. It is PrismGo's **runnable example application, local integration entry point, and feature-coverage verification ground**. A local `replace` in `go.mod` points directly to the sibling `framework/` source, so framework changes can be demonstrated and tested immediately in a realistic application structure.
 
-We want Go developers to avoid choosing between "high performance" and "high development efficiency." PrismGo uses mature components from the Go ecosystem ([Gin](https://github.com/gin-gonic/gin), [GORM](https://github.com/go-gorm/gorm), [Redis](https://github.com/redis/go-redis), [Viper](https://github.com/spf13/viper), [Logrus](https://github.com/sirupsen/logrus), [Cobra](https://github.com/spf13/cobra)) and organizes them with Laravel's design philosophy into a complete, ready-to-use web toolkit.
+The Demo project has four main responsibilities:
 
-> **In one sentence: PrismGo lets you write Go syntax while enjoying Laravel's developer experience.**
+- **Demonstrate usage** through real application code for routes, commands, models, repositories, transactions, queued jobs, scheduled tasks, and more.
+- **Maintain the coverage catalog**, mapping Framework version → feature → documentation section → example → test as a queryable progress map.
+- **Provide isolated verification** with a test Application that defaults to SQLite, memory/file drivers, and temporary directories without reading the development `.env`.
+- **Support local integration** through `./dev`, which initializes the workspace and manages MySQL, PostgreSQL, SQL Server, Redis, and RabbitMQ as needed.
 
----
+| Path | Purpose |
+|---|---|
+| `app/demo/catalog/` | Catalog data, feature progress, and documentation mappings |
+| `app/demo/` | Runnable feature examples and scenario tests |
+| `app/models/`, `app/repositories/`, `app/services/` | Model, repository, and business-service examples for the order domain |
+| `app/demo/testing/` | Test Application isolated from the local development environment |
+| `database/migrations/` | Demo database migrations |
+| `.dev/`, `dev` | Workspace initialization, local dependencies, and integration tools |
 
-## Why Choose PrismGo?
+## Catalog Progress Map
 
-| | Raw Gin/GORM | PrismGo |
+The catalog currently covers **29 modules and 87 entries**: 28 implemented, 56 planned, and 3 manually verified. The table below is a snapshot taken when this README was updated. `app/demo/catalog/` is the single source of truth; use `demo:list` for live progress.
+
+| Module | Coverage | Progress | Remaining | Status |
+|---|---|---:|---:|---|
+| `cache` | Cache stores, tags, and locks | 0/1 | 1 | Planned |
+| `commands` | Console command discovery | 1/1 | 0 | Implemented |
+| `config` | Environment and application configuration | 0/1 | 1 | Planned |
+| `console` | Artisan-style commands and terminal IO | 0/1 | 1 | Planned |
+| `container` | Dependency binding and resolution | 0/1 | 1 | Planned |
+| `cookie` | Cookie values and queued writes | 0/1 | 1 | Planned |
+| `database` | Database connections and pools | 0/1 | 1 | Planned |
+| `encryption` | Application data encryption | 0/1 | 1 | Planned |
+| `event` | Synchronous, asynchronous, and queued events | 0/1 | 1 | Planned |
+| `exception` | Exception reporting and rendering | 0/1 | 1 | Planned |
+| `facade` | Framework facade access | 0/1 | 1 | Planned |
+| `filesystem` | Local, public, and cloud filesystems | 0/1 | 1 | Planned |
+| `horizon` | Queue monitoring and worker management | 0/1 | 1 | Planned |
+| `http-server` | HTTP server startup and lifecycle | 0/1 | 1 | Planned |
+| `installation` | Application installation workflow | 0/1 | — | Manual |
+| `lens` | Lens development workflow | 0/1 | — | Manual |
+| `lifecycle` | Application bootstrap and shutdown | 0/1 | 1 | Planned |
+| `logger` | Multi-channel application logging | 0/1 | 1 | Planned |
+| `queue` | Queues, jobs, and workers | 27/59 | 32 | In progress |
+| `ratelimit` | Request and action rate limiting | 0/1 | 1 | Planned |
+| `redis` | Redis connections and operations | 0/1 | 1 | Planned |
+| `route` | HTTP route registration | 0/1 | 1 | Planned |
+| `schema` | Database schema and migration builder | 0/1 | 1 | Planned |
+| `service-provider` | Service provider registration and lifecycle | 0/1 | 1 | Planned |
+| `session` | Server-side session storage | 0/1 | 1 | Planned |
+| `starter` | Generated application starter | 0/1 | — | Manual |
+| `support` | General framework helpers | 0/1 | 1 | Planned |
+| `timer` | Scheduled task definitions | 0/1 | 1 | Planned |
+| `translation` | Application translation and pluralization | 0/1 | 1 | Planned |
+
+From the workspace root, inspect the live map and entry details with:
+
+```bash
+go run ./demo demo:list
+go run ./demo demo:show queue
+go run ./demo demo:show queue --status=planned
+go run ./demo demo:show queue --level=integration
+go run ./demo demo:list --json
+```
+
+Status meanings: `Implemented` means every entry in the module is complete; `In progress` means some entries are complete; `Planned` means no entries are implemented yet; `Manual` means an external workflow such as the installer or Lens performs verification, so it is not counted as remaining work.
+
+## Local Development Workspace and the `dev` Script
+
+PrismGo local development uses three sibling repositories. The workspace root only organizes repositories and shared configuration; it is not itself a Git repository. `demo/`, `framework/`, and `docs/` each have independent Git history.
+
+```mermaid
+flowchart TB
+    workspace["PrismGo local workspace<br/>not a Git repository"]
+    demo["demo/<br/>example app · Catalog · integration tools"]
+    framework["framework/<br/>framework source · framework tests"]
+    docs["docs/<br/>Chinese and English user documentation"]
+
+    workspace --> demo
+    workspace --> framework
+    workspace --> docs
+    demo -. "go.mod replace ../framework" .-> framework
+    demo -. "Catalog maps documentation sections" .-> docs
+    framework -. "feature changes update docs" .-> docs
+```
+
+| Repository | What belongs here | What does not belong here |
 |---|---|---|
-| **Routing** | Hand-written Gin Router setup | `route.Get("/users/{id}")`, named routes, resource routes, groups |
-| **Commands** | Raw main/flag code | Artisan-style CLI: `go run . serve` `go run . migrate` |
-| **Configuration** | `viper.Get` everywhere | Unified dot-path access: `config.GetString("app.name")` |
-| **Logging** | Raw logrus usage | Multi-channel logs: `logger.Channel("error").Error(...)` |
-| **Cache** | Wrap Redis yourself | `cache.Remember(ctx, key, ttl, callback)` |
-| **Events** | None | `event.Dispatch(ctx, OrderPaid{ID: 1001})` + listener |
-| **Queues** | Build workers yourself | `queue.Dispatch(ctx, job)`, Redis/RabbitMQ ready out of the box |
-| **Migrations** | Hand-written SQL | Schema Blueprint: `$table->String("name")` |
-| **Resource Management** | Each resource closes itself | Unified application lifecycle: boot registration and shutdown cleanup |
+| `demo/` | Demos, the Catalog, scenario tests, local dependencies, and development tools | Real implementations of framework public APIs |
+| `framework/` | Framework implementations, public APIs, components, and framework tests | Demo-specific business examples |
+| `docs/` | Chinese and English user guides and API documentation | Framework or Demo implementation code |
 
-The core advantage is simple: **you know what you want to build, and the framework removes the boilerplate.**
-
----
-
-## Quick Start
-
-### Installation
-
-Install the PrismGo installer:
+Run all `dev` commands from the workspace root. Prepare a workspace for the first time with:
 
 ```bash
-go install github.com/prismgo/installer/cmd/prismgo@latest
+./demo/dev init
+./demo/dev doctor
 ```
 
-Create an application:
+`init` creates workspace Agent-instruction and skill links, clones missing `framework/` and `docs/` repositories, creates `demo/.env` when absent, maintains a `go.work` containing `demo/` and `framework/`, and downloads framework dependencies. It does not overwrite existing repositories or an existing `demo/.env`. `doctor` checks prerequisites such as Docker and Compose and validates the Compose configuration.
+
+### Common `dev` Commands
+
+| Command | Usage |
+|---|---|
+| `./demo/dev help` | Show commands and available service names |
+| `./demo/dev up [service...]` | Start all or selected dependencies and wait for health checks |
+| `./demo/dev status` | Show service health, local ports, and connection details |
+| `./demo/dev logs [service]` | Follow logs for all services or one service |
+| `./demo/dev env` | Regenerate and print `demo/.dev/runtime/test.env` |
+| `./demo/dev test [go-test-args]` | Start dependencies and run selected integration tests in `framework/` |
+| `./demo/dev down` | Stop services while retaining local data |
+| `./demo/dev reset [--yes]` | Delete all local test data and rebuild the environment; use with care |
+
+Available service names are `mysql`, `postgres`, `sqlserver`, `redis`, `rabbitmq`, and `sqlite`. Usually, start only the dependencies needed by the current task:
 
 ```bash
-prismgo new github.com/acme/myapp
+./demo/dev up mysql redis
+./demo/dev status
+./demo/dev logs redis
 ```
 
-Start the web server:
+Load the generated test connection variables, or run framework integration tests through the unified entry point:
 
 ```bash
-cd myapp
-go run . serve
+./demo/dev env
+source demo/.dev/runtime/test.env
+
+./demo/dev test ./queue/... ./horizon/...
+./demo/dev down
 ```
 
-Open `http://localhost:8080/api` in your browser.
-
-### Local Test Environment
-
-When developing the framework in this workspace, start MySQL, PostgreSQL, SQL Server, Redis, and RabbitMQ—and prepare the SQLite test file—with one command:
+The Demo's default tests use isolated drivers and do not require Docker:
 
 ```bash
-./dev up
+cd demo
+GOWORK=off go test . ./app/... ./bootstrap/... ./config/... ./database/... ./routes/...
 ```
 
-Inspect or stop the environment with:
-
-```bash
-./dev status
-./dev down
-```
-
-See the [local test environment guide](.dev/docs/local-test-environment.md) for connection details, test variables, and Agent guidance.
-
-### Minimal Runnable Example
-
-```go
-package main
-
-import (
-	"context"
-	"os"
-
-	"github.com/prismgo/framework/foundation"
-	"github.com/prismgo/framework/route"
-)
-
-func main() {
-	app := foundation.Configure().
-		WithRouting(func(r route.Registrar) {
-			r.Get("/", func(c *gin.Context) {
-				c.JSON(200, gin.H{"message": "Hello PrismGo!"})
-			})
-		}).
-		Create()
-
-	if err := app.HandleCommand(context.Background(), os.Args); err != nil {
-		console.Exit(err.Error())
-	}
-}
-```
-
-```bash
-go run . serve --port=8000
-```
-
-Open `http://localhost:8000` and you will see `{"message": "Hello PrismGo!"}`.
-
----
-
-## Core Features At a Glance
-
-## 🎭 Facade: Call Services Like Global Functions
-
-```go
-cache.Put(ctx, "key", value, ttl)           // Cache
-logger.Channel("error").Error("failed")     // Logging
-event.Dispatch(ctx, ev)                      // Events
-queue.Dispatch(ctx, job)                     // Queue
-db := database.Resolve()                    // Database
-```
-
-As convenient as Laravel Facades. Under the hood, the Application container manages lifecycles, avoiding global variable pollution and initialization order problems.
-
----
-
-## 🧩 Provider-Driven Architecture
-
-PrismGo uses the same ServiceProvider pattern as Laravel to organize features:
-
-```go
-type CacheServiceProvider struct{}
-
-func (p *CacheServiceProvider) Register(app provider.Application) error {
-	app.Container().Singleton("cache.manager", func() (any, error) {
-		return cache.NewManager()
-	}, container.WithCloser(func(m *Manager) error {
-		return m.Close()
-	}))
-	return nil
-}
-
-func (p *CacheServiceProvider) Boot(app provider.Application) error {
-	return nil
-}
-```
-
-Each feature module is registered through a Provider, loaded lazily, and released cleanly. You only need to declare providers in `bootstrap/app.go`:
-
-```go
-foundation.Configure().
-	WithProviders(
-		&cache.ServiceProvider{},
-		&queue.ServiceProvider{},
-		&filesystem.ServiceProvider{},
-	)
-```
-
-The framework automatically loads providers in dependency order and releases all resources in reverse order on shutdown.
-
----
-
-### 🎨 Laravel-Style Routing
-
-```go
-route.Prefix("/api").Middleware(auth).Group(func(r route.Registrar) {
-	r.Get("/users", userController.Index).Name("users.index")
-	r.Post("/users", userController.Store).Name("users.store")
-	r.Get("/users/{id}", userController.Show).Name("users.show")
-})
-```
-
-Named routes, nested groups, middleware, and parameter constraints - written like Laravel Router.
-
----
-
-### 🖥 Artisan-Style CLI
-
-```bash
-go run . serve --port=8051          # Start the HTTP server
-go run . migrate                    # Run database migrations
-go run . db:seed                    # Seed the database
-go run . queue --queue=default      # Start the queue worker
-go run . cron                       # Start the scheduler
-```
-
-Registering a custom command is as simple as in Laravel. Define a command by implementing only `Definition()` and `Handle()`:
-
-```go
-// app/cmd/report_daily.go
-type DailyReportCommand struct{}
-
-func (c *DailyReportCommand) Definition() *console.Definition {
-	return console.MustDefinition(
-		"report:daily {date? : Report date, defaults to today} {--e|email= : Send to the specified email address}",
-		"Generate the daily business report",
-	)
-}
-
-func (c *DailyReportCommand) Handle(ctx console.CommandContext) error {
-	date := ctx.Input().Argument("date")
-	email := ctx.Input().Option("email")
-	// Business logic...
-	ctx.IO().Success("Daily report generated: %s", date)
-	return nil
-}
-```
-
-Register it:
-
-```go
-// bootstrap/app.go
-foundation.Configure().
-	WithRouting(func(r *foundation.Routing) {
-		r.Commands(
-			func() console.Command { return NewDailyReportCommand() },
-		)
-	})
-```
-
-`MustDefinition` accepts an Artisan-style signature DSL and automatically parses argument types, required and optional arguments, short option aliases, with no hand-written Cobra binding code.
-
----
-
-### ⏱ Scheduled Tasks
-
-```go
-schedule.Command("report:daily --force").DailyAt("08:00")
-schedule.Command("cache:clean").EveryThirtyMinutes()
-```
-
-Start them with the `cron` command. One line of configuration is enough.
-
----
-
-### 📦 Event System
-
-```go
-event.ListenFunc("order.paid", func(ctx context.Context, e event.Event) error {
-	order := e.(*OrderPaid)
-	notification.Send(ctx, order.UserID, "Your order has been paid")
-	return nil
-})
-
-event.Dispatch(ctx, &OrderPaid{ID: order.ID})
-```
-
-Switch freely among synchronous listeners, async goroutines, and queued listeners.
-
----
-
-### ⏳ Queue Jobs
-
-Implement just one interface:
-
-```go
-type SendEmailJob struct {
-	To      string
-	Subject string
-	Body    string
-}
-
-func (j *SendEmailJob) Handle(ctx context.Context) error {
-	return mailer.Send(ctx, j.To, j.Subject, j.Body)
-}
-
-queue.Dispatch(ctx, &SendEmailJob{
-	To: "user@example.com", Subject: "Welcome", Body: "...",
-})
-```
-
-Retries, timeouts, unique jobs, batches, and chained jobs are supported. Drivers include Redis, RabbitMQ, and Sync.
-
----
-
-### 🗃 Cache System
-
-```go
-cache.Put(ctx, "user:1", user, 10*time.Minute)
-
-user, err := cache.Get[User](ctx, "user:1")
-
-user, err := cache.Remember(ctx, "stats:daily", 1*time.Hour, func() (*Stats, error) {
-	return computeStats(ctx)
-})
-```
-
-Drivers include memory, redis, file, and failover. Advanced features include `Tags`, `Flexible` (stale-while-revalidate), `Lock` (distributed locks), and `Memo` (request-level memoization).
-
----
-
-### 📁 Filesystem
-
-```go
-disk := filesystem.Disk("public")
-
-disk.PutFileAs(ctx, "avatars", uploadedFile, "user_123.jpg")
-
-url := disk.URL("avatars/user_123.jpg")
-```
-
-A unified Disk abstraction supports local, public, and Alibaba Cloud OSS. Switching drivers only requires changing configuration.
-
----
-
-### 📝 Multi-Channel Logging
-
-```go
-logger.Channel("daily").WithFields(logrus.Fields{
-	"user_id": userID,
-}).Info("User logged in successfully")
-
-logger.Channel("error").WithError(err).Error("Order sync failed")
-```
-
-Supports stack, single, daily, stderr, and null drivers. Channels are lazily loaded on demand, and construction failures automatically fall back to the default channel so logging system failures do not affect business availability.
-
----
-
-### 🗄 Database & Schema Migrations
-
-Write migrations with Blueprint instead of hand-written SQL:
-
-```go
-schema.Bind(db).Create("orders", func(table *schema.Blueprint) {
-	table.ID()
-	table.String("order_no", 32).Unique()
-	table.UnsignedBigInteger("user_id")
-	table.Decimal("amount", 10, 2)
-	table.Timestamps()
-	table.SoftDeletes()
-})
-```
-
-GORM is used as the underlying ORM, with an Eloquent-style query API:
-
-```go
-db.Where("status = ?", "paid").Order("created_at desc").Find(&orders)
-```
-
----
-
-### 📊 Rate Limiting
-
-```go
-ratelimit.For("api").Limit(60).PerMinute()
-```
-
-Mount it directly as middleware. It shares cache storage and supports custom over-limit responses.
-
----
-
-## Documentation
-
-- [github.com/prismgo/docs](https://github.com/prismgo/docs)
-
----
-
-## Component Overview
-
-| Component | What It Does | How to Use |
-|---|---|---|
-| `cache` | Cache manager: memory/redis/file/failover | `cache.Remember(ctx, key, ttl, fn)` |
-| `config` | `.env` loading and dot-path configuration access | `config.GetString("app.name")` |
-| `console` | Artisan-style command model, IO, table output | `console.NewDefinition("cmd:name")` |
-| `container` | Service container: binding, resolution, singletons, instance management | `app.Container().Bind("key", factory)` |
-| `cookie` | Cookie value object and queued writes | `cookie.New("name", "val").HttpOnly()` |
-| `database` | GORM connection management and connection pools | `database.Resolve()` |
-| `database/schema` | Blueprint-style migration DSL | `schema.Bind(db).Create("table", fn)` |
-| `encryption` | Encryption and decryption: key configuration, string encrypter | `encryption.EncryptString("value")` |
-| `event` | Event bus: sync/async/queue | `event.Dispatch(ctx, ev)` |
-| `exception` | Unified exception handler: Report + Render + log level mapping | `exception.Report(ctx, err, fields)` |
-| `filesystem` | Filesystem abstraction: local/public/OSS | `filesystem.Disk("public").Put(...)` |
-| `foundation` | Application startup, Provider registration, lifecycle, resource closing | `foundation.NewApplication()` |
-| `horizon` | Queue monitoring panel, worker management, job metrics, Dashboard | `go run . horizon` |
-| `kernel` | CLI Kernel, command registration, scheduling, command-to-command calls | `kernel.RegisterLazy("xxx", factory)` |
-| `logger` | Multi-channel logging: stack/single/daily/stderr/null | `logger.Channel("daily").Info("msg")` |
-| `queue` | Job queue: Redis/RabbitMQ/Sync | `queue.Dispatch(ctx, job)` |
-| `ratelimit` | Fixed-window rate limiting | `ratelimit.For("api").PerMinute(60)` |
-| `route` | Laravel-style route declarations on top of Gin | `route.Get("/", handler).Name("home")` |
-| `session` | Server-side sessions with the file driver | `session.Put(ctx, "key", value)` |
-| `support` | General helpers: path resolution, value checks, type conversion, environment checks | `support.StoragePath(...)` / `support.IsProduction()` |
-| `timer` | Scheduled task runner | `schedule.Command("x").Daily()` |
-
----
-
-## License
-
-MIT
+See the [local test environment guide](.dev/docs/local-test-environment.md) for service addresses, environment variables, security notes, and troubleshooting.
