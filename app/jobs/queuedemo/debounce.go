@@ -11,10 +11,11 @@ import (
 
 // DebounceJob records which dispatch survives a shared debounce window.
 type DebounceJob struct {
-	TraceID string        `json:"trace_id"`
-	Label   string        `json:"label"`
-	Store   string        `json:"store"`
-	Window  time.Duration `json:"window"`
+	TraceID     string        `json:"trace_id"`
+	Label       string        `json:"label"`
+	Store       string        `json:"store"`
+	Window      time.Duration `json:"window"`
+	ProviderKey string        `json:"provider_key,omitempty"`
 }
 
 func init() {
@@ -29,7 +30,12 @@ func (j *DebounceJob) Handle(context.Context) error {
 }
 
 // DebounceID groups dispatches belonging to the same trace.
-func (j *DebounceJob) DebounceID() string { return "queue-demo:" + j.TraceID }
+func (j *DebounceJob) DebounceID() string {
+	if j.ProviderKey != "" {
+		return j.ProviderKey
+	}
+	return "queue-demo:" + j.TraceID
+}
 
 // DebounceFor returns the configured debounce window or a demo default.
 func (j *DebounceJob) DebounceFor() time.Duration {

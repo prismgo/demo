@@ -69,6 +69,9 @@ func Run(ctx context.Context, manager *queue.Manager, caseName, connection strin
 	if caseName == "debounce" {
 		return runDebounce(ctx, manager, connection)
 	}
+	if caseName == "debounce-options" {
+		return runDebounceDispatchOptions(ctx, manager, connection)
+	}
 	if caseName == "middleware" {
 		return runMiddleware(ctx, manager, connection)
 	}
@@ -81,11 +84,20 @@ func Run(ctx context.Context, manager *queue.Manager, caseName, connection strin
 	if caseName == "chain" {
 		return runChain(ctx, manager, connection)
 	}
+	if caseName == "job-control" {
+		return runJobControl(ctx, manager, connection)
+	}
 	if caseName == "batch" {
 		return runBatch(ctx, manager, connection)
 	}
 	if caseName == "worker" {
 		return runWorker(ctx, manager, connection)
+	}
+	if caseName == "worker-command" {
+		return runWorkerCommand(ctx, manager, connection)
+	}
+	if caseName == "expiration" {
+		return runExpirationPolicies(ctx, manager, connection)
 	}
 	if caseName == "failure" {
 		return runFailure(ctx, manager, connection)

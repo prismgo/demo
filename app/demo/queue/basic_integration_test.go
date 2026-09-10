@@ -99,6 +99,25 @@ func TestQueueDemoDebounce(t *testing.T) {
 	})
 }
 
+func TestQueueDemoDebounceDispatchOptions(t *testing.T) {
+	for _, connection := range []string{"redis", "rabbitmq"} {
+		t.Run(connection, func(t *testing.T) {
+			manager := newRealQueueManager(t, connection)
+			result, err := qdemo.Run(context.Background(), manager, "debounce-options", connection)
+			if err != nil {
+				t.Fatalf("run debounce dispatch options on %s: %v", connection, err)
+			}
+			want := "option:new:handled,key:option,via:queue-demo"
+			if got := strings.Join(result.Steps, ","); got != want {
+				t.Fatalf("debounce dispatch option steps on %s = %q, want %q", connection, got, want)
+			}
+			if !result.Processed || result.JobID == "" || !strings.HasPrefix(result.Queue, "demo-debounce-options-") {
+				t.Fatalf("debounce dispatch option result on %s = %#v, want processed result with job ID", connection, result)
+			}
+		})
+	}
+}
+
 func TestQueueDemoUniqueUntilProcessingWithRealRedis(t *testing.T) {
 	manager := newRealRedisQueueManager(t)
 	result, err := qdemo.Run(context.Background(), manager, "unique", "redis")
@@ -153,6 +172,31 @@ func TestQueueDemoChain(t *testing.T) {
 	}
 }
 
+func TestQueueDemoJobControlErrors(t *testing.T) {
+	for _, connection := range []string{"redis", "rabbitmq"} {
+		t.Run(connection, func(t *testing.T) {
+			manager := newRealQueueManager(t, connection)
+			result, err := qdemo.Run(context.Background(), manager, "job-control", connection)
+			if err != nil {
+				t.Fatalf("run job control errors on %s: %v", connection, err)
+			}
+			for _, expected := range []string{
+				"fail:attempt", "fail:failed-callback", "release:attempt", "release:handled", "skip:attempt",
+			} {
+				if !hasIntegrationStep(result.Steps, expected) {
+					t.Fatalf("job control steps on %s missing %q: %v", connection, expected, result.Steps)
+				}
+			}
+			if countIntegrationStep(result.Steps, "fail:attempt") != 1 || countIntegrationStep(result.Steps, "release:attempt") != 2 {
+				t.Fatalf("job control attempt counts on %s = %v, want fail once and release twice", connection, result.Steps)
+			}
+			if hasIntegrationStep(result.Steps, "skip:handled") {
+				t.Fatalf("job control skip executed handler body on %s: %v", connection, result.Steps)
+			}
+		})
+	}
+}
+
 func TestQueueDemoBatch(t *testing.T) {
 	for _, connection := range []string{"redis", "rabbitmq"} {
 		t.Run(connection, func(t *testing.T) {
@@ -193,6 +237,47 @@ func TestQueueDemoWorker(t *testing.T) {
 			}
 			if integrationStepIndex(result.Steps, "priority:high") >= integrationStepIndex(result.Steps, "priority:low") {
 				t.Fatalf("worker priority order is invalid: %v", result.Steps)
+			}
+		})
+	}
+}
+
+func TestQueueDemoWorkerCommand(t *testing.T) {
+	for _, connection := range []string{"redis", "rabbitmq"} {
+		t.Run(connection, func(t *testing.T) {
+			manager := newRealQueueManager(t, connection)
+			result, err := qdemo.Run(context.Background(), manager, "worker-command", connection)
+			if err != nil {
+				t.Fatalf("run worker command on %s: %v", connection, err)
+			}
+			want := "command:queue,alias:queue:work,output:queue worker started,command:handled"
+			if got := strings.Join(result.Steps, ","); got != want {
+				t.Fatalf("worker command steps on %s = %q, want %q", connection, got, want)
+			}
+			if !result.Processed || result.JobID == "" || !strings.HasPrefix(result.Queue, "demo-worker-command-") {
+				t.Fatalf("worker command result on %s = %#v, want processed result with job ID", connection, result)
+			}
+		})
+	}
+}
+
+func TestQueueDemoExpirationPolicies(t *testing.T) {
+	for _, connection := range []string{"redis", "rabbitmq"} {
+		t.Run(connection, func(t *testing.T) {
+			manager := newRealQueueManager(t, connection)
+			result, err := qdemo.Run(context.Background(), manager, "expiration", connection)
+			if err != nil {
+				t.Fatalf("run expiration policies on %s: %v", connection, err)
+			}
+			for _, expected := range []string{
+				"expired:attempt", "expired:failed-callback", "timeout:attempt", "timeout:cancelled", "timeout:failed-callback",
+			} {
+				if !hasIntegrationStep(result.Steps, expected) {
+					t.Fatalf("expiration steps on %s missing %q: %v", connection, expected, result.Steps)
+				}
+			}
+			if countIntegrationStep(result.Steps, "expired:attempt") != 1 || countIntegrationStep(result.Steps, "timeout:attempt") != 1 {
+				t.Fatalf("expiration attempt counts on %s = %v, want one attempt for each terminal policy", connection, result.Steps)
 			}
 		})
 	}
@@ -354,6 +439,16 @@ func integrationStepIndex(steps []string, expected string) int {
 	return -1
 }
 
+func countIntegrationStep(steps []string, expected string) int {
+	count := 0
+	for _, step := range steps {
+		if step == expected {
+			count++
+		}
+	}
+	return count
+}
+
 func installIntegrationCache(t *testing.T, registry *container.Container, store cache.StoreConfig) {
 	t.Helper()
 	manager, err := cache.NewManager(cache.Config{
@@ -415,6 +510,9 @@ func newRealRedisQueueManager(t *testing.T) *queue.Manager {
 	if err != nil {
 		t.Fatalf("create Redis queue manager: %v", err)
 	}
+	if err := registry.Instance("queue.manager", manager); err != nil {
+		t.Fatalf("register Redis queue manager: %v", err)
+	}
 	t.Cleanup(func() { _ = manager.Close() })
 	return manager
 }
@@ -440,6 +538,9 @@ func newRealRabbitMQQueueManager(t *testing.T) *queue.Manager {
 	}, queue.NewRegistry())
 	if err != nil {
 		t.Fatalf("create RabbitMQ queue manager: %v", err)
+	}
+	if err := registry.Instance("queue.manager", manager); err != nil {
+		t.Fatalf("register RabbitMQ queue manager: %v", err)
 	}
 	t.Cleanup(func() { _ = manager.Close() })
 	return manager

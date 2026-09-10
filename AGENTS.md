@@ -11,6 +11,7 @@
 | 先读再改 | 按下表只读取与任务相关的说明；修改框架 Go 代码前先读 `framework/CODE_INDEX.md`。 |
 | Go 风格前置 | 任务只要会编写或修改 Go 代码，必须在第一次改动前完整读取 `demo/.dev/docs/go-style.md`，并在实现过程中直接将其作为验收条件；显式规范高于相邻旧代码，旧违规不得作为继续复制的先例。 |
 | 保持本地联调 | `demo/go.mod` 中的 `github.com/prismgo/framework` 必须指向同级的本地 `framework/`。 |
+| Catalog 进度同步 | 修改 `demo/app/demo/catalog/` 中会影响条目或进度统计的内容时，必须在同一变更中同步更新 `demo/README.md` 与 `demo/README_en.md` 的 Catalog 总数、模块进度和剩余数量，并用 `demo:list` 核对一致性。 |
 | 文档同步 | `framework/` 功能变更时，同步更新 `docs/` 中的对应文档。 |
 | 分仓处理 | 根目录不是提交仓库；`demo/`、`framework/` 与 `docs/` 是三个独立 Git 仓库，检查和提交必须分别执行。 |
 

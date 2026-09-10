@@ -27,6 +27,7 @@ func TestCatalogEntries(t *testing.T) {
 	for _, slug := range []string{
 		"driver-prerequisites", "config", "payload-encoding", "sync-connection",
 		"failed-store", "batch-store", "restart-store",
+		"debounce-options", "job-control", "worker-command", "expiration",
 	} {
 		if item, ok := Find("queue", slug); !ok || item.Status != StatusImplemented {
 			t.Fatalf("queue configuration entry %q = %#v, %v; want implemented", slug, item, ok)
@@ -35,11 +36,11 @@ func TestCatalogEntries(t *testing.T) {
 	if got := Filter("redis", LevelIntegration, StatusPlanned); len(got) != 1 {
 		t.Fatalf("redis integration filter returned %d entries, want 1", len(got))
 	}
-	if got := Filter("queue", "", StatusImplemented); len(got) != 30 {
-		t.Fatalf("implemented queue entries = %d, want 30", len(got))
+	if got := Filter("queue", "", StatusImplemented); len(got) != 34 {
+		t.Fatalf("implemented queue entries = %d, want 34", len(got))
 	}
-	if got := Filter("queue", "", StatusPlanned); len(got) != 29 {
-		t.Fatalf("planned queue entries = %d, want 29", len(got))
+	if got := Filter("queue", "", StatusPlanned); len(got) != 25 {
+		t.Fatalf("planned queue entries = %d, want 25", len(got))
 	}
 }
 
@@ -53,8 +54,8 @@ func TestCatalogFeatureSummaries(t *testing.T) {
 	if !ok {
 		t.Fatal("SummaryFor(queue) found = false")
 	}
-	if queue.Implemented != 30 || queue.Planned != 29 || queue.Manual != 0 || queue.Total != 59 || queue.Remaining != 29 {
-		t.Fatalf("queue summary = %#v, want implemented=30 planned=29 manual=0 total=59 remaining=29", queue)
+	if queue.Implemented != 34 || queue.Planned != 25 || queue.Manual != 0 || queue.Total != 59 || queue.Remaining != 25 {
+		t.Fatalf("queue summary = %#v, want implemented=34 planned=25 manual=0 total=59 remaining=25", queue)
 	}
 	if queue.Status != FeatureStatusInProgress || queue.Since != SinceInitial {
 		t.Fatalf("queue status/since = %q/%q, want %q/%q", queue.Status, queue.Since, FeatureStatusInProgress, SinceInitial)

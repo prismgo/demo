@@ -15,6 +15,74 @@ import (
 	jobs "prismgo-demo/app/jobs/queuedemo"
 )
 
+func runJobControl(ctx context.Context, manager *queue.Manager, connection string) (Result, error) {
+	if connection != "redis" && connection != "rabbitmq" {
+		return Result{}, fmt.Errorf("queue demo job-control requires redis or rabbitmq, got %s", connection)
+	}
+	runID := time.Now().UnixNano()
+	traceID := fmt.Sprintf("job-control-%d", runID)
+	queueName := fmt.Sprintf("demo-job-control-%d", runID)
+	releaseDelay := 100 * time.Millisecond
+	if connection == "rabbitmq" {
+		releaseDelay = 5 * time.Second
+	}
+	jobs.ResetTrace(traceID)
+	defer jobs.TakeTrace(traceID)
+
+	var jobID string
+	for _, item := range []struct {
+		label string
+		mode  string
+	}{
+		{label: "release", mode: "release"},
+		{label: "fail", mode: "fail"},
+		{label: "skip", mode: "skip"},
+	} {
+		id, err := manager.Dispatch(ctx, &jobs.ControlJob{
+			TraceID: traceID, Label: item.label, Mode: item.mode, ReleaseDelay: releaseDelay,
+		}, queue.OnConnection(connection), queue.OnQueue(queueName), queue.Tries(3))
+		if err != nil {
+			return Result{}, fmt.Errorf("queue demo job-control dispatch %s on %s: %w", item.label, connection, err)
+		}
+		if jobID == "" {
+			jobID = id
+		}
+	}
+	workerCtx, cancelWorker := context.WithTimeout(ctx, 12*time.Second)
+	defer cancelWorker()
+	if err := queue.NewWorker(manager).Work(workerCtx, queue.WorkerOptions{
+		Connection: connection, Queues: []string{queueName}, MaxJobs: 4, Tries: 3,
+	}); err != nil {
+		return Result{}, fmt.Errorf("queue demo job-control worker on %s: %w", connection, err)
+	}
+	if err := clearRedisQueue(ctx, manager, connection, queueName); err != nil {
+		return Result{}, err
+	}
+	steps := jobs.TakeTrace(traceID)
+	for _, expected := range []string{"fail:failed-callback", "release:handled", "skip:attempt"} {
+		if !resultHasStep(steps, expected) {
+			return Result{}, fmt.Errorf("queue demo job-control on %s missing %q: %v", connection, expected, steps)
+		}
+	}
+	if countResultStep(steps, "fail:attempt") != 1 || countResultStep(steps, "release:attempt") != 2 {
+		return Result{}, fmt.Errorf("queue demo job-control attempt counts on %s = %v, want fail once and release twice", connection, steps)
+	}
+	if resultHasStep(steps, "skip:handled") {
+		return Result{}, fmt.Errorf("queue demo job-control skip unexpectedly handled on %s: %v", connection, steps)
+	}
+	return Result{Case: "job-control", Connection: connection, Queue: queueName, JobID: jobID, Processed: true, Steps: steps}, nil
+}
+
+func countResultStep(steps []string, expected string) int {
+	count := 0
+	for _, step := range steps {
+		if step == expected {
+			count++
+		}
+	}
+	return count
+}
+
 func runFailure(ctx context.Context, manager *queue.Manager, connection string) (Result, error) {
 	if connection != "redis" && connection != "rabbitmq" {
 		return Result{}, fmt.Errorf("queue demo failure requires redis or rabbitmq, got %s", connection)

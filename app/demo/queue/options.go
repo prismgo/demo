@@ -120,6 +120,64 @@ func runUniqueDispatchOptions(ctx context.Context, connection string) (Result, e
 	return Result{Case: "unique-options", Connection: connection, Queue: queueName, JobID: jobID, Processed: true, Steps: steps}, nil
 }
 
+func runDebounceDispatchOptions(ctx context.Context, manager *queue.Manager, connection string) (Result, error) {
+	if connection != "redis" && connection != "rabbitmq" {
+		return Result{}, fmt.Errorf("queue demo debounce-options requires redis or rabbitmq, got %s", connection)
+	}
+	runID := time.Now().UnixNano()
+	traceID := fmt.Sprintf("debounce-options-%d", runID)
+	queueName := fmt.Sprintf("demo-debounce-options-%d", runID)
+	window := 100 * time.Millisecond
+	if connection == "rabbitmq" {
+		window = 5 * time.Second
+	}
+	jobs.ResetTrace(traceID)
+	defer jobs.TakeTrace(traceID)
+
+	store := cache.Default()
+	debounceKey := fmt.Sprintf("queue-demo:debounce-option:%d", runID)
+	var jobID string
+	for _, label := range []string{"option:old", "option:new"} {
+		id, err := manager.Dispatch(ctx, &jobs.DebounceJob{
+			TraceID:     traceID,
+			Label:       label,
+			Store:       store.Name(),
+			Window:      time.Minute,
+			ProviderKey: debounceKey + ":provider:" + label,
+		},
+			queue.OnConnection(connection),
+			queue.OnQueue(queueName),
+			queue.Debounce(debounceKey, window),
+			queue.DebounceVia(store),
+		)
+		if err != nil {
+			return Result{}, fmt.Errorf("queue demo debounce-options dispatch %s on %s: %w", label, connection, err)
+		}
+		jobID = id
+	}
+	timer := time.NewTimer(window + 300*time.Millisecond)
+	select {
+	case <-ctx.Done():
+		timer.Stop()
+		return Result{}, ctx.Err()
+	case <-timer.C:
+	}
+	if err := queue.NewWorker(manager).Work(ctx, queue.WorkerOptions{
+		Connection: connection, Queues: []string{queueName}, MaxJobs: 2, StopWhenEmpty: true,
+	}); err != nil {
+		return Result{}, fmt.Errorf("queue demo debounce-options worker on %s: %w", connection, err)
+	}
+	if err := clearRedisQueue(ctx, manager, connection, queueName); err != nil {
+		return Result{}, err
+	}
+	steps := jobs.TakeTrace(traceID)
+	if len(steps) != 1 || steps[0] != "option:new:handled" {
+		return Result{}, fmt.Errorf("queue demo debounce-options on %s steps = %v, want option:new:handled", connection, steps)
+	}
+	steps = append(steps, "key:option", "via:"+store.Name())
+	return Result{Case: "debounce-options", Connection: connection, Queue: queueName, JobID: jobID, Processed: true, Steps: steps}, nil
+}
+
 func runOverlapReleasePolicy(ctx context.Context, connection string) (Result, error) {
 	if connection != "sync" {
 		return Result{}, fmt.Errorf("queue demo overlap-release is hermetic and selected with sync, got %s", connection)
