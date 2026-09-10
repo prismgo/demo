@@ -431,6 +431,149 @@ func TestQueueDemoBulkTransport(t *testing.T) {
 	}
 }
 
+func TestQueueDemoTransportDelay(t *testing.T) {
+	for _, connection := range []string{"redis", "rabbitmq"} {
+		t.Run(connection, func(t *testing.T) {
+			manager := newRealQueueManager(t, connection)
+			result, err := qdemo.Run(context.Background(), manager, "transport-delay", connection)
+			if err != nil {
+				t.Fatalf("run transport delay on %s: %v", connection, err)
+			}
+			want := "before-due:empty,after-due:handled"
+			if got := strings.Join(result.Steps, ","); got != want {
+				t.Fatalf("transport delay steps on %s = %q, want %q", connection, got, want)
+			}
+			if !result.Processed || result.JobID == "" || !strings.HasPrefix(result.Queue, "demo-transport-delay-") {
+				t.Fatalf("transport delay result on %s = %#v, want processed delayed job", connection, result)
+			}
+		})
+	}
+}
+
+func TestQueueDemoBlockingPop(t *testing.T) {
+	for _, connection := range []string{"redis", "rabbitmq"} {
+		t.Run(connection, func(t *testing.T) {
+			manager := newRealQueueManager(t, connection)
+			result, err := qdemo.Run(context.Background(), manager, "blocking-pop", connection)
+			if err != nil {
+				t.Fatalf("run blocking pop on %s: %v", connection, err)
+			}
+			want := "blocking:woke,priority:high,priority:low"
+			if got := strings.Join(result.Steps, ","); got != want {
+				t.Fatalf("blocking pop steps on %s = %q, want %q", connection, got, want)
+			}
+			if !result.Processed || result.JobID == "" || !strings.HasPrefix(result.Queue, "demo-blocking-pop-") {
+				t.Fatalf("blocking pop result on %s = %#v, want processed result", connection, result)
+			}
+		})
+	}
+}
+
+func TestQueueDemoRedisRetryAfter(t *testing.T) {
+	manager := newRealRedisQueueManager(t)
+	result, err := qdemo.Run(context.Background(), manager, "redis-retry-after", "redis")
+	if err != nil {
+		t.Fatalf("run Redis retry-after: %v", err)
+	}
+	want := "attempts:1,retry-after:visible,attempts:2"
+	if got := strings.Join(result.Steps, ","); got != want {
+		t.Fatalf("Redis retry-after steps = %q, want %q", got, want)
+	}
+	if !result.Processed || result.JobID == "" || !strings.HasPrefix(result.Queue, "demo-redis-retry-after-") {
+		t.Fatalf("Redis retry-after result = %#v, want processed reservation", result)
+	}
+}
+
+func TestQueueDemoRabbitMQRetryAfter(t *testing.T) {
+	manager := newRealRabbitMQQueueManager(t)
+	result, err := qdemo.Run(context.Background(), manager, "rabbitmq-retry-after", "rabbitmq")
+	if err != nil {
+		t.Fatalf("run RabbitMQ retry-after: %v", err)
+	}
+	want := "transport:connected,retry-after:rejected"
+	if got := strings.Join(result.Steps, ","); got != want {
+		t.Fatalf("RabbitMQ retry-after steps = %q, want %q", got, want)
+	}
+	if !result.Processed || result.JobID != "" || !strings.HasPrefix(result.Queue, "demo-rabbitmq-retry-after-") {
+		t.Fatalf("RabbitMQ retry-after result = %#v, want processed rejection", result)
+	}
+}
+
+func TestQueueDemoRabbitMQPublisherConfirm(t *testing.T) {
+	manager := newRealRabbitMQQueueManager(t)
+	result, err := qdemo.Run(context.Background(), manager, "rabbitmq-confirm", "rabbitmq")
+	if err != nil {
+		t.Fatalf("run RabbitMQ publisher confirm: %v", err)
+	}
+	want := "publisher-confirm:accepted,queue.job_queued,worker:handled"
+	if got := strings.Join(result.Steps, ","); got != want {
+		t.Fatalf("RabbitMQ publisher confirm steps = %q, want %q", got, want)
+	}
+	if !result.Processed || result.JobID == "" || !strings.HasPrefix(result.Queue, "demo-rabbitmq-confirm-") {
+		t.Fatalf("RabbitMQ publisher confirm result = %#v, want processed confirmed job", result)
+	}
+}
+
+func TestQueueDemoRabbitMQTopology(t *testing.T) {
+	manager := newRealRabbitMQQueueManager(t)
+	result, err := qdemo.Run(context.Background(), manager, "rabbitmq-topology", "rabbitmq")
+	if err != nil {
+		t.Fatalf("run RabbitMQ topology: %v", err)
+	}
+	want := "queue.topology_declared,exchange:named,queue:routed"
+	if got := strings.Join(result.Steps, ","); got != want {
+		t.Fatalf("RabbitMQ topology steps = %q, want %q", got, want)
+	}
+	if !result.Processed || result.JobID == "" || !strings.HasPrefix(result.Queue, "demo-rabbitmq-topology-") {
+		t.Fatalf("RabbitMQ topology result = %#v, want processed routed job", result)
+	}
+}
+
+func TestQueueDemoRabbitMQDelayModes(t *testing.T) {
+	manager := newRealRabbitMQQueueManager(t)
+	result, err := qdemo.Run(context.Background(), manager, "rabbitmq-delay-modes", "rabbitmq")
+	if err != nil {
+		t.Fatalf("run RabbitMQ delay modes: %v", err)
+	}
+	want := "ttl_dlx:handled,none:rejected,plugin:requires-extension"
+	if got := strings.Join(result.Steps, ","); got != want {
+		t.Fatalf("RabbitMQ delay mode steps = %q, want %q", got, want)
+	}
+	if !result.Processed || result.JobID == "" || !strings.HasPrefix(result.Queue, "demo-rabbitmq-delay-modes-") {
+		t.Fatalf("RabbitMQ delay mode result = %#v, want processed ttl_dlx job", result)
+	}
+}
+
+func TestQueueDemoRabbitMQReconnect(t *testing.T) {
+	manager := newRealRabbitMQQueueManager(t)
+	result, err := qdemo.Run(context.Background(), manager, "rabbitmq-reconnect", "rabbitmq")
+	if err != nil {
+		t.Fatalf("run RabbitMQ reconnect: %v", err)
+	}
+	want := "queue.connection_disconnected,queue.connection_reconnecting,queue.connection_reconnected,worker:handled"
+	if got := strings.Join(result.Steps, ","); got != want {
+		t.Fatalf("RabbitMQ reconnect steps = %q, want %q", got, want)
+	}
+	if !result.Processed || result.JobID == "" || !strings.HasPrefix(result.Queue, "demo-rabbitmq-reconnect-") {
+		t.Fatalf("RabbitMQ reconnect result = %#v, want processed post-reconnect job", result)
+	}
+}
+
+func TestQueueDemoPoisonEnvelopeRejection(t *testing.T) {
+	manager := newRealRabbitMQQueueManager(t)
+	result, err := qdemo.Run(context.Background(), manager, "poison-rejection", "rabbitmq")
+	if err != nil {
+		t.Fatalf("run RabbitMQ poison rejection: %v", err)
+	}
+	want := "message:injected,action:reject,queue:unblocked"
+	if got := strings.Join(result.Steps, ","); got != want {
+		t.Fatalf("RabbitMQ poison rejection steps = %q, want %q", got, want)
+	}
+	if !result.Processed || result.JobID != "" || !strings.HasPrefix(result.Queue, "demo-poison-rejection-") {
+		t.Fatalf("RabbitMQ poison rejection result = %#v, want processed rejection without job ID", result)
+	}
+}
+
 func TestQueueDemoInfrastructureEvents(t *testing.T) {
 	manager := newRealRabbitMQQueueManager(t)
 	result, err := qdemo.Run(context.Background(), manager, "infrastructure-events", "rabbitmq")
@@ -649,7 +792,7 @@ func newRealRedisQueueManager(t *testing.T) *queue.Manager {
 			Cache: "queue-demo", Key: fmt.Sprintf("prismgo:demo:restart:%d", time.Now().UnixNano()),
 		},
 		Connections: map[string]queue.ConnectionConfig{
-			"redis": {Driver: "redis", Queue: "queue-demo", Prefix: fmt.Sprintf("prismgo_demo_%d", time.Now().UnixNano()), Options: map[string]any{"connection": "default"}},
+			"redis": {Driver: "redis", Queue: "queue-demo", Prefix: fmt.Sprintf("prismgo_demo_%d", time.Now().UnixNano()), RetryAfter: 250 * time.Millisecond, BlockFor: time.Second, Options: map[string]any{"connection": "default"}},
 		},
 	}, queue.NewRegistry())
 	if err != nil {
@@ -670,16 +813,16 @@ func newRealRabbitMQQueueManager(t *testing.T) *queue.Manager {
 	t.Cleanup(func() { container.SetProvider(nil) })
 	installIntegrationCache(t, registry, cache.StoreConfig{Driver: "memory"})
 	slug := fmt.Sprintf("prismgo.demo.%d", time.Now().UnixNano())
+	connections := map[string]queue.ConnectionConfig{
+		"rabbitmq": rabbitMQIntegrationConnection(url, slug+".default", "ttl_dlx", nil),
+		"rabbitmq-ttl_dlx": rabbitMQIntegrationConnection(
+			url, slug+".ttl", "ttl_dlx", []time.Duration{250 * time.Millisecond},
+		),
+		"rabbitmq-none":   rabbitMQIntegrationConnection(url, slug+".none", "none", nil),
+		"rabbitmq-plugin": rabbitMQIntegrationConnection(url, slug+".plugin", "plugin", nil),
+	}
 	manager, err := queue.NewManager(queue.Config{
-		Default: "rabbitmq",
-		Connections: map[string]queue.ConnectionConfig{
-			"rabbitmq": {Driver: "rabbitmq", Queue: slug + ".queue", BlockFor: 2 * time.Second, Options: map[string]any{
-				"url": url, "exchange": slug + ".exchange", "declare": true,
-				"exchange_durable": false, "queue_durable": false, "message_persistent": false,
-				"auto_delete": true, "confirm": true, "delay_mode": "ttl_dlx",
-				"restart_queue": slug + ".restart", "restart_enabled": false,
-			}},
-		},
+		Default: "rabbitmq", Connections: connections,
 	}, queue.NewRegistry())
 	if err != nil {
 		t.Fatalf("create RabbitMQ queue manager: %v", err)
@@ -689,6 +832,21 @@ func newRealRabbitMQQueueManager(t *testing.T) *queue.Manager {
 	}
 	t.Cleanup(func() { _ = manager.Close() })
 	return manager
+}
+
+func rabbitMQIntegrationConnection(url, slug, delayMode string, buckets []time.Duration) queue.ConnectionConfig {
+	options := map[string]any{
+		"url": url, "exchange": slug + ".exchange", "declare": true,
+		"exchange_durable": false, "queue_durable": false, "message_persistent": false,
+		"auto_delete": true, "confirm": true, "delay_mode": delayMode,
+		"restart_queue": slug + ".restart", "restart_enabled": false,
+	}
+	if len(buckets) > 0 {
+		options["delay_buckets"] = buckets
+	}
+	return queue.ConnectionConfig{
+		Driver: "rabbitmq", Queue: slug + ".queue", BlockFor: 2 * time.Second, Options: options,
+	}
 }
 
 func assertBasicIntegration(t *testing.T, manager *queue.Manager, connection string) {

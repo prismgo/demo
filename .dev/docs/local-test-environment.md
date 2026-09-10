@@ -77,6 +77,7 @@ source demo/.dev/runtime/test.env
 - `PRISMGO_SQLSERVER_TEST_DSN`
 - `PRISMGO_REDIS_TEST_ADDR`、`PRISMGO_REDIS_TEST_URL`
 - `PRISMGO_RABBITMQ_TEST_URL`
+- `PRISMGO_RABBITMQ_MANAGEMENT_URL`（仅用于需要 broker 端故障注入的 Demo 集成测试）
 
 现有 RabbitMQ 集成测试已经读取 `PRISMGO_RABBITMQ_TEST_URL`。可直接运行：
 

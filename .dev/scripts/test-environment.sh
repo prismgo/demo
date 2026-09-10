@@ -86,6 +86,7 @@ prepare_runtime() {
         printf 'export PRISMGO_REDIS_TEST_ADDR=%q\n' "127.0.0.1:${REDIS_PORT}"
         printf 'export PRISMGO_REDIS_TEST_URL=%q\n' "redis://127.0.0.1:${REDIS_PORT}/0"
         printf 'export PRISMGO_RABBITMQ_TEST_URL=%q\n' "amqp://${RABBITMQ_USER}:${RABBITMQ_PASSWORD}@127.0.0.1:${RABBITMQ_PORT}/%2F"
+        printf 'export PRISMGO_RABBITMQ_MANAGEMENT_URL=%q\n' "http://127.0.0.1:${RABBITMQ_MANAGEMENT_PORT}"
     } >"${runtime_env}"
 }
 

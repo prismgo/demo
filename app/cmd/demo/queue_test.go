@@ -33,6 +33,9 @@ func TestQueueDemoListShowsDocumentedScenariosAndConnections(t *testing.T) {
 		"infrastructure-events",
 		"rabbitmq",
 		"RabbitMQ Configuration",
+		"transport-delay",
+		"rabbitmq-reconnect",
+		"poison-rejection",
 	} {
 		if !strings.Contains(output.String(), expected) {
 			t.Fatalf("output does not contain %q:\n%s", expected, output.String())

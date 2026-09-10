@@ -59,6 +59,15 @@ var scenarios = []Scenario{
 	{Name: "redis", Section: "Redis Connection", Status: "implemented", Connections: []string{"redis"}, Requires: []string{"redis"}},
 	{Name: "rabbitmq", Section: "RabbitMQ Configuration", Status: "implemented", Connections: []string{"rabbitmq"}, Requires: []string{"rabbitmq"}},
 	{Name: "bulk", Section: "Built-in Connection Capability Matrix", Status: "implemented", Connections: []string{"redis", "rabbitmq"}, Requires: []string{"redis", "rabbitmq"}},
+	{Name: "transport-delay", Section: "Built-in Connection Capability Matrix", Status: "implemented", Connections: []string{"redis", "rabbitmq"}, Requires: []string{"redis", "rabbitmq"}},
+	{Name: "blocking-pop", Section: "Built-in Connection Capability Matrix", Status: "implemented", Connections: []string{"redis", "rabbitmq"}, Requires: []string{"redis", "rabbitmq"}},
+	{Name: "redis-retry-after", Section: "Built-in Connection Capability Matrix", Status: "implemented", Connections: []string{"redis"}, Requires: []string{"redis"}},
+	{Name: "rabbitmq-retry-after", Section: "Built-in Connection Capability Matrix", Status: "implemented", Connections: []string{"rabbitmq"}, Requires: []string{"rabbitmq"}},
+	{Name: "rabbitmq-confirm", Section: "RabbitMQ Configuration", Status: "implemented", Connections: []string{"rabbitmq"}, Requires: []string{"rabbitmq"}},
+	{Name: "rabbitmq-reconnect", Section: "RabbitMQ Configuration", Status: "implemented", Connections: []string{"rabbitmq"}, Requires: []string{"rabbitmq"}},
+	{Name: "rabbitmq-topology", Section: "RabbitMQ Configuration", Status: "implemented", Connections: []string{"rabbitmq"}, Requires: []string{"rabbitmq"}},
+	{Name: "rabbitmq-delay-modes", Section: "RabbitMQ Configuration", Status: "implemented", Connections: []string{"rabbitmq"}, Requires: []string{"rabbitmq"}},
+	{Name: "poison-rejection", Section: "Built-in Connection Capability Matrix", Status: "implemented", Connections: []string{"rabbitmq"}, Requires: []string{"rabbitmq"}},
 }
 
 // Scenarios returns a copy of the queue demo catalog in presentation order.

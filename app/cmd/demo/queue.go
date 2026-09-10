@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/prismgo/framework/console"
 	"github.com/prismgo/framework/queue"
@@ -23,6 +24,19 @@ func NewQueueCommand() *QueueCommand {
 	return newQueueCommand(func(ctx context.Context, caseName, connection string) (result qdemo.Result, err error) {
 		cfg := queue.BuildConfig()
 		cfg.Default = connection
+		if caseName == "blocking-pop" {
+			spec := cfg.Connections[connection]
+			spec.BlockFor = time.Second
+			cfg.Connections[connection] = spec
+		}
+		if caseName == "redis-retry-after" {
+			spec := cfg.Connections[connection]
+			spec.RetryAfter = 250 * time.Millisecond
+			cfg.Connections[connection] = spec
+		}
+		if caseName == "rabbitmq-delay-modes" {
+			addRabbitMQDelayModeConnections(&cfg, connection)
+		}
 		if err := queueDemoConfigError(caseName, cfg); err != nil {
 			return qdemo.Result{}, err
 		}
@@ -37,6 +51,25 @@ func NewQueueCommand() *QueueCommand {
 		}()
 		return qdemo.Run(ctx, manager, caseName, connection)
 	})
+}
+
+func addRabbitMQDelayModeConnections(cfg *queue.Config, connection string) {
+	base, ok := cfg.Connections[connection]
+	if !ok {
+		return
+	}
+	for _, mode := range []string{"ttl_dlx", "none", "plugin"} {
+		spec := base
+		spec.Options = make(map[string]any, len(base.Options)+2)
+		for key, value := range base.Options {
+			spec.Options[key] = value
+		}
+		spec.Options["delay_mode"] = mode
+		if mode == "ttl_dlx" {
+			spec.Options["delay_buckets"] = []time.Duration{250 * time.Millisecond}
+		}
+		cfg.Connections["rabbitmq-"+mode] = spec
+	}
 }
 
 func queueDemoConfigError(caseName string, cfg queue.Config) error {
@@ -106,6 +139,15 @@ func (c *QueueCommand) Definition() *console.Definition {
 		"go run ./demo demo:queue redis --connection=redis",
 		"go run ./demo demo:queue rabbitmq --connection=rabbitmq",
 		"go run ./demo demo:queue bulk --connection=redis",
+		"go run ./demo demo:queue transport-delay --connection=redis",
+		"go run ./demo demo:queue blocking-pop --connection=rabbitmq",
+		"go run ./demo demo:queue redis-retry-after --connection=redis",
+		"go run ./demo demo:queue rabbitmq-retry-after --connection=rabbitmq",
+		"go run ./demo demo:queue rabbitmq-confirm --connection=rabbitmq",
+		"go run ./demo demo:queue rabbitmq-reconnect --connection=rabbitmq",
+		"go run ./demo demo:queue rabbitmq-topology --connection=rabbitmq",
+		"go run ./demo demo:queue rabbitmq-delay-modes --connection=rabbitmq",
+		"go run ./demo demo:queue poison-rejection --connection=rabbitmq",
 	}
 	return definition
 }

@@ -174,6 +174,33 @@ func Run(ctx context.Context, manager *queue.Manager, caseName, connection strin
 	if caseName == "bulk" {
 		return runBulkTransport(ctx, manager, connection)
 	}
+	if caseName == "transport-delay" {
+		return runTransportDelay(ctx, manager, connection)
+	}
+	if caseName == "blocking-pop" {
+		return runBlockingPop(ctx, manager, connection)
+	}
+	if caseName == "redis-retry-after" {
+		return runRedisRetryAfter(ctx, manager, connection)
+	}
+	if caseName == "rabbitmq-retry-after" {
+		return runRabbitMQRetryAfter(ctx, manager, connection)
+	}
+	if caseName == "rabbitmq-confirm" {
+		return runRabbitMQPublisherConfirm(ctx, manager, connection)
+	}
+	if caseName == "rabbitmq-topology" {
+		return runRabbitMQTopology(ctx, manager, connection)
+	}
+	if caseName == "rabbitmq-delay-modes" {
+		return runRabbitMQDelayModes(ctx, manager, connection)
+	}
+	if caseName == "rabbitmq-reconnect" {
+		return runRabbitMQReconnect(ctx, manager, connection)
+	}
+	if caseName == "poison-rejection" {
+		return runPoisonEnvelopeRejection(ctx, manager, connection)
+	}
 	if caseName != "basic" {
 		return Result{}, fmt.Errorf("queue demo: unknown scenario %q", caseName)
 	}

@@ -22,8 +22,8 @@ func TestDemoListCommandShowsFeatureOverview(t *testing.T) {
 	for _, expected := range []string{
 		"PrismGo Framework: v0.2.2 (local workspace)",
 		"Feature", "Description", "Since", "Progress", "Remaining", "Status",
-		"Queues, jobs, and workers", "50/59", "in progress",
-		"Modules: 29 | Implemented: 51/87 | Planned: 33 | Manual: 3",
+		"Queues, jobs, and workers", "59/59", "implemented",
+		"Modules: 29 | Implemented: 60/87 | Planned: 24 | Manual: 3",
 		"go run ./demo demo:show <feature>",
 	} {
 		if !strings.Contains(output.String(), expected) {
@@ -39,7 +39,7 @@ func TestDemoListCommandJSONAndFeatureStatusFilter(t *testing.T) {
 	command := NewListCommand()
 	var output bytes.Buffer
 	input := demoInput{
-		options: map[string]string{"status": "in-progress"},
+		options: map[string]string{"status": "implemented"},
 		bools:   map[string]bool{"json": true},
 	}
 	if err := command.Handle(commandContext(command, input, &output)); err != nil {
@@ -52,8 +52,8 @@ func TestDemoListCommandJSONAndFeatureStatusFilter(t *testing.T) {
 	if result.Framework != "v0.2.2" {
 		t.Fatalf("framework = %q, want v0.2.2", result.Framework)
 	}
-	if len(result.Features) != 1 || result.Features[0].Feature != "queue" || result.Features[0].Status != catalog.FeatureStatusInProgress {
-		t.Fatalf("features = %#v, want queue in progress", result.Features)
+	if len(result.Features) != 2 || result.Features[1].Feature != "queue" || result.Features[1].Status != catalog.FeatureStatusImplemented {
+		t.Fatalf("features = %#v, want commands and queue implemented", result.Features)
 	}
 	if strings.Contains(output.String(), "\x1b[") {
 		t.Fatalf("JSON contains ANSI decoration: %q", output.String())
@@ -73,8 +73,7 @@ func TestDemoListCommandColorsFeatureStatuses(t *testing.T) {
 	for _, expected := range []string{
 		"\x1b[32mimplemented\x1b[0m",
 		"\x1b[32mcommands\x1b[0m",
-		"\x1b[33min progress\x1b[0m",
-		"\x1b[33mqueue\x1b[0m",
+		"\x1b[32mqueue\x1b[0m",
 		"\x1b[39mcache\x1b[0m",
 	} {
 		if !strings.Contains(output.String(), expected) {
@@ -111,8 +110,8 @@ func TestDemoShowCommandJSONAndFilters(t *testing.T) {
 	if err := json.Unmarshal(output.Bytes(), &result); err != nil {
 		t.Fatalf("decode JSON: %v\n%s", err, output.String())
 	}
-	if result.Framework != "v0.2.2" || len(result.Entries) != 11 {
-		t.Fatalf("detail output framework/entries = %q/%d, want v0.2.2/11", result.Framework, len(result.Entries))
+	if result.Framework != "v0.2.2" || len(result.Entries) != 2 {
+		t.Fatalf("detail output framework/entries = %q/%d, want v0.2.2/2", result.Framework, len(result.Entries))
 	}
 	for _, item := range result.Entries {
 		if item.Level != catalog.LevelIntegration || item.Status != catalog.StatusPlanned || item.Since != catalog.SinceInitial {
@@ -132,9 +131,9 @@ func TestDemoShowCommandShowsFeatureDetails(t *testing.T) {
 		t.Fatalf("handle demo:show queue: %v", err)
 	}
 	for _, expected := range []string{
-		"Module: queue — 50/59 implemented — in progress",
+		"Module: queue — 59/59 implemented — implemented",
 		"Case", "Section", "Since", "Example", "Level", "Requires", "Status",
-		"basic-sync", "v0.1.0", "Entries: 50 | Implemented: 50 | Planned: 0 | Manual: 0",
+		"basic-sync", "v0.1.0", "Entries: 59 | Implemented: 59 | Planned: 0 | Manual: 0",
 	} {
 		if !strings.Contains(output.String(), expected) {
 			t.Fatalf("detail output does not contain %q:\n%s", expected, output.String())
@@ -156,7 +155,7 @@ func TestDemoShowCommandColorsModuleAndCases(t *testing.T) {
 		t.Fatalf("handle ANSI demo:show queue: %v", err)
 	}
 	for _, expected := range []string{
-		"\x1b[33mqueue\x1b[0m",
+		"\x1b[32mqueue\x1b[0m",
 		"\x1b[32mbasic-sync\x1b[0m",
 		"\x1b[32mimplemented\x1b[0m",
 	} {
