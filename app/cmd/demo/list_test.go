@@ -41,8 +41,8 @@ func TestDemoListCommandJSONAndFilters(t *testing.T) {
 	if err := json.Unmarshal(output.Bytes(), &entries); err != nil {
 		t.Fatalf("decode JSON: %v\n%s", err, output.String())
 	}
-	if len(entries) != 4 {
-		t.Fatalf("integration planned entries = %d, want 4", len(entries))
+	if len(entries) != 27 {
+		t.Fatalf("integration planned entries = %d, want 27", len(entries))
 	}
 	for _, item := range entries {
 		if item.Level != catalog.LevelIntegration || item.Status != catalog.StatusPlanned {

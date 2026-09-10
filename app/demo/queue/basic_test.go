@@ -167,6 +167,54 @@ func TestQueueDemoFailedCommands(t *testing.T) {
 	}
 }
 
+func TestQueueDemoEncryption(t *testing.T) {
+	manager := newSyncQueueManager(t)
+
+	result, err := Run(context.Background(), manager, "encryption", "sync")
+	if err != nil {
+		t.Fatalf("run encrypted payload queue scenario: %v", err)
+	}
+	want := []string{"provider:encrypted", "option:encrypted", "provider:handled", "option:handled"}
+	if strings.Join(result.Steps, ",") != strings.Join(want, ",") {
+		t.Fatalf("encryption steps = %v, want %v", result.Steps, want)
+	}
+	if !result.Processed || result.JobID == "" || !strings.HasPrefix(result.Queue, "demo-encryption-") {
+		t.Fatalf("unexpected result: %#v", result)
+	}
+}
+
+func TestQueueDemoCustomDriver(t *testing.T) {
+	manager := newSyncQueueManager(t)
+
+	result, err := Run(context.Background(), manager, "custom-driver", "sync")
+	if err != nil {
+		t.Fatalf("run custom queue driver scenario: %v", err)
+	}
+	want := []string{"connector:resolved", "options:received", "custom:handled"}
+	if strings.Join(result.Steps, ",") != strings.Join(want, ",") {
+		t.Fatalf("custom driver steps = %v, want %v", result.Steps, want)
+	}
+	if !result.Processed || result.Connection != "custom" || result.JobID == "" || !strings.HasPrefix(result.Queue, "demo-custom-") {
+		t.Fatalf("unexpected result: %#v", result)
+	}
+}
+
+func TestQueueDemoErrors(t *testing.T) {
+	manager := newSyncQueueManager(t)
+
+	result, err := Run(context.Background(), manager, "errors", "sync")
+	if err != nil {
+		t.Fatalf("run queue error constants scenario: %v", err)
+	}
+	want := []string{"empty:matched", "job-not-registered:matched", "unsupported-operation:matched", "manager-closed:matched"}
+	if strings.Join(result.Steps, ",") != strings.Join(want, ",") {
+		t.Fatalf("error steps = %v, want %v", result.Steps, want)
+	}
+	if !result.Processed || result.JobID != "" || result.Queue != "demo-errors" {
+		t.Fatalf("unexpected result: %#v", result)
+	}
+}
+
 func newSyncQueueManager(t *testing.T) *queue.Manager {
 	t.Helper()
 	manager, err := queue.NewManager(queue.Config{

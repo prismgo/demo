@@ -23,7 +23,7 @@ func TestQueueDemoListShowsDocumentedScenariosAndConnections(t *testing.T) {
 		"Creating Jobs",
 		"implemented",
 		"sync,redis,rabbitmq",
-		"planned",
+		"custom-driver",
 		"rabbitmq",
 		"RabbitMQ Configuration",
 	} {

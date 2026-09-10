@@ -69,6 +69,21 @@ func Run(ctx context.Context, manager *queue.Manager, caseName, connection strin
 	if caseName == "events" {
 		return runEvents(ctx, manager, connection)
 	}
+	if caseName == "encryption" {
+		return runEncryption(ctx, connection)
+	}
+	if caseName == "custom-driver" {
+		return runCustomDriver(ctx, connection)
+	}
+	if caseName == "errors" {
+		return runErrors(ctx, manager, connection)
+	}
+	if caseName == "redis" {
+		return runRedisBoundaries(ctx, manager, connection)
+	}
+	if caseName == "rabbitmq" {
+		return runRabbitMQBoundaries(ctx, manager, connection)
+	}
 	if caseName != "basic" {
 		return Result{}, fmt.Errorf("queue demo: unknown scenario %q", caseName)
 	}

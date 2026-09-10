@@ -257,6 +257,36 @@ func TestQueueDemoEvents(t *testing.T) {
 	}
 }
 
+func TestQueueDemoRedisBoundaries(t *testing.T) {
+	manager := newRealRedisQueueManager(t)
+	result, err := qdemo.Run(context.Background(), manager, "redis", "redis")
+	if err != nil {
+		t.Fatalf("run Redis queue boundaries: %v", err)
+	}
+	want := "size:1,clear:size=0,empty:matched,worker:handled"
+	if got := strings.Join(result.Steps, ","); got != want {
+		t.Fatalf("Redis boundary steps = %q, want %q", got, want)
+	}
+	if !result.Processed || result.JobID == "" || !strings.HasPrefix(result.Queue, "demo-redis-") {
+		t.Fatalf("unexpected result: %#v", result)
+	}
+}
+
+func TestQueueDemoRabbitMQBoundaries(t *testing.T) {
+	manager := newRealRabbitMQQueueManager(t)
+	result, err := qdemo.Run(context.Background(), manager, "rabbitmq", "rabbitmq")
+	if err != nil {
+		t.Fatalf("run RabbitMQ queue boundaries: %v", err)
+	}
+	want := "config:default-queue,config:delay-buckets,size:1,clear:size=0,empty:matched,worker:handled"
+	if got := strings.Join(result.Steps, ","); got != want {
+		t.Fatalf("RabbitMQ boundary steps = %q, want %q", got, want)
+	}
+	if !result.Processed || result.JobID == "" || !strings.HasPrefix(result.Queue, "demo-rabbitmq-") {
+		t.Fatalf("unexpected result: %#v", result)
+	}
+}
+
 func newRealQueueManager(t *testing.T, connection string) *queue.Manager {
 	t.Helper()
 	if connection == "redis" {

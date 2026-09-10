@@ -12,8 +12,8 @@ func TestCatalogEntries(t *testing.T) {
 	if err := Validate(entries); err != nil {
 		t.Fatalf("validate catalog entries: %v", err)
 	}
-	if len(entries) != 48 {
-		t.Fatalf("catalog has %d entries, want 48", len(entries))
+	if len(entries) != 87 {
+		t.Fatalf("catalog has %d entries, want 87", len(entries))
 	}
 	if item, ok := Find("commands", "list"); !ok || item.Status != StatusImplemented {
 		t.Fatalf("implemented demo:list entry = %#v, %v", item, ok)
@@ -21,11 +21,11 @@ func TestCatalogEntries(t *testing.T) {
 	if got := Filter("redis", LevelIntegration, StatusPlanned); len(got) != 1 {
 		t.Fatalf("redis integration filter returned %d entries, want 1", len(got))
 	}
-	if got := Filter("queue", "", StatusImplemented); len(got) != 15 {
-		t.Fatalf("implemented queue entries = %d, want 15", len(got))
+	if got := Filter("queue", "", StatusImplemented); len(got) != 20 {
+		t.Fatalf("implemented queue entries = %d, want 20", len(got))
 	}
-	if got := Filter("queue", "", StatusPlanned); len(got) != 5 {
-		t.Fatalf("planned queue entries = %d, want 5", len(got))
+	if got := Filter("queue", "", StatusPlanned); len(got) != 39 {
+		t.Fatalf("planned queue entries = %d, want 39", len(got))
 	}
 }
 

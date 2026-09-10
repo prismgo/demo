@@ -24,11 +24,11 @@ var scenarios = []Scenario{
 	{Name: "failed-commands", Section: "Dealing With Failed Jobs", Status: "implemented", Connections: []string{"sync"}},
 	{Name: "restart", Section: "Queue Workers and Deployment", Status: "implemented", Connections: []string{"redis", "rabbitmq"}, Requires: []string{"redis", "rabbitmq"}},
 	{Name: "events", Section: "Lifecycle Events", Status: "implemented", Connections: []string{"redis", "rabbitmq"}, Requires: []string{"redis", "rabbitmq"}},
-	{Name: "encryption", Section: "Encrypted Payloads", Connections: []string{"redis", "rabbitmq"}},
-	{Name: "custom-driver", Section: "Custom Drivers", Connections: []string{"custom"}},
-	{Name: "errors", Section: "Error Constants", Connections: []string{"sync", "redis", "rabbitmq"}},
-	{Name: "redis", Section: "Redis Connection", Connections: []string{"redis"}, Requires: []string{"redis"}},
-	{Name: "rabbitmq", Section: "RabbitMQ Configuration", Connections: []string{"rabbitmq"}, Requires: []string{"rabbitmq"}},
+	{Name: "encryption", Section: "Encrypted Payloads", Status: "implemented", Connections: []string{"sync"}},
+	{Name: "custom-driver", Section: "Custom Drivers", Status: "implemented", Connections: []string{"sync"}},
+	{Name: "errors", Section: "Error Constants", Status: "implemented", Connections: []string{"sync"}},
+	{Name: "redis", Section: "Redis Connection", Status: "implemented", Connections: []string{"redis"}, Requires: []string{"redis"}},
+	{Name: "rabbitmq", Section: "RabbitMQ Configuration", Status: "implemented", Connections: []string{"rabbitmq"}, Requires: []string{"rabbitmq"}},
 }
 
 // Scenarios returns a copy of the queue demo catalog in presentation order.
