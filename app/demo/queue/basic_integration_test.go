@@ -198,6 +198,65 @@ func TestQueueDemoWorker(t *testing.T) {
 	}
 }
 
+func TestQueueDemoFailure(t *testing.T) {
+	for _, connection := range []string{"redis", "rabbitmq"} {
+		t.Run(connection, func(t *testing.T) {
+			manager := newRealQueueManager(t, connection)
+			result, err := qdemo.Run(context.Background(), manager, "failure", connection)
+			if err != nil {
+				t.Fatalf("run failure scenario on %s: %v", connection, err)
+			}
+			for _, expected := range []string{"failure:failed-callback", "failure:archived", "failure:handled"} {
+				if !hasIntegrationStep(result.Steps, expected) {
+					t.Fatalf("failure steps missing %q: %v", expected, result.Steps)
+				}
+			}
+			if !result.Processed || result.JobID == "" {
+				t.Fatalf("unexpected result: %#v", result)
+			}
+		})
+	}
+}
+
+func TestQueueDemoRestart(t *testing.T) {
+	for _, connection := range []string{"redis", "rabbitmq"} {
+		t.Run(connection, func(t *testing.T) {
+			manager := newRealQueueManager(t, connection)
+			result, err := qdemo.Run(context.Background(), manager, "restart", connection)
+			if err != nil {
+				t.Fatalf("run restart scenario on %s: %v", connection, err)
+			}
+			for _, expected := range []string{"restart:current:handled", "restart:requested", "restart:worker-stopped"} {
+				if !hasIntegrationStep(result.Steps, expected) {
+					t.Fatalf("restart steps missing %q: %v", expected, result.Steps)
+				}
+			}
+			if hasIntegrationStep(result.Steps, "restart:pending:handled") {
+				t.Fatalf("restart processed pending job: %v", result.Steps)
+			}
+		})
+	}
+}
+
+func TestQueueDemoEvents(t *testing.T) {
+	for _, connection := range []string{"redis", "rabbitmq"} {
+		t.Run(connection, func(t *testing.T) {
+			manager := newRealQueueManager(t, connection)
+			result, err := qdemo.Run(context.Background(), manager, "events", connection)
+			if err != nil {
+				t.Fatalf("run events scenario on %s: %v", connection, err)
+			}
+			want := []string{
+				queue.EventJobQueued, queue.EventJobProcessing, queue.EventJobReleased,
+				queue.EventJobProcessing, queue.EventJobProcessed,
+			}
+			if strings.Join(result.Steps, ",") != strings.Join(want, ",") {
+				t.Fatalf("event steps = %v, want %v", result.Steps, want)
+			}
+		})
+	}
+}
+
 func newRealQueueManager(t *testing.T, connection string) *queue.Manager {
 	t.Helper()
 	if connection == "redis" {

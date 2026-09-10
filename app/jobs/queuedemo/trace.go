@@ -8,8 +8,9 @@ import (
 
 var demoTrace = struct {
 	sync.Mutex
-	items map[string][]string
-}{items: make(map[string][]string)}
+	items    map[string][]string
+	attempts map[string]map[string]int
+}{items: make(map[string][]string), attempts: make(map[string]map[string]int)}
 
 type traceGate struct {
 	started chan struct{}
@@ -25,6 +26,7 @@ var demoGates = struct {
 func ResetTrace(id string) {
 	demoTrace.Lock()
 	demoTrace.items[id] = nil
+	demoTrace.attempts[id] = make(map[string]int)
 	demoTrace.Unlock()
 }
 
@@ -41,7 +43,19 @@ func TakeTrace(id string) []string {
 	defer demoTrace.Unlock()
 	steps := append([]string(nil), demoTrace.items[id]...)
 	delete(demoTrace.items, id)
+	delete(demoTrace.attempts, id)
 	return steps
+}
+
+// NextAttempt increments and returns a process-local attempt number for a demo job.
+func NextAttempt(id, label string) int {
+	demoTrace.Lock()
+	defer demoTrace.Unlock()
+	if demoTrace.attempts[id] == nil {
+		demoTrace.attempts[id] = make(map[string]int)
+	}
+	demoTrace.attempts[id][label]++
+	return demoTrace.attempts[id][label]
 }
 
 // PrepareGate creates a deterministic blocking point for concurrency examples.

@@ -151,6 +151,22 @@ func TestQueueDemoBatch(t *testing.T) {
 	}
 }
 
+func TestQueueDemoFailedCommands(t *testing.T) {
+	manager := newSyncQueueManager(t)
+
+	result, err := Run(context.Background(), manager, "failed-commands", "sync")
+	if err != nil {
+		t.Fatalf("run failed commands queue scenario: %v", err)
+	}
+	want := []string{"queue:failed:list", "queue:failed:find", "queue:forget", "queue:flush"}
+	if strings.Join(result.Steps, ",") != strings.Join(want, ",") {
+		t.Fatalf("failed command steps = %v, want %v", result.Steps, want)
+	}
+	if !result.Processed || result.JobID != "job-one" || result.Queue != "demo-failed" {
+		t.Fatalf("unexpected result: %#v", result)
+	}
+}
+
 func newSyncQueueManager(t *testing.T) *queue.Manager {
 	t.Helper()
 	manager, err := queue.NewManager(queue.Config{

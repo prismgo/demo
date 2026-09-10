@@ -46,6 +46,10 @@ func (c *QueueCommand) Definition() *console.Definition {
 		"go run ./demo demo:queue basic --connection=sync",
 		"go run ./demo demo:queue basic --connection=redis",
 		"go run ./demo demo:queue basic --connection=rabbitmq",
+		"go run ./demo demo:queue failed-commands",
+		"go run ./demo demo:queue failure --connection=redis",
+		"go run ./demo demo:queue restart --connection=rabbitmq",
+		"go run ./demo demo:queue events --connection=redis",
 	}
 	return definition
 }

@@ -57,6 +57,18 @@ func Run(ctx context.Context, manager *queue.Manager, caseName, connection strin
 	if caseName == "worker" {
 		return runWorker(ctx, manager, connection)
 	}
+	if caseName == "failure" {
+		return runFailure(ctx, manager, connection)
+	}
+	if caseName == "failed-commands" {
+		return runFailedCommands(ctx, manager, connection)
+	}
+	if caseName == "restart" {
+		return runRestart(ctx, manager, connection)
+	}
+	if caseName == "events" {
+		return runEvents(ctx, manager, connection)
+	}
 	if caseName != "basic" {
 		return Result{}, fmt.Errorf("queue demo: unknown scenario %q", caseName)
 	}

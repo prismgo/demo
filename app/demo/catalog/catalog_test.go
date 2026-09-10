@@ -21,11 +21,11 @@ func TestCatalogEntries(t *testing.T) {
 	if got := Filter("redis", LevelIntegration, StatusPlanned); len(got) != 1 {
 		t.Fatalf("redis integration filter returned %d entries, want 1", len(got))
 	}
-	if got := Filter("queue", "", StatusImplemented); len(got) != 11 {
-		t.Fatalf("implemented queue entries = %d, want 11", len(got))
+	if got := Filter("queue", "", StatusImplemented); len(got) != 15 {
+		t.Fatalf("implemented queue entries = %d, want 15", len(got))
 	}
-	if got := Filter("queue", "", StatusPlanned); len(got) != 9 {
-		t.Fatalf("planned queue entries = %d, want 9", len(got))
+	if got := Filter("queue", "", StatusPlanned); len(got) != 5 {
+		t.Fatalf("planned queue entries = %d, want 5", len(got))
 	}
 }
 
