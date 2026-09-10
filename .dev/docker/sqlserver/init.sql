@@ -1,5 +1,7 @@
 IF DB_ID(N'$(DatabaseName)') IS NULL
 BEGIN
-    EXEC(N'CREATE DATABASE ' + QUOTENAME(N'$(DatabaseName)'));
+    DECLARE @CreateDatabaseSQL nvarchar(max);
+    SET @CreateDatabaseSQL = N'CREATE DATABASE ' + QUOTENAME(N'$(DatabaseName)');
+    EXEC sys.sp_executesql @CreateDatabaseSQL;
 END;
 GO

@@ -71,8 +71,8 @@ services:
       SQLSERVER_DATABASE: ${SQLSERVER_DATABASE:-prismgo_test}
       SQLSERVER_SA_PASSWORD: ${SQLSERVER_SA_PASSWORD:-PrismGo_Test123!}
     volumes:
-      - ./sqlserver/init.sh:/usr/local/bin/prismgo-sqlserver-init:ro
-      - ./sqlserver/init.sql:/usr/local/share/prismgo/init.sql:ro
+      - ./.dev/docker/sqlserver/init.sh:/usr/local/bin/prismgo-sqlserver-init:ro
+      - ./.dev/docker/sqlserver/init.sql:/usr/local/share/prismgo/init.sql:ro
     entrypoint: ["/bin/bash", "/usr/local/bin/prismgo-sqlserver-init"]
     restart: "no"
 
