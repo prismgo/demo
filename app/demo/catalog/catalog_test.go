@@ -12,8 +12,8 @@ func TestCatalogEntries(t *testing.T) {
 	if err := Validate(entries); err != nil {
 		t.Fatalf("validate catalog entries: %v", err)
 	}
-	if len(entries) != 87 {
-		t.Fatalf("catalog has %d entries, want 87", len(entries))
+	if len(entries) != 209 {
+		t.Fatalf("catalog has %d entries, want 209", len(entries))
 	}
 	if item, ok := Find("commands", "list"); !ok || item.Status != StatusImplemented {
 		t.Fatalf("implemented demo:list entry = %#v, %v", item, ok)
@@ -36,6 +36,41 @@ func TestCatalogEntries(t *testing.T) {
 	} {
 		if item, ok := Find("queue", slug); !ok || item.Status != StatusImplemented {
 			t.Fatalf("queue configuration entry %q = %#v, %v; want implemented", slug, item, ok)
+		}
+	}
+	for _, slug := range []string{
+		"architecture", "config", "driver-prerequisites", "top-level-config",
+		"memory-config", "redis-config", "file-config", "failover-config", "lock-config", "flexible-config",
+		"facade", "named-store", "repository", "missing-store",
+		"get", "fallbacks", "typed-retrieval", "existence",
+		"put", "forever", "add", "put-many", "remember", "remember-forever", "flexible", "touch", "many", "pull",
+		"forget", "forget-many", "flush", "counters",
+		"lock", "lock-callback", "lock-block", "lock-restore", "lock-flush", "funnel", "without-overlapping",
+		"tags-memory", "tags-redis", "tags-unsupported", "memo", "failover", "custom-driver", "resource-lifecycle",
+		"events", "event-contract", "deferred", "key-prefixes", "encoding", "errors",
+		"memory-capabilities", "file-capabilities", "redis-capabilities", "failover-capabilities", "laravel-compatibility",
+	} {
+		if item, ok := Find("cache", slug); !ok || item.Status != StatusPlanned {
+			t.Fatalf("cache catalog entry %q = %#v, %v; want planned", slug, item, ok)
+		}
+	}
+	for _, slug := range []string{
+		"architecture", "config", "local-prerequisites", "oss-prerequisites",
+		"top-level-config", "local-config", "public-config", "oss-config", "links-config", "disk-config",
+		"facade", "named-disk", "cloud", "interface-selection",
+		"get", "json", "open-stream", "read-stream", "download", "file-existence", "directory-existence",
+		"put", "put-reader", "prepend-append", "put-options", "put-file", "put-file-as", "upload-fields",
+		"copy-move", "cross-disk-guard", "delete", "size", "last-modified", "file-info", "mime-type", "checksum", "path",
+		"make-directory", "files", "all-files", "directories", "all-directories", "delete-directory",
+		"public-url", "storage-link", "storage-link-options", "storage-unlink",
+		"temporary-url", "temporary-url-capability", "temporary-upload-url", "temporary-upload-capability", "verify-temporary-url",
+		"local-visibility", "oss-visibility", "oss-driver",
+		"custom-driver", "custom-driver-lifecycle", "driver-contract", "optional-driver-capabilities", "driver-factory-context",
+		"manual-manager", "manager-from-config", "errors", "local-capabilities", "oss-capabilities",
+		"laravel-compatibility", "best-practices",
+	} {
+		if item, ok := Find("filesystem", slug); !ok || item.Status != StatusPlanned {
+			t.Fatalf("filesystem catalog entry %q = %#v, %v; want planned", slug, item, ok)
 		}
 	}
 	if got := Filter("redis", LevelIntegration, StatusPlanned); len(got) != 1 {
@@ -64,6 +99,28 @@ func TestCatalogFeatureSummaries(t *testing.T) {
 	}
 	if queue.Status != FeatureStatusImplemented || queue.Since != SinceInitial {
 		t.Fatalf("queue status/since = %q/%q, want %q/%q", queue.Status, queue.Since, FeatureStatusImplemented, SinceInitial)
+	}
+
+	cache, ok := SummaryFor("cache")
+	if !ok {
+		t.Fatal("SummaryFor(cache) found = false")
+	}
+	if cache.Implemented != 0 || cache.Planned != 57 || cache.Manual != 0 || cache.Total != 57 || cache.Remaining != 57 {
+		t.Fatalf("cache summary = %#v, want implemented=0 planned=57 manual=0 total=57 remaining=57", cache)
+	}
+	if cache.Status != FeatureStatusPlanned || cache.Since != SinceInitial {
+		t.Fatalf("cache status/since = %q/%q, want %q/%q", cache.Status, cache.Since, FeatureStatusPlanned, SinceInitial)
+	}
+
+	filesystem, ok := SummaryFor("filesystem")
+	if !ok {
+		t.Fatal("SummaryFor(filesystem) found = false")
+	}
+	if filesystem.Implemented != 0 || filesystem.Planned != 67 || filesystem.Manual != 0 || filesystem.Total != 67 || filesystem.Remaining != 67 {
+		t.Fatalf("filesystem summary = %#v, want implemented=0 planned=67 manual=0 total=67 remaining=67", filesystem)
+	}
+	if filesystem.Status != FeatureStatusPlanned || filesystem.Since != SinceInitial {
+		t.Fatalf("filesystem status/since = %q/%q, want %q/%q", filesystem.Status, filesystem.Since, FeatureStatusPlanned, SinceInitial)
 	}
 
 	commands, ok := SummaryFor("commands")

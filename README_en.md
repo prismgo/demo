@@ -41,11 +41,11 @@ The Demo project has four main responsibilities:
 
 ## Catalog Progress Map
 
-The catalog currently covers **29 modules and 87 entries**: 60 implemented, 24 planned, and 3 manually verified. The table below is a snapshot taken when this README was updated. `app/demo/catalog/` is the single source of truth; use `demo:list` for live progress.
+The catalog currently covers **29 modules and 209 entries**: 60 implemented, 146 planned, and 3 manually verified. The table below is a snapshot taken when this README was updated. `app/demo/catalog/` is the single source of truth; use `demo:list` for live progress.
 
 | Module | Coverage | Progress | Remaining | Status |
 |---|---|---:|---:|---|
-| `cache` | Cache stores, tags, and locks | 0/1 | 1 | Planned |
+| `cache` | Cache stores, tags, and locks | 0/57 | 57 | Planned |
 | `commands` | Console command discovery | 1/1 | 0 | Implemented |
 | `config` | Environment and application configuration | 0/1 | 1 | Planned |
 | `console` | Artisan-style commands and terminal IO | 0/1 | 1 | Planned |
@@ -56,7 +56,7 @@ The catalog currently covers **29 modules and 87 entries**: 60 implemented, 24 p
 | `event` | Synchronous, asynchronous, and queued events | 0/1 | 1 | Planned |
 | `exception` | Exception reporting and rendering | 0/1 | 1 | Planned |
 | `facade` | Framework facade access | 0/1 | 1 | Planned |
-| `filesystem` | Local, public, and cloud filesystems | 0/1 | 1 | Planned |
+| `filesystem` | Local, public, and cloud filesystems | 0/67 | 67 | Planned |
 | `horizon` | Queue monitoring and worker management | 0/1 | 1 | Planned |
 | `http-server` | HTTP server startup and lifecycle | 0/1 | 1 | Planned |
 | `installation` | Application installation workflow | 0/1 | — | Manual |
