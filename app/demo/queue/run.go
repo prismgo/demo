@@ -123,6 +123,12 @@ func Run(ctx context.Context, manager *queue.Manager, caseName, connection strin
 	if caseName == "batch-events" {
 		return runBatchEvents(ctx, manager, connection)
 	}
+	if caseName == "poison-event" {
+		return runPoisonEnvelopeEvent(ctx, manager, connection)
+	}
+	if caseName == "infrastructure-events" {
+		return runInfrastructureEvents(ctx, manager, connection)
+	}
 	if caseName == "encryption" {
 		return runEncryption(ctx, connection)
 	}

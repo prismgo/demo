@@ -361,6 +361,38 @@ func TestQueueDemoBatchEvents(t *testing.T) {
 	}
 }
 
+func TestQueueDemoPoisonEnvelopeEvent(t *testing.T) {
+	manager := newRealRedisQueueManager(t)
+	result, err := qdemo.Run(context.Background(), manager, "poison-event", "redis")
+	if err != nil {
+		t.Fatalf("run poison envelope event on Redis: %v", err)
+	}
+	want := "queue.poison_envelope,action:discard,encoding:msgpack,body:base64"
+	if got := strings.Join(result.Steps, ","); got != want {
+		t.Fatalf("poison envelope event steps = %q, want %q", got, want)
+	}
+	if !result.Processed || result.JobID != "" || !strings.HasPrefix(result.Queue, "demo-poison-event-") {
+		t.Fatalf("poison envelope event result = %#v, want processed poison result without job ID", result)
+	}
+}
+
+func TestQueueDemoInfrastructureEvents(t *testing.T) {
+	manager := newRealRabbitMQQueueManager(t)
+	result, err := qdemo.Run(context.Background(), manager, "infrastructure-events", "rabbitmq")
+	if err != nil {
+		t.Fatalf("run infrastructure events on RabbitMQ: %v", err)
+	}
+	want := strings.Join([]string{
+		queue.EventTopologyDeclared, queue.EventConsumerStarted, queue.EventConsumerStopped,
+	}, ",")
+	if got := strings.Join(result.Steps, ","); got != want {
+		t.Fatalf("infrastructure event steps = %q, want %q", got, want)
+	}
+	if !result.Processed || result.JobID == "" || !strings.HasPrefix(result.Queue, "demo-infrastructure-events-") {
+		t.Fatalf("infrastructure event result = %#v, want processed result with job ID", result)
+	}
+}
+
 func TestQueueDemoRestart(t *testing.T) {
 	for _, connection := range []string{"redis", "rabbitmq"} {
 		t.Run(connection, func(t *testing.T) {

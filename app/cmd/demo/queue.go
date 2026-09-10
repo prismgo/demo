@@ -85,6 +85,8 @@ func (c *QueueCommand) Definition() *console.Definition {
 		"go run ./demo demo:queue events --connection=redis",
 		"go run ./demo demo:queue failed-event --connection=redis",
 		"go run ./demo demo:queue batch-events --connection=redis",
+		"go run ./demo demo:queue poison-event --connection=redis",
+		"go run ./demo demo:queue infrastructure-events --connection=rabbitmq",
 		"go run ./demo demo:queue encryption",
 		"go run ./demo demo:queue custom-driver",
 		"go run ./demo demo:queue errors",

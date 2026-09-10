@@ -29,6 +29,8 @@ func TestQueueDemoListShowsDocumentedScenariosAndConnections(t *testing.T) {
 		"strategy-envelope",
 		"unique-options",
 		"overlap-release",
+		"poison-event",
+		"infrastructure-events",
 		"rabbitmq",
 		"RabbitMQ Configuration",
 	} {

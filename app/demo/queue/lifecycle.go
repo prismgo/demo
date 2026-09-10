@@ -3,6 +3,7 @@ package queuedemo
 import (
 	"bytes"
 	"context"
+	"encoding/base64"
 	"errors"
 	"fmt"
 	"io"
@@ -12,6 +13,7 @@ import (
 
 	queuecommand "github.com/prismgo/framework/cmd/queue"
 	"github.com/prismgo/framework/console"
+	queuecontract "github.com/prismgo/framework/contracts/queue"
 	"github.com/prismgo/framework/queue"
 	"github.com/prismgo/framework/queue/payload"
 	"github.com/prismgo/framework/queue/state"
@@ -249,6 +251,106 @@ func runBatchEvents(ctx context.Context, manager *queue.Manager, connection stri
 		return Result{}, fmt.Errorf("queue demo batch-events on %s: got %v, want %v", connection, steps, want)
 	}
 	return Result{Case: "batch-events", Connection: connection, Queue: queueName, JobID: created.ID, Processed: true, Steps: steps}, nil
+}
+
+func runPoisonEnvelopeEvent(ctx context.Context, manager *queue.Manager, connection string) (Result, error) {
+	if connection != "redis" {
+		return Result{}, fmt.Errorf("queue demo poison-event requires redis, got %s", connection)
+	}
+	queueName := fmt.Sprintf("demo-poison-event-%d", time.Now().UnixNano())
+	queueConnection, err := manager.Queue(connection)
+	if err != nil {
+		return Result{}, fmt.Errorf("queue demo poison-event resolve %s: %w", connection, err)
+	}
+	if err := queueConnection.Clear(ctx, queueName); err != nil {
+		return Result{}, fmt.Errorf("queue demo poison-event initial clear on %s: %w", connection, err)
+	}
+
+	body := queuecontract.Payload("not-a-prismgo-envelope")
+	var observed queue.PoisonEnvelope
+	previous := queue.CurrentEventSink()
+	queue.UseEventSink(func(eventCtx context.Context, event queue.Event) {
+		if poison, ok := event.(queue.PoisonEnvelope); ok && poison.Queue == queueName {
+			observed = poison
+		}
+		if previous != nil {
+			previous(eventCtx, event)
+		}
+	})
+	defer queue.UseEventSink(previous)
+
+	if err := queueConnection.Push(ctx, queueName, body); err != nil {
+		return Result{}, fmt.Errorf("queue demo poison-event inject on %s: %w", connection, err)
+	}
+	_, popErr := queueConnection.Pop(ctx, []string{queueName}, queuecontract.PopNoWait)
+	if err := queueConnection.Clear(ctx, queueName); err != nil {
+		return Result{}, fmt.Errorf("queue demo poison-event cleanup on %s: %w", connection, err)
+	}
+	if !errors.Is(popErr, queue.ErrPoisonEnvelope) {
+		return Result{}, fmt.Errorf("queue demo poison-event pop on %s: got %v, want %w", connection, popErr, queue.ErrPoisonEnvelope)
+	}
+	wantBody := base64.StdEncoding.EncodeToString(body)
+	if observed.Name() != queue.EventPoisonEnvelope || observed.Connection != connection || observed.Driver != "redis" ||
+		observed.Action != queue.PoisonEnvelopeActionDiscard || observed.Encoding == "" || observed.BodyEncoding != "base64" ||
+		observed.BodyBase64 != wantBody || observed.BodySize != len(body) || observed.BodyTruncated || observed.Error == "" || observed.Timestamp.IsZero() {
+		return Result{}, fmt.Errorf("queue demo poison-event payload on %s = %#v", connection, observed)
+	}
+	steps := []string{observed.Name(), "action:discard", "encoding:" + observed.Encoding, "body:base64"}
+	return Result{Case: "poison-event", Connection: connection, Queue: queueName, Processed: true, Steps: steps}, nil
+}
+
+func runInfrastructureEvents(ctx context.Context, manager *queue.Manager, connection string) (Result, error) {
+	if connection != "rabbitmq" {
+		return Result{}, fmt.Errorf("queue demo infrastructure-events requires rabbitmq, got %s", connection)
+	}
+	runID := time.Now().UnixNano()
+	traceID := fmt.Sprintf("infrastructure-events-%d", runID)
+	queueName := fmt.Sprintf("demo-infrastructure-events-%d", runID)
+	jobs.ResetTrace(traceID)
+	defer jobs.TakeTrace(traceID)
+
+	observed := make(map[string]queue.InfrastructureEvent)
+	var mu sync.Mutex
+	previous := queue.CurrentEventSink()
+	queue.UseEventSink(func(eventCtx context.Context, event queue.Event) {
+		if infrastructure, ok := event.(queue.InfrastructureEvent); ok && infrastructure.Queue == queueName {
+			mu.Lock()
+			observed[infrastructure.Name()] = infrastructure
+			mu.Unlock()
+		}
+		if previous != nil {
+			previous(eventCtx, event)
+		}
+	})
+	defer queue.UseEventSink(previous)
+
+	jobID, err := manager.Dispatch(ctx, &jobs.WorkerJob{TraceID: traceID, Label: "infrastructure:handled"},
+		queue.OnConnection(connection), queue.OnQueue(queueName))
+	if err != nil {
+		return Result{}, fmt.Errorf("queue demo infrastructure-events dispatch on %s: %w", connection, err)
+	}
+	if err := queue.NewWorker(manager).Work(ctx, queue.WorkerOptions{
+		Connection: connection, Queues: []string{queueName}, Once: true,
+	}); err != nil {
+		return Result{}, fmt.Errorf("queue demo infrastructure-events worker on %s: %w", connection, err)
+	}
+
+	want := []string{queue.EventTopologyDeclared, queue.EventConsumerStarted, queue.EventConsumerStopped}
+	mu.Lock()
+	defer mu.Unlock()
+	for _, eventName := range want {
+		event, ok := observed[eventName]
+		if !ok {
+			return Result{}, fmt.Errorf("queue demo infrastructure-events on %s missing %s: %#v", connection, eventName, observed)
+		}
+		if event.Connection != connection || event.Driver != "rabbitmq" || event.Exchange == "" || event.Error != "" || event.Timestamp.IsZero() {
+			return Result{}, fmt.Errorf("queue demo infrastructure-events %s payload = %#v", eventName, event)
+		}
+	}
+	if steps := jobs.TakeTrace(traceID); !resultHasStep(steps, "infrastructure:handled") {
+		return Result{}, fmt.Errorf("queue demo infrastructure-events job trace on %s = %v", connection, steps)
+	}
+	return Result{Case: "infrastructure-events", Connection: connection, Queue: queueName, JobID: jobID, Processed: true, Steps: want}, nil
 }
 
 func runQueueManagementCommand(ctx context.Context, command console.Command, input queueWorkerInput) (string, error) {

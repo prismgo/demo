@@ -42,6 +42,8 @@ var scenarios = []Scenario{
 	{Name: "events", Section: "Lifecycle Events", Status: "implemented", Connections: []string{"redis", "rabbitmq"}, Requires: []string{"redis", "rabbitmq"}},
 	{Name: "failed-event", Section: "Lifecycle Events", Status: "implemented", Connections: []string{"redis", "rabbitmq"}, Requires: []string{"redis", "rabbitmq"}},
 	{Name: "batch-events", Section: "Lifecycle Events", Status: "implemented", Connections: []string{"redis", "rabbitmq"}, Requires: []string{"redis", "rabbitmq"}},
+	{Name: "poison-event", Section: "Lifecycle Events", Status: "implemented", Connections: []string{"redis"}, Requires: []string{"redis"}},
+	{Name: "infrastructure-events", Section: "Lifecycle Events", Status: "implemented", Connections: []string{"rabbitmq"}, Requires: []string{"rabbitmq"}},
 	{Name: "encryption", Section: "Encrypted Payloads", Status: "implemented", Connections: []string{"sync"}},
 	{Name: "custom-driver", Section: "Custom Drivers", Status: "implemented", Connections: []string{"sync"}},
 	{Name: "errors", Section: "Error Constants", Status: "implemented", Connections: []string{"sync"}},
