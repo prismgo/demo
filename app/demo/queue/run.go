@@ -57,14 +57,23 @@ func Run(ctx context.Context, manager *queue.Manager, caseName, connection strin
 	if caseName == "strategies" {
 		return runStrategies(ctx, manager, connection)
 	}
+	if caseName == "strategy-envelope" {
+		return runStrategyEnvelope(ctx, connection)
+	}
 	if caseName == "unique" {
 		return runUnique(ctx, manager, connection)
+	}
+	if caseName == "unique-options" {
+		return runUniqueDispatchOptions(ctx, connection)
 	}
 	if caseName == "debounce" {
 		return runDebounce(ctx, manager, connection)
 	}
 	if caseName == "middleware" {
 		return runMiddleware(ctx, manager, connection)
+	}
+	if caseName == "overlap-release" {
+		return runOverlapReleasePolicy(ctx, connection)
 	}
 	if caseName == "dispatch" {
 		return runDispatch(ctx, manager, connection)

@@ -26,6 +26,9 @@ func TestQueueDemoListShowsDocumentedScenariosAndConnections(t *testing.T) {
 		"implemented",
 		"sync,redis,rabbitmq",
 		"custom-driver",
+		"strategy-envelope",
+		"unique-options",
+		"overlap-release",
 		"rabbitmq",
 		"RabbitMQ Configuration",
 	} {

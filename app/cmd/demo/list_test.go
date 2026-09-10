@@ -22,8 +22,8 @@ func TestDemoListCommandShowsFeatureOverview(t *testing.T) {
 	for _, expected := range []string{
 		"PrismGo Framework: v0.2.2 (local workspace)",
 		"Feature", "Description", "Since", "Progress", "Remaining", "Status",
-		"Queues, jobs, and workers", "27/59", "in progress",
-		"Modules: 29 | Implemented: 28/87 | Planned: 56 | Manual: 3",
+		"Queues, jobs, and workers", "30/59", "in progress",
+		"Modules: 29 | Implemented: 31/87 | Planned: 53 | Manual: 3",
 		"go run ./demo demo:show <feature>",
 	} {
 		if !strings.Contains(output.String(), expected) {
@@ -132,9 +132,9 @@ func TestDemoShowCommandShowsFeatureDetails(t *testing.T) {
 		t.Fatalf("handle demo:show queue: %v", err)
 	}
 	for _, expected := range []string{
-		"Module: queue — 27/59 implemented — in progress",
+		"Module: queue — 30/59 implemented — in progress",
 		"Case", "Section", "Since", "Example", "Level", "Requires", "Status",
-		"basic-sync", "v0.1.0", "Entries: 27 | Implemented: 27 | Planned: 0 | Manual: 0",
+		"basic-sync", "v0.1.0", "Entries: 30 | Implemented: 30 | Planned: 0 | Manual: 0",
 	} {
 		if !strings.Contains(output.String(), expected) {
 			t.Fatalf("detail output does not contain %q:\n%s", expected, output.String())

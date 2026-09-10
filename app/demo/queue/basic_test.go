@@ -57,6 +57,25 @@ func TestQueueDemoStrategies(t *testing.T) {
 	}
 }
 
+func TestQueueDemoStrategyEnvelope(t *testing.T) {
+	manager := newSyncQueueManager(t)
+
+	result, err := Run(context.Background(), manager, "strategy-envelope", "sync")
+	if err != nil {
+		t.Fatalf("run strategy envelope queue scenario: %v", err)
+	}
+	want := []string{
+		"connection:option", "queue:option", "delay:2s", "limits:option",
+		"retry:option", "tags:option", "fail-on-timeout:provider", "silenced:provider",
+	}
+	if got := strings.Join(result.Steps, ","); got != strings.Join(want, ",") {
+		t.Fatalf("strategy envelope steps = %q, want %q", got, strings.Join(want, ","))
+	}
+	if !result.Processed || result.JobID == "" || !strings.HasPrefix(result.Queue, "demo-strategy-envelope-") {
+		t.Fatalf("strategy envelope result = %#v, want processed result with job ID", result)
+	}
+}
+
 func TestQueueDemoUnique(t *testing.T) {
 	installMemoryCache(t)
 	manager := newSyncQueueManager(t)
@@ -70,6 +89,23 @@ func TestQueueDemoUnique(t *testing.T) {
 	}
 	if !result.Processed || result.JobID == "" || !strings.HasPrefix(result.Queue, "demo-unique-") {
 		t.Fatalf("unexpected result: %#v", result)
+	}
+}
+
+func TestQueueDemoUniqueDispatchOptions(t *testing.T) {
+	manager := newSyncQueueManager(t)
+
+	result, err := Run(context.Background(), manager, "unique-options", "sync")
+	if err != nil {
+		t.Fatalf("run unique dispatch options queue scenario: %v", err)
+	}
+	for _, want := range []string{"key:option", "ttl:45s", "via:memory", "until-processing:true", "duplicate:rejected"} {
+		if !containsStep(result.Steps, want) {
+			t.Fatalf("unique dispatch option steps = %v, want step %q", result.Steps, want)
+		}
+	}
+	if !result.Processed || result.JobID == "" || !strings.HasPrefix(result.Queue, "demo-unique-options-") {
+		t.Fatalf("unique dispatch options result = %#v, want processed result with job ID", result)
 	}
 }
 
@@ -97,6 +133,22 @@ func TestQueueDemoMiddleware(t *testing.T) {
 	}
 	if !result.Processed || result.JobID == "" || !strings.HasPrefix(result.Queue, "demo-middleware-") {
 		t.Fatalf("unexpected result: %#v", result)
+	}
+}
+
+func TestQueueDemoOverlapReleasePolicy(t *testing.T) {
+	manager := newSyncQueueManager(t)
+
+	result, err := Run(context.Background(), manager, "overlap-release", "sync")
+	if err != nil {
+		t.Fatalf("run overlap release queue scenario: %v", err)
+	}
+	want := []string{"first:locked", "second:released-after-25s", "first:unlocked"}
+	if got := strings.Join(result.Steps, ","); got != strings.Join(want, ",") {
+		t.Fatalf("overlap release steps = %q, want %q", got, strings.Join(want, ","))
+	}
+	if !result.Processed || result.JobID != "" || result.Queue != "demo-overlap-release" {
+		t.Fatalf("overlap release result = %#v, want processed middleware result", result)
 	}
 }
 

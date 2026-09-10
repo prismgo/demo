@@ -35,11 +35,11 @@ func TestCatalogEntries(t *testing.T) {
 	if got := Filter("redis", LevelIntegration, StatusPlanned); len(got) != 1 {
 		t.Fatalf("redis integration filter returned %d entries, want 1", len(got))
 	}
-	if got := Filter("queue", "", StatusImplemented); len(got) != 27 {
-		t.Fatalf("implemented queue entries = %d, want 27", len(got))
+	if got := Filter("queue", "", StatusImplemented); len(got) != 30 {
+		t.Fatalf("implemented queue entries = %d, want 30", len(got))
 	}
-	if got := Filter("queue", "", StatusPlanned); len(got) != 32 {
-		t.Fatalf("planned queue entries = %d, want 32", len(got))
+	if got := Filter("queue", "", StatusPlanned); len(got) != 29 {
+		t.Fatalf("planned queue entries = %d, want 29", len(got))
 	}
 }
 
@@ -53,8 +53,8 @@ func TestCatalogFeatureSummaries(t *testing.T) {
 	if !ok {
 		t.Fatal("SummaryFor(queue) found = false")
 	}
-	if queue.Implemented != 27 || queue.Planned != 32 || queue.Manual != 0 || queue.Total != 59 || queue.Remaining != 32 {
-		t.Fatalf("queue summary = %#v, want implemented=27 planned=32 manual=0 total=59 remaining=32", queue)
+	if queue.Implemented != 30 || queue.Planned != 29 || queue.Manual != 0 || queue.Total != 59 || queue.Remaining != 29 {
+		t.Fatalf("queue summary = %#v, want implemented=30 planned=29 manual=0 total=59 remaining=29", queue)
 	}
 	if queue.Status != FeatureStatusInProgress || queue.Since != SinceInitial {
 		t.Fatalf("queue status/since = %q/%q, want %q/%q", queue.Status, queue.Since, FeatureStatusInProgress, SinceInitial)
