@@ -8,7 +8,7 @@ import (
 
 func TestExtensionsIncludeRabbitMQProvider(t *testing.T) {
 	exts := Extensions()
-	if got, want := len(exts), 2; got != want {
+	if got, want := len(exts), 3; got != want {
 		t.Fatalf("len(Extensions()) = %d, want %d", got, want)
 	}
 	named, ok := exts[1].(pcontract.NamedProvider)
@@ -17,5 +17,12 @@ func TestExtensionsIncludeRabbitMQProvider(t *testing.T) {
 	}
 	if got, want := named.Name(), "prismgo.extension.rabbitmq"; got != want {
 		t.Fatalf("Extensions()[1].Name() = %q, want %q", got, want)
+	}
+	named, ok = exts[2].(pcontract.NamedProvider)
+	if !ok {
+		t.Fatalf("Extensions()[2] type = %T, want provider.NamedProvider", exts[2])
+	}
+	if got, want := named.Name(), "prismgo.extension.oss"; got != want {
+		t.Fatalf("Extensions()[2].Name() = %q, want %q", got, want)
 	}
 }

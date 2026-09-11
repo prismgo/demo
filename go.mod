@@ -5,6 +5,7 @@ go 1.25.0
 require (
 	github.com/gin-gonic/gin v1.12.0
 	github.com/prismgo/framework v0.2.3-0.20260911074405-34e228c170c2
+	github.com/prismgo/oss v0.0.0
 	github.com/prismgo/rabbitmq v0.0.0
 	github.com/prismgo/sqlite v0.0.0
 	github.com/redis/go-redis/v9 v9.22.0
@@ -12,6 +13,8 @@ require (
 )
 
 replace github.com/prismgo/framework => ../framework
+
+replace github.com/prismgo/oss => ../ext/oss
 
 replace github.com/prismgo/rabbitmq => ../ext/rabbitmq
 
