@@ -224,6 +224,7 @@ func runRabbitMQRetryAfter(ctx context.Context, manager *queue.Manager, connecti
 	if err != nil {
 		return Result{}, fmt.Errorf("queue demo rabbitmq-retry-after manager: %w", err)
 	}
+	extendRabbitMQ(rejected)
 	defer rejected.Close() //nolint:errcheck // best-effort cleanup of the rejected manager
 	_, err = rejected.Queue("rabbitmq")
 	if !errors.Is(err, queue.ErrUnsupportedRetryAfter) {

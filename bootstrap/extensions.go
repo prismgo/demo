@@ -2,6 +2,7 @@ package bootstrap
 
 import (
 	"github.com/prismgo/framework/contracts/provider"
+	"github.com/prismgo/rabbitmq"
 	"github.com/prismgo/sqlite"
 )
 
@@ -9,5 +10,6 @@ import (
 func Extensions() []provider.ServiceProvider {
 	return []provider.ServiceProvider{
 		sqlite.ServiceProvider{},
+		rabbitmq.ServiceProvider{},
 	}
 }

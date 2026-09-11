@@ -14,7 +14,7 @@ import (
 	"github.com/prismgo/framework/encryption"
 	"github.com/prismgo/framework/queue"
 	"github.com/prismgo/framework/queue/payload"
-	rabbitmqdriver "github.com/prismgo/framework/queue/rabbitmq"
+	"github.com/prismgo/rabbitmq"
 
 	jobs "prismgo-demo/app/jobs/queuedemo"
 )
@@ -176,10 +176,10 @@ func runRabbitMQBoundaries(ctx context.Context, manager *queue.Manager, connecti
 	if connection != "rabbitmq" {
 		return Result{}, fmt.Errorf("queue demo rabbitmq requires rabbitmq, got %s", connection)
 	}
-	if got := rabbitmqdriver.NormalizeQueues(nil); len(got) != 1 || got[0] != "default" {
+	if got := rabbitmq.NormalizeQueues(nil); len(got) != 1 || got[0] != "default" {
 		return Result{}, fmt.Errorf("queue demo rabbitmq default queue: %v", got)
 	}
-	if got := rabbitmqdriver.SanitizeDelayBuckets([]time.Duration{-time.Second, 2 * time.Second}); len(got) != 1 || got[0] != 2*time.Second {
+	if got := rabbitmq.SanitizeDelayBuckets([]time.Duration{-time.Second, 2 * time.Second}); len(got) != 1 || got[0] != 2*time.Second {
 		return Result{}, fmt.Errorf("queue demo rabbitmq delay buckets: %v", got)
 	}
 	result, err := runTransportBoundaries(ctx, manager, connection, "demo-rabbitmq")
@@ -188,6 +188,12 @@ func runRabbitMQBoundaries(ctx context.Context, manager *queue.Manager, connecti
 	}
 	result.Steps = append([]string{"config:default-queue", "config:delay-buckets"}, result.Steps...)
 	return result, nil
+}
+
+func extendRabbitMQ(m *queue.Manager) {
+	m.Extend("rabbitmq", func() (queuecontract.Connector, error) {
+		return rabbitmq.Connector{}, nil
+	})
 }
 
 func runTransportBoundaries(ctx context.Context, manager *queue.Manager, connection, prefix string) (Result, error) {
