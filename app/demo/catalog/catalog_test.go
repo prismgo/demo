@@ -12,8 +12,8 @@ func TestCatalogEntries(t *testing.T) {
 	if err := Validate(entries); err != nil {
 		t.Fatalf("validate catalog entries: %v", err)
 	}
-	if len(entries) != 247 {
-		t.Fatalf("catalog has %d entries, want 247", len(entries))
+	if len(entries) != 476 {
+		t.Fatalf("catalog has %d entries, want 476", len(entries))
 	}
 	if item, ok := Find("commands", "list"); !ok || item.Status != StatusImplemented {
 		t.Fatalf("implemented demo:list entry = %#v, %v", item, ok)
@@ -64,6 +64,78 @@ func TestCatalogEntries(t *testing.T) {
 	} {
 		if item, ok := Find("cache", slug); !ok || item.Status != StatusPlanned {
 			t.Fatalf("cache catalog entry %q = %#v, %v; want planned", slug, item, ok)
+		}
+	}
+	for _, slug := range []string{
+		"architecture", "manual-registration", "struct-registration", "closure-listener",
+		"wildcard-prefix", "wildcard-all", "wildcard-exact-operations",
+		"event-definition", "event-naming", "payload-boundaries",
+		"struct-listener", "listener-func", "propagation",
+		"queue-prerequisites", "should-queue", "queued-wrapper", "queued-sync", "queued-redis",
+		"queue-routing-options", "queue-retry-options", "event-factory", "event-factory-validation", "raw-queued-event",
+		"dispatch", "dispatch-isolation", "nil-dispatch",
+		"subscriber", "subscriber-registration", "facade", "async", "async-durability",
+		"app-lifecycle", "provider-lifecycle", "server-lifecycle", "request-lifecycle", "request-finished-ordering",
+		"console-lifecycle", "vendor-publish-event",
+		"listener-error-isolation", "listener-panic-isolation", "async-failure-isolation", "queued-failure-handling", "consistency-boundary",
+		"isolated-testing", "queued-sync-testing", "queued-worker-testing",
+		"event-interface", "listener-interface", "listener-func-interface", "dispatcher-interface",
+		"subscriber-interface", "should-queue-interface", "async-listener-interface", "queue-options-interface",
+		"provider-register", "provider-boot", "laravel-compatibility",
+	} {
+		if item, ok := Find("event", slug); !ok || item.Status != StatusPlanned {
+			t.Fatalf("event catalog entry %q = %#v, %v; want planned", slug, item, ok)
+		}
+	}
+	for _, slug := range []string{
+		"architecture", "config", "store-resolution", "memory-store", "redis-store", "config-registration",
+		"auto-initialization", "quick-start", "explicit-limiter",
+		"named-registration", "named-lookup", "unregistered-pass-through", "multi-rule-counters", "multi-rule-block",
+		"limit-contract", "every", "per-second", "per-minute", "per-minutes", "per-hour", "per-day", "none",
+		"by", "fallback-key", "after-count", "after-skip", "after-headers", "custom-response", "result-contract",
+		"throttle", "throttle-for", "disabled-rule", "default-response", "success-headers", "over-limit-headers", "tightest-headers", "route-group",
+		"route-compatibility", "facade", "instance",
+		"hit", "hit-default-decay", "increment", "increment-default", "decrement", "decrement-default",
+		"attempts", "attempts-missing", "too-many-attempts", "non-positive-limit", "expired-window",
+		"remaining", "remaining-floor", "available-in", "available-in-elapsed", "reset-attempts", "clear",
+		"attempt-success", "attempt-blocked", "attempt-error", "attempt-nil", "clean-key",
+		"hashed-key", "unhashed-key", "manual-key", "key-design",
+		"cache-layout", "fixed-window", "middleware-key",
+		"cache-errors", "redis-errors", "counter-type-error", "error-policy", "laravel-compatibility",
+	} {
+		if item, ok := Find("ratelimit", slug); !ok || item.Status != StatusPlanned {
+			t.Fatalf("ratelimit catalog entry %q = %#v, %v; want planned", slug, item, ok)
+		}
+	}
+	for _, slug := range []string{
+		"architecture", "config", "single-driver", "daily-driver", "stderr-driver", "null-driver",
+		"top-level-config", "channel-config", "deployment-config", "stack", "stack-channel-isolation", "levels",
+		"facade", "formatted-facade", "fatal", "with-field", "with-fields", "with-error", "error-stacktrace",
+		"context-extractor", "context-noop", "named-channel", "missing-channel", "channel-context",
+		"resolve-manager", "default-name", "driver-contract", "custom-driver", "custom-driver-replacement",
+		"custom-formatter", "formatter-params", "line-formatter", "text-formatter", "json-formatter",
+		"manual-manager", "provider-lifecycle", "provider-cleanup", "resource-cleanup", "closed-writes", "global-logrus",
+	} {
+		if item, ok := Find("logger", slug); !ok || item.Status != StatusPlanned {
+			t.Fatalf("logger catalog entry %q = %#v, %v; want planned", slug, item, ok)
+		}
+	}
+	for _, slug := range []string{
+		"architecture", "requirements", "cron-command", "signal-shutdown", "registration", "deployment",
+		"timezone", "debug-logging", "overlap-cache", "exception-config",
+		"command", "command-validation", "call", "every", "second-frequencies", "minute-frequencies",
+		"hourly", "hourly-at", "hour-steps", "daily", "daily-at", "twice-daily", "twice-daily-at", "at",
+		"weekly", "weekly-on", "weekday-groups", "named-weekdays", "days",
+		"monthly", "monthly-on", "twice-monthly", "last-day-of-month", "days-of-month",
+		"quarterly", "quarterly-on", "yearly", "yearly-on",
+		"without-overlapping", "cross-process-overlap", "start", "stop", "summary",
+		"task-error", "task-panic", "task-success", "exception-reporter",
+		"fixed-interval-model", "calendar-model", "immediate-run", "execution-concurrency",
+		"time-parsing", "offset-parsing", "weekday-parsing",
+		"timer-type", "resolved-command", "command-resolver", "new-schedule", "name", "description", "defaults", "standalone",
+	} {
+		if item, ok := Find("timer", slug); !ok || item.Status != StatusPlanned {
+			t.Fatalf("timer catalog entry %q = %#v, %v; want planned", slug, item, ok)
 		}
 	}
 	for _, slug := range []string{
@@ -144,6 +216,50 @@ func TestCatalogFeatureSummaries(t *testing.T) {
 	}
 	if translation.Status != FeatureStatusPlanned || translation.Since != SinceInitial {
 		t.Fatalf("translation status/since = %q/%q, want %q/%q", translation.Status, translation.Since, FeatureStatusPlanned, SinceInitial)
+	}
+
+	event, ok := SummaryFor("event")
+	if !ok {
+		t.Fatal("SummaryFor(event) found = false")
+	}
+	if event.Implemented != 0 || event.Planned != 57 || event.Manual != 0 || event.Total != 57 || event.Remaining != 57 {
+		t.Fatalf("event summary = %#v, want implemented=0 planned=57 manual=0 total=57 remaining=57", event)
+	}
+	if event.Status != FeatureStatusPlanned || event.Since != SinceInitial {
+		t.Fatalf("event status/since = %q/%q, want %q/%q", event.Status, event.Since, FeatureStatusPlanned, SinceInitial)
+	}
+
+	logger, ok := SummaryFor("logger")
+	if !ok {
+		t.Fatal("SummaryFor(logger) found = false")
+	}
+	if logger.Implemented != 0 || logger.Planned != 40 || logger.Manual != 0 || logger.Total != 40 || logger.Remaining != 40 {
+		t.Fatalf("logger summary = %#v, want implemented=0 planned=40 manual=0 total=40 remaining=40", logger)
+	}
+	if logger.Status != FeatureStatusPlanned || logger.Since != SinceInitial {
+		t.Fatalf("logger status/since = %q/%q, want %q/%q", logger.Status, logger.Since, FeatureStatusPlanned, SinceInitial)
+	}
+
+	timer, ok := SummaryFor("timer")
+	if !ok {
+		t.Fatal("SummaryFor(timer) found = false")
+	}
+	if timer.Implemented != 0 || timer.Planned != 62 || timer.Manual != 0 || timer.Total != 62 || timer.Remaining != 62 {
+		t.Fatalf("timer summary = %#v, want implemented=0 planned=62 manual=0 total=62 remaining=62", timer)
+	}
+	if timer.Status != FeatureStatusPlanned || timer.Since != SinceInitial {
+		t.Fatalf("timer status/since = %q/%q, want %q/%q", timer.Status, timer.Since, FeatureStatusPlanned, SinceInitial)
+	}
+
+	ratelimit, ok := SummaryFor("ratelimit")
+	if !ok {
+		t.Fatal("SummaryFor(ratelimit) found = false")
+	}
+	if ratelimit.Implemented != 0 || ratelimit.Planned != 74 || ratelimit.Manual != 0 || ratelimit.Total != 74 || ratelimit.Remaining != 74 {
+		t.Fatalf("ratelimit summary = %#v, want implemented=0 planned=74 manual=0 total=74 remaining=74", ratelimit)
+	}
+	if ratelimit.Status != FeatureStatusPlanned || ratelimit.Since != SinceInitial {
+		t.Fatalf("ratelimit status/since = %q/%q, want %q/%q", ratelimit.Status, ratelimit.Since, FeatureStatusPlanned, SinceInitial)
 	}
 
 	commands, ok := SummaryFor("commands")

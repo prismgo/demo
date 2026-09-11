@@ -41,7 +41,7 @@ The Demo project has four main responsibilities:
 
 ## Catalog Progress Map
 
-The catalog currently covers **29 modules and 247 entries**: 60 implemented, 184 planned, and 3 manually verified. The table below is a snapshot taken when this README was updated. `app/demo/catalog/` is the single source of truth; use `demo:list` for live progress.
+The catalog currently covers **29 modules and 476 entries**: 60 implemented, 413 planned, and 3 manually verified. The table below is a snapshot taken when this README was updated. `app/demo/catalog/` is the single source of truth; use `demo:list` for live progress.
 
 | Module | Coverage | Progress | Remaining | Status |
 |---|---|---:|---:|---|
@@ -53,7 +53,7 @@ The catalog currently covers **29 modules and 247 entries**: 60 implemented, 184
 | `cookie` | Cookie values and queued writes | 0/1 | 1 | Planned |
 | `database` | Database connections and pools | 0/1 | 1 | Planned |
 | `encryption` | Application data encryption | 0/1 | 1 | Planned |
-| `event` | Synchronous, asynchronous, and queued events | 0/1 | 1 | Planned |
+| `event` | Synchronous, asynchronous, and queued events | 0/57 | 57 | Planned |
 | `exception` | Exception reporting and rendering | 0/1 | 1 | Planned |
 | `facade` | Framework facade access | 0/1 | 1 | Planned |
 | `filesystem` | Local, public, and cloud filesystems | 0/67 | 67 | Planned |
@@ -62,9 +62,9 @@ The catalog currently covers **29 modules and 247 entries**: 60 implemented, 184
 | `installation` | Application installation workflow | 0/1 | — | Manual |
 | `lens` | Lens development workflow | 0/1 | — | Manual |
 | `lifecycle` | Application bootstrap and shutdown | 0/1 | 1 | Planned |
-| `logger` | Multi-channel application logging | 0/1 | 1 | Planned |
+| `logger` | Multi-channel application logging | 0/40 | 40 | Planned |
 | `queue` | Queues, jobs, and workers | 59/59 | 0 | Implemented |
-| `ratelimit` | Request and action rate limiting | 0/1 | 1 | Planned |
+| `ratelimit` | Request and action rate limiting | 0/74 | 74 | Planned |
 | `redis` | Redis connections and operations | 0/1 | 1 | Planned |
 | `route` | HTTP route registration | 0/1 | 1 | Planned |
 | `schema` | Database schema and migration builder | 0/1 | 1 | Planned |
@@ -72,7 +72,7 @@ The catalog currently covers **29 modules and 247 entries**: 60 implemented, 184
 | `session` | Server-side session storage | 0/1 | 1 | Planned |
 | `starter` | Generated application starter | 0/1 | — | Manual |
 | `support` | General framework helpers | 0/1 | 1 | Planned |
-| `timer` | Scheduled task definitions | 0/1 | 1 | Planned |
+| `timer` | Scheduled task definitions | 0/62 | 62 | Planned |
 | `translation` | Application translation and pluralization | 0/39 | 39 | Planned |
 
 From the workspace root, inspect the live map and entry details with:
