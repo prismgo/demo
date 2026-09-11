@@ -31,7 +31,7 @@ Go 风格必须在实现阶段就地保证，不得留到独立 code review 才�
 ./demo/dev init
 ```
 
-该命令会创建根目录的 Agent 指令链接，并把 `demo/.agents/skills/` 中的项目 skills（当前包含 `dev-harness-lite` 与 `code-review`）软链到根目录的 `.agents/skills/` 与 `.claude/skills/`；随后克隆缺失的 `framework/` 与 `docs/` 仓库，将 `demo/.env.example` 复制为缺失的 `demo/.env`，创建或更新本地 `go.work`，并下载框架 Go 依赖。已有文件和 `demo/.env` 不会被覆盖。
+该命令会创建根目录的 Agent 指令链接，并把 `demo/.agents/skills/` 中的项目 skills（当前包含 `dev-harness-lite` 与 `code-review`）软链到根目录的 `.agents/skills/` 与 `.claude/skills/`；随后克隆缺失的 `framework/` 与 `docs/` 仓库，将 `demo/.env.example` 复制为缺失的 `demo/.env`，为仍为空的 `APP_KEY` 生成本地随机密钥，创建或更新本地 `go.work`，并下载框架 Go 依赖。已有非空配置不会被覆盖。
 
 初始化完成后，从项目根目录启动 Demo HTTP 服务器：
 

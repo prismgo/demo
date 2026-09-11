@@ -24,6 +24,9 @@ func TestCatalogEntries(t *testing.T) {
 	if item, ok := Find("queue", "batch-events"); !ok || item.Since != SinceInitial {
 		t.Fatalf("planned demo framework version = %#v, %v; want %s", item, ok, SinceInitial)
 	}
+	if item, ok := Find("horizon", "list"); !ok || item.Status != StatusImplemented || item.Example != "./demo/dev test-horizon" {
+		t.Fatalf("Horizon live queue entry = %#v, %v; want implemented ./demo/dev test-horizon", item, ok)
+	}
 	for _, slug := range []string{
 		"driver-prerequisites", "config", "payload-encoding", "sync-connection",
 		"failed-store", "batch-store", "restart-store",
@@ -205,6 +208,17 @@ func TestCatalogFeatureSummaries(t *testing.T) {
 	}
 	if filesystem.Status != FeatureStatusInProgress || filesystem.Since != SinceInitial {
 		t.Fatalf("filesystem status/since = %q/%q, want %q/%q", filesystem.Status, filesystem.Since, FeatureStatusInProgress, SinceInitial)
+	}
+
+	horizonSummary, ok := SummaryFor("horizon")
+	if !ok {
+		t.Fatal("SummaryFor(horizon) found = false")
+	}
+	if horizonSummary.Implemented != 1 || horizonSummary.Planned != 0 || horizonSummary.Total != 1 || horizonSummary.Remaining != 0 {
+		t.Fatalf("horizon summary = %#v, want implemented=1 planned=0 total=1 remaining=0", horizonSummary)
+	}
+	if horizonSummary.Status != FeatureStatusImplemented {
+		t.Fatalf("horizon status = %q, want %q", horizonSummary.Status, FeatureStatusImplemented)
 	}
 
 	translation, ok := SummaryFor("translation")

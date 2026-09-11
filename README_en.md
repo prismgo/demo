@@ -41,7 +41,7 @@ The Demo project has four main responsibilities:
 
 ## Catalog Progress Map
 
-The catalog currently covers **29 modules and 476 entries**: 61 implemented, 412 planned, and 3 manually verified. The table below is a snapshot taken when this README was updated. `app/demo/catalog/` is the single source of truth; use `demo:list` for live progress.
+The catalog currently covers **29 modules and 476 entries**: 62 implemented, 411 planned, and 3 manually verified. The table below is a snapshot taken when this README was updated. `app/demo/catalog/` is the single source of truth; use `demo:list` for live progress.
 
 | Module | Coverage | Progress | Remaining | Status |
 |---|---|---:|---:|---|
@@ -57,7 +57,7 @@ The catalog currently covers **29 modules and 476 entries**: 61 implemented, 412
 | `exception` | Exception reporting and rendering | 0/1 | 1 | Planned |
 | `facade` | Framework facade access | 0/1 | 1 | Planned |
 | `filesystem` | Local, public, and cloud filesystems | 1/67 | 66 | In progress |
-| `horizon` | Queue monitoring and worker management | 0/1 | 1 | Planned |
+| `horizon` | Queue monitoring and worker management | 1/1 | 0 | Implemented |
 | `http-server` | HTTP server startup and lifecycle | 0/1 | 1 | Planned |
 | `installation` | Application installation workflow | 0/1 | — | Manual |
 | `lens` | Lens development workflow | 0/1 | — | Manual |
@@ -107,7 +107,7 @@ git clone git@github.com:prismgo/demo.git demo
 `init` automatically completes the remaining setup:
 
 1. Clone missing `framework/` and `docs/` repositories alongside `demo/`.
-2. Create `demo/.env` when absent without overwriting an existing file.
+2. Create `demo/.env` when absent and generate a random local key when `APP_KEY` is still empty; existing non-empty configuration is preserved.
 3. Create or update `go.work` with `demo/` and `framework/`.
 4. Create workspace Agent-instruction and project-skill links.
 5. Download the Framework's Go dependencies.
@@ -159,6 +159,7 @@ If no external services are needed, skip `doctor` and `dev up` and run the Catal
 | `./demo/dev logs [service]` | Follow logs for all services or one service |
 | `./demo/dev env` | Regenerate and print `demo/.dev/runtime/test.env` |
 | `./demo/dev test [go-test-args]` | Start dependencies and run selected integration tests in `framework/` |
+| `./demo/dev test-horizon` | Start Redis and RabbitMQ and run the real Horizon dual-queue consumption test |
 | `./demo/dev down` | Stop services while retaining local data |
 | `./demo/dev reset [--yes]` | Delete all local test data and rebuild the environment; use with care |
 
@@ -176,7 +177,8 @@ Load the generated test connection variables, or run framework integration tests
 ./demo/dev env
 source demo/.dev/runtime/test.env
 
-./demo/dev test ./queue/... ./horizon/...
+./demo/dev test ./queue/...
+./demo/dev test-horizon
 ./demo/dev down
 ```
 

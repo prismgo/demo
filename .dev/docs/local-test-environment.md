@@ -32,6 +32,7 @@
 | `./demo/dev logs [service]` | 持续查看全部或指定服务日志 |
 | `./demo/dev env` | 重新生成并输出测试环境变量 |
 | `./demo/dev test [go-test-args]` | 启动环境并在 `framework/` 中执行测试 |
+| `./demo/dev test-horizon` | 只启动 Redis 与 RabbitMQ，并在 `demo/` 中执行 Horizon 真实双队列消费测试 |
 | `./demo/dev down` | 停止容器，保留数据库和队列数据 |
 | `./demo/dev reset` | 删除全部测试数据并重新创建；需要交互确认 |
 
@@ -79,11 +80,19 @@ source demo/.dev/runtime/test.env
 - `PRISMGO_RABBITMQ_TEST_URL`
 - `PRISMGO_RABBITMQ_MANAGEMENT_URL`（仅用于需要 broker 端故障注入的 Demo 集成测试）
 
-现有 RabbitMQ 集成测试已经读取 `PRISMGO_RABBITMQ_TEST_URL`。可直接运行：
+框架集成测试可以通过统一入口运行，例如：
 
 ```bash
-./demo/dev test ./queue/... ./horizon/...
+./demo/dev test ./queue/...
 ```
+
+Horizon 的本地端到端测试会同时向真实 Redis 与 RabbitMQ 队列投递任务，通过 Horizon worker 各消费一次，并把指标快照写入真实 Redis：
+
+```bash
+./demo/dev test-horizon
+```
+
+直接运行 `go test ./app/demo/horizon` 时，如果 Redis 或 RabbitMQ 的测试环境变量缺失，测试会明确跳过；`test-horizon` 入口会负责启动两项依赖并加载这些变量。
 
 ## Agent 测试规则
 

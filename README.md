@@ -40,7 +40,7 @@ Demo 项目主要承担四件事：
 
 ## Catalog 进度地图
 
-Catalog 当前覆盖 **29 个模块、476 个条目**：已实现 61 个、计划中 412 个、手工验证 3 个。以下是 README 更新时的快照；`app/demo/catalog/` 是唯一数据源，实时进度以 `demo:list` 输出为准。
+Catalog 当前覆盖 **29 个模块、476 个条目**：已实现 62 个、计划中 411 个、手工验证 3 个。以下是 README 更新时的快照；`app/demo/catalog/` 是唯一数据源，实时进度以 `demo:list` 输出为准。
 
 | 模块 | 覆盖范围 | 进度 | 剩余 | 状态 |
 |---|---|---:|---:|---|
@@ -56,7 +56,7 @@ Catalog 当前覆盖 **29 个模块、476 个条目**：已实现 61 个、计�
 | `exception` | 异常报告与渲染 | 0/1 | 1 | 计划中 |
 | `facade` | 框架 Facade 访问 | 0/1 | 1 | 计划中 |
 | `filesystem` | 本地、公共与云文件系统 | 1/67 | 66 | 进行中 |
-| `horizon` | 队列监控与 Worker 管理 | 0/1 | 1 | 计划中 |
+| `horizon` | 队列监控与 Worker 管理 | 1/1 | 0 | 已实现 |
 | `http-server` | HTTP 服务启动与生命周期 | 0/1 | 1 | 计划中 |
 | `installation` | 应用安装流程 | 0/1 | — | 手工验证 |
 | `lens` | Lens 开发流程 | 0/1 | — | 手工验证 |
@@ -106,7 +106,7 @@ git clone git@github.com:prismgo/demo.git demo
 `init` 会自动完成剩余工作：
 
 1. 将缺失的 `framework/` 和 `docs/` 克隆到 `demo/` 的同级目录。
-2. 在缺失时创建 `demo/.env`，已有文件不会被覆盖。
+2. 在缺失时创建 `demo/.env`，并为仍为空的 `APP_KEY` 生成本地随机密钥；已有非空配置不会被覆盖。
 3. 创建或更新 `go.work`，加入 `demo/` 和 `framework/`。
 4. 创建工作区 Agent 指令与项目 skill 链接。
 5. 下载 Framework 的 Go 依赖。
@@ -158,6 +158,7 @@ go run ./demo serve            # 启动 Demo HTTP 服务
 | `./demo/dev logs [service]` | 持续查看全部或指定服务的日志 |
 | `./demo/dev env` | 重新生成并输出 `demo/.dev/runtime/test.env` |
 | `./demo/dev test [go-test-args]` | 启动依赖，并在 `framework/` 中运行指定集成测试 |
+| `./demo/dev test-horizon` | 启动 Redis 与 RabbitMQ，运行 Horizon 双队列真实消费测试 |
 | `./demo/dev down` | 停止服务但保留本地数据 |
 | `./demo/dev reset [--yes]` | 删除全部本地测试数据并重建环境；请谨慎使用 |
 
@@ -175,7 +176,8 @@ go run ./demo serve            # 启动 Demo HTTP 服务
 ./demo/dev env
 source demo/.dev/runtime/test.env
 
-./demo/dev test ./queue/... ./horizon/...
+./demo/dev test ./queue/...
+./demo/dev test-horizon
 ./demo/dev down
 ```
 

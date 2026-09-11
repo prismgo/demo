@@ -105,10 +105,21 @@ ensure_repository() {
 ensure_env_file() {
     local env_file="${demo_root}/.env"
 
-    if [[ -e "${env_file}" ]]; then
+    if [[ ! -e "${env_file}" ]]; then
+        cp "${demo_root}/.env.example" "${env_file}"
+    fi
+}
+
+ensure_application_key() {
+    local env_file="${demo_root}/.env"
+    local encoded_key
+
+    if ! grep -Fxq 'APP_KEY=' "${env_file}"; then
         return
     fi
-    cp "${demo_root}/.env.example" "${env_file}"
+
+    encoded_key="$(head -c 32 /dev/urandom | base64 | tr -d '\n')"
+    sed -i "s|^APP_KEY=$|APP_KEY=base64:${encoded_key}|" "${env_file}"
 }
 
 ensure_go_workspace() {
@@ -144,6 +155,7 @@ if [[ "${1:-}" == "init" ]]; then
     ensure_repository framework git@github.com:prismgo/framework.git
     ensure_repository docs git@github.com:prismgo/docs.git
     ensure_env_file
+    ensure_application_key
     ensure_go_workspace
     install_framework_dependencies
     exit 0

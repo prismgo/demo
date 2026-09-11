@@ -5,14 +5,18 @@ go 1.25.0
 require (
 	github.com/gin-gonic/gin v1.12.0
 	github.com/prismgo/framework v0.2.3-0.20260911074405-34e228c170c2
+	github.com/prismgo/horizon v0.0.0
 	github.com/prismgo/oss v0.0.0
 	github.com/prismgo/rabbitmq v0.0.0
 	github.com/prismgo/sqlite v0.0.0
+	github.com/rabbitmq/amqp091-go v1.14.0
 	github.com/redis/go-redis/v9 v9.22.0
 	gorm.io/gorm v1.31.2
 )
 
 replace github.com/prismgo/framework => ../framework
+
+replace github.com/prismgo/horizon => ../ext/horizon
 
 replace github.com/prismgo/oss => ../ext/oss
 
@@ -67,7 +71,6 @@ require (
 	github.com/prometheus/procfs v0.19.2 // indirect
 	github.com/quic-go/qpack v0.6.0 // indirect
 	github.com/quic-go/quic-go v0.59.1 // indirect
-	github.com/rabbitmq/amqp091-go v1.14.0 // indirect
 	github.com/remyoudompheng/bigfft v0.0.0-20230129092748-24d4a6f8daec // indirect
 	github.com/sagikazarmark/locafero v0.11.0 // indirect
 	github.com/sirupsen/logrus v1.10.2 // indirect

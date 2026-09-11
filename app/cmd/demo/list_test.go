@@ -23,7 +23,7 @@ func TestDemoListCommandShowsFeatureOverview(t *testing.T) {
 		"PrismGo Framework: v0.2.2 (local workspace)",
 		"Feature", "Description", "Since", "Progress", "Remaining", "Status",
 		"Queues, jobs, and workers", "59/59", "implemented",
-		"Modules: 29 | Implemented: 61/476 | Planned: 412 | Manual: 3",
+		"Modules: 29 | Implemented: 62/476 | Planned: 411 | Manual: 3",
 		"go run ./demo demo:show <feature>",
 	} {
 		if !strings.Contains(output.String(), expected) {
@@ -52,8 +52,8 @@ func TestDemoListCommandJSONAndFeatureStatusFilter(t *testing.T) {
 	if result.Framework != "v0.2.2" {
 		t.Fatalf("framework = %q, want v0.2.2", result.Framework)
 	}
-	if len(result.Features) != 2 || result.Features[1].Feature != "queue" || result.Features[1].Status != catalog.FeatureStatusImplemented {
-		t.Fatalf("features = %#v, want commands and queue implemented", result.Features)
+	if len(result.Features) != 3 || result.Features[1].Feature != "horizon" || result.Features[2].Feature != "queue" {
+		t.Fatalf("features = %#v, want commands, horizon, and queue implemented", result.Features)
 	}
 	if strings.Contains(output.String(), "\x1b[") {
 		t.Fatalf("JSON contains ANSI decoration: %q", output.String())
@@ -73,6 +73,7 @@ func TestDemoListCommandColorsFeatureStatuses(t *testing.T) {
 	for _, expected := range []string{
 		"\x1b[32mimplemented\x1b[0m",
 		"\x1b[32mcommands\x1b[0m",
+		"\x1b[32mhorizon\x1b[0m",
 		"\x1b[32mqueue\x1b[0m",
 		"\x1b[39mcache\x1b[0m",
 	} {
@@ -110,8 +111,8 @@ func TestDemoShowCommandJSONAndFilters(t *testing.T) {
 	if err := json.Unmarshal(output.Bytes(), &result); err != nil {
 		t.Fatalf("decode JSON: %v\n%s", err, output.String())
 	}
-	if result.Framework != "v0.2.2" || len(result.Entries) != 14 {
-		t.Fatalf("detail output framework/entries = %q/%d, want v0.2.2/14", result.Framework, len(result.Entries))
+	if result.Framework != "v0.2.2" || len(result.Entries) != 13 {
+		t.Fatalf("detail output framework/entries = %q/%d, want v0.2.2/13", result.Framework, len(result.Entries))
 	}
 	for _, item := range result.Entries {
 		if item.Level != catalog.LevelIntegration || item.Status != catalog.StatusPlanned || item.Since != catalog.SinceInitial {

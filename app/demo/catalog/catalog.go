@@ -246,7 +246,7 @@ var Entries = []Entry{
 	baselineEntry("filesystem", "OSS driver capability matrix", "驱动能力矩阵", "Driver Capability Matrix", "demo:filesystem oss-capabilities --disk=oss", "oss-capabilities", "TestFilesystemDemoOSSCapabilities", LevelIntegration, StatusPlanned, "oss"),
 	baselineEntry("filesystem", "Laravel filesystem API mapping", "与 Laravel Filesystem 的对应关系", "Laravel Filesystem Mapping", "demo:filesystem laravel-compatibility", "laravel-compatibility", "TestFilesystemDemoLaravelCompatibility", LevelCompile, StatusPlanned),
 	baselineEntry("filesystem", "Filesystem usage guidance", "使用建议", "Best Practices", "demo:filesystem best-practices", "best-practices", "TestFilesystemDemoBestPractices", LevelCompile, StatusPlanned),
-	baselineEntry("horizon", "Running Horizon", "运行 Horizon", "Running Horizon", "demo:horizon list", "list", "TestHorizonWithRealQueue", LevelIntegration, StatusPlanned, "redis", "rabbitmq"),
+	baselineEntry("horizon", "Running Horizon", "运行 Horizon", "Running Horizon", "./demo/dev test-horizon", "list", "TestHorizonWithRealQueue", LevelIntegration, StatusImplemented, "redis", "rabbitmq"),
 	baselineEntry("http-server", "Starting the server", "启动服务", "Starting the Server", "demo:http-server list", "list", "TestHTTPServerDemo", LevelScenario, StatusPlanned),
 	manualEntry("installation", "Creating an application", "创建应用", "Creating an Application", "installer smoke test", "TestInstallerSmoke", LevelIntegration, "requires a clean temporary checkout and network access"),
 	manualEntry("lens", "Installation", "安装", "Installation", "Lens workflow verification", "TestLensWorkflow", LevelIntegration, "validated by the Lens toolchain rather than an application command"),

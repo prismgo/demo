@@ -34,6 +34,7 @@ Commands:
   logs [service]        Follow logs for all services or one service
   env                   Regenerate and print the test environment file
   test [go-test-args]   Start dependencies and run framework integration tests
+  test-horizon          Run the Demo Horizon test with real Redis and RabbitMQ
   doctor                Check local prerequisites and render Compose config
   reset [--yes]         Delete all local test data and recreate the environment
   help                  Show this help
@@ -170,6 +171,18 @@ run_tests() {
     go test "$@"
 }
 
+run_horizon_test() {
+    if [[ $# -ne 0 ]]; then
+        echo "test-horizon does not accept arguments" >&2
+        exit 2
+    fi
+    up_environment redis rabbitmq
+    # shellcheck disable=SC1090
+    source "${runtime_env}"
+    cd "${repo_root}"
+    go test -count=1 -v -timeout=45s ./app/demo/horizon -run '^TestHorizonWithRealQueue$'
+}
+
 doctor() {
     require_docker
     prepare_runtime
@@ -246,6 +259,9 @@ case "${command}" in
         ;;
     test)
         run_tests "$@"
+        ;;
+    test-horizon)
+        run_horizon_test "$@"
         ;;
     doctor)
         doctor
