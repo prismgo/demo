@@ -254,4 +254,18 @@ grep -Fq 'repos: [ext/rabbitmq]' "${fixture}/demo/.dev/_task/tasks/0009-nested-r
 bash "${wf}" branch 0009 >/dev/null
 [[ "$(git -C "${fixture}/ext/rabbitmq" branch --show-current)" == 'lite/nested-repo' ]]
 
+# Mid-flight scope expansion records only clean repositories already prepared
+# on the card's feature branch, so existing WIP is never switched or stashed.
+mkdir -p "${fixture}/ext/extra"
+git -C "${fixture}/ext/extra" init -q -b main
+git -C "${fixture}/ext/extra" config user.email test@example.com
+git -C "${fixture}/ext/extra" config user.name test
+printf 'fixture\n' >"${fixture}/ext/extra/README.md"
+git -C "${fixture}/ext/extra" add README.md
+git -C "${fixture}/ext/extra" commit -qm init
+git -C "${fixture}/ext/extra" switch -qc lite/nested-repo
+bash "${wf}" lite-add-repos 0009 ext/extra >/dev/null
+grep -Fq 'repos: [ext/rabbitmq, ext/extra]' "${fixture}/demo/.dev/_task/tasks/0009-nested-repo.md"
+grep -Fq 'branched_repos: [ext/rabbitmq, ext/extra]' "${fixture}/demo/.dev/_task/tasks/0009-nested-repo.md"
+
 echo "dev-harness-lite S1-S4 workflow tests: PASS"

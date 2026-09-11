@@ -10,8 +10,10 @@ import (
 	"github.com/prismgo/framework/cache"
 	"github.com/prismgo/framework/config"
 	"github.com/prismgo/framework/container"
+	qcontract "github.com/prismgo/framework/contracts/queue"
 	"github.com/prismgo/framework/queue"
 	"github.com/prismgo/framework/redis"
+	"github.com/prismgo/rabbitmq"
 	goredis "github.com/redis/go-redis/v9"
 
 	qdemo "prismgo-demo/app/demo/queue"
@@ -84,6 +86,7 @@ func TestQueueDemoBasicWithRealRabbitMQ(t *testing.T) {
 	if err != nil {
 		t.Fatalf("create RabbitMQ queue manager: %v", err)
 	}
+	extendRabbitMQ(manager)
 	t.Cleanup(func() { _ = manager.Close() })
 	assertBasicIntegration(t, manager, "rabbitmq")
 }
@@ -827,6 +830,7 @@ func newRealRabbitMQQueueManager(t *testing.T) *queue.Manager {
 	if err != nil {
 		t.Fatalf("create RabbitMQ queue manager: %v", err)
 	}
+	extendRabbitMQ(manager)
 	if err := registry.Instance("queue.manager", manager); err != nil {
 		t.Fatalf("register RabbitMQ queue manager: %v", err)
 	}
@@ -847,6 +851,12 @@ func rabbitMQIntegrationConnection(url, slug, delayMode string, buckets []time.D
 	return queue.ConnectionConfig{
 		Driver: "rabbitmq", Queue: slug + ".queue", BlockFor: 2 * time.Second, Options: options,
 	}
+}
+
+func extendRabbitMQ(m *queue.Manager) {
+	m.Extend("rabbitmq", func() (qcontract.Connector, error) {
+		return rabbitmq.Connector{}, nil
+	})
 }
 
 func assertBasicIntegration(t *testing.T, manager *queue.Manager, connection string) {

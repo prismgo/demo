@@ -24,6 +24,7 @@ PrismGo dev-harness-lite state helper
   wf.sh sect <id> <section-prefix>
   wf.sh fill <id> <section>                 # body from stdin
   wf.sh branch <id>
+  wf.sh lite-add-repos <id> <repo[,repo...]> [--allow-dirty]
   wf.sh lite-merge <id>
   wf.sh lite-progress <id> <S1|S2|S3|S4> <checkpoint>
   wf.sh lite-start <id> <Ftag>
@@ -278,6 +279,36 @@ cmd_lite_new() {
     timing_event "${card}" lite-new "card created"
     bash "${board_script}" >/dev/null
     echo "created ${card}"
+}
+
+cmd_lite_add_repos() {
+    local id="${1:-}" repo_input="${2:-}" option="${3:-}" file branch existing requested combined repo repo_path current
+    local -a added=()
+    [[ -n "${id}" && -n "${repo_input}" ]] || die "usage: wf.sh lite-add-repos <id> <repo[,repo...]> [--allow-dirty]"
+    [[ -z "${option}" || "${option}" == --allow-dirty ]] || die "unknown lite-add-repos option: ${option}"
+    file="$(active_card "${id}")"; ensure_not_paused "${file}"
+    case "$(field "${file}" stage)" in S1|S2) ;; *) die "lite-add-repos requires stage S1 or S2" ;; esac
+    [[ "$(field "${file}" workspace)" == normal ]] || die "lite-add-repos currently requires normal workspace"
+    branch="$(field "${file}" branch)"; existing="$(field "${file}" repos)"; requested="$(normalize_repos "${repo_input}")"
+
+    requested="${requested// /}"
+    IFS=',' read -r -a repos <<<"${requested}"
+    for repo in "${repos[@]}"; do
+        list_has "${existing}" "${repo}" && continue
+        repo_path="${workspace_root}/${repo}"
+        [[ -d "${repo_path}/.git" || -f "${repo_path}/.git" ]] || die "not a git repo: ${repo_path}"
+        [[ "${option}" == --allow-dirty || -z "$(git -C "${repo_path}" status --short)" ]] || \
+            die "dirty repository cannot be added without --allow-dirty: ${repo}"
+        current="$(git -C "${repo_path}" branch --show-current)"
+        [[ "${current}" == "${branch}" ]] || die "repository must already be on ${branch}: ${repo} (${current})"
+        added+=("${repo}")
+    done
+
+    (( ${#added[@]} > 0 )) || { echo "repositories already tracked: ${requested}"; return; }
+    combined="$(normalize_repos "${existing},${requested}")"
+    rewrite_field "${file}" repos "[${combined}]"
+    for repo in "${added[@]}"; do mark_repo_branched "${file}" "${repo}"; done
+    echo "added repositories to ${id}: ${added[*]}"
 }
 
 feature_counts() {
@@ -638,6 +669,7 @@ case "${command}" in
     sect) cmd_sect "$@" ;;
     fill) cmd_fill "$@" ;;
     branch) cmd_branch "$@" ;;
+    lite-add-repos) cmd_lite_add_repos "$@" ;;
     lite-merge) cmd_lite_merge "$@" ;;
     lite-progress) cmd_lite_progress "$@" ;;
     lite-start) cmd_lite_start "$@" ;;
