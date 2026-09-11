@@ -5,11 +5,14 @@ go 1.25.0
 require (
 	github.com/gin-gonic/gin v1.12.0
 	github.com/prismgo/framework v0.2.2
+	github.com/prismgo/sqlite v0.0.0
 	github.com/redis/go-redis/v9 v9.22.0
 	gorm.io/gorm v1.31.2
 )
 
 replace github.com/prismgo/framework => ../framework
+
+replace github.com/prismgo/sqlite => ../ext/sqlite
 
 require (
 	filippo.io/edwards25519 v1.2.0 // indirect

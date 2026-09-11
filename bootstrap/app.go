@@ -15,6 +15,7 @@ import (
 // NewApplication creates the project application instance.
 func NewApplication(basePath ...string) *foundation.Application {
 	return foundation.Configure(basePath...).
+		WithExtensionProviders(Extensions()...).
 		WithProviders(Providers()...).
 		WithRouting(func(r *foundation.Routing) {
 			r.Commands(appcmd.CommandFactories()...)
