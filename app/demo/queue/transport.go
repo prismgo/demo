@@ -221,11 +221,13 @@ func runRabbitMQRetryAfter(ctx context.Context, manager *queue.Manager, connecti
 			"rabbitmq": {Driver: "rabbitmq", Queue: queueName, RetryAfter: time.Second},
 		},
 	}, queue.NewRegistry())
-	if rejected != nil {
-		_ = rejected.Close()
+	if err != nil {
+		return Result{}, fmt.Errorf("queue demo rabbitmq-retry-after manager: %w", err)
 	}
+	defer rejected.Close() //nolint:errcheck // best-effort cleanup of the rejected manager
+	_, err = rejected.Queue("rabbitmq")
 	if !errors.Is(err, queue.ErrUnsupportedRetryAfter) {
-		return Result{}, fmt.Errorf("queue demo rabbitmq-retry-after manager error = %v, want %w", err, queue.ErrUnsupportedRetryAfter)
+		return Result{}, fmt.Errorf("queue demo rabbitmq-retry-after queue error = %v, want %w", err, queue.ErrUnsupportedRetryAfter)
 	}
 	return Result{
 		Case: "rabbitmq-retry-after", Connection: connection, Queue: queueName,

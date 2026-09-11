@@ -33,7 +33,6 @@ func runEncryption(ctx context.Context, connection string) (result Result, err e
 	}
 	connector := &demoMemoryConnector{}
 	driver := "demo-encryption"
-	queue.Extend(driver, connector)
 	manager, err := queue.NewManager(queue.Config{
 		Default: "encrypted",
 		Connections: map[string]queue.ConnectionConfig{
@@ -44,6 +43,7 @@ func runEncryption(ctx context.Context, connection string) (result Result, err e
 	if err != nil {
 		return Result{}, fmt.Errorf("queue demo encryption manager: %w", err)
 	}
+	manager.Extend(driver, func() (queuecontract.Connector, error) { return connector, nil })
 	defer func() {
 		if closeErr := manager.Close(); err == nil && closeErr != nil {
 			err = fmt.Errorf("queue demo encryption close manager: %w", closeErr)
@@ -96,7 +96,6 @@ func runCustomDriver(ctx context.Context, connection string) (result Result, err
 	}
 	connector := &demoMemoryConnector{}
 	driver := "demo-memory"
-	queue.Extend(driver, connector)
 	manager, err := queue.NewManager(queue.Config{
 		Default: "custom",
 		Connections: map[string]queue.ConnectionConfig{
@@ -106,6 +105,7 @@ func runCustomDriver(ctx context.Context, connection string) (result Result, err
 	if err != nil {
 		return Result{}, fmt.Errorf("queue demo custom-driver manager: %w", err)
 	}
+	manager.Extend(driver, func() (queuecontract.Connector, error) { return connector, nil })
 	defer func() {
 		if closeErr := manager.Close(); err == nil && closeErr != nil {
 			err = fmt.Errorf("queue demo custom-driver close manager: %w", closeErr)
@@ -250,13 +250,9 @@ type demoMemoryConnector struct {
 	queue *demoMemoryQueue
 }
 
-func (c *demoMemoryConnector) Connect(_ context.Context, name string, config map[string]any) (queuecontract.Queue, error) {
-	spec, ok := config["_spec"].(queue.ConnectionConfig)
-	if !ok {
-		return nil, fmt.Errorf("demo memory connector missing connection config")
-	}
+func (c *demoMemoryConnector) Connect(_ context.Context, name string, config queuecontract.ConnectorConfig) (queuecontract.Queue, error) {
 	c.name = name
-	c.label, _ = spec.Options["label"].(string)
+	c.label, _ = config.Options["label"].(string)
 	c.queue = &demoMemoryQueue{SyncConnection: queue.NewSyncConnection()}
 	return c.queue, nil
 }

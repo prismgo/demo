@@ -253,7 +253,6 @@ func runOverlapReleasePolicy(ctx context.Context, connection string) (result Res
 func newHoldingQueueManager(label string) (*queue.Manager, *demoHoldingQueue, error) {
 	transport := &demoHoldingQueue{queue: queue.NewSyncConnection()}
 	driver := fmt.Sprintf("demo-holding-%s-%d", label, time.Now().UnixNano())
-	queue.Extend(driver, demoHoldingConnector{queue: transport})
 	manager, err := queue.NewManager(queue.Config{
 		Default: "inspect",
 		Connections: map[string]queue.ConnectionConfig{
@@ -263,6 +262,9 @@ func newHoldingQueueManager(label string) (*queue.Manager, *demoHoldingQueue, er
 	if err != nil {
 		return nil, nil, fmt.Errorf("queue demo %s manager: %w", label, err)
 	}
+	manager.Extend(driver, func() (queuecontract.Connector, error) {
+		return demoHoldingConnector{queue: transport}, nil
+	})
 	return manager, transport, nil
 }
 
@@ -292,7 +294,7 @@ type demoHoldingConnector struct {
 	queue *demoHoldingQueue
 }
 
-func (c demoHoldingConnector) Connect(context.Context, string, map[string]any) (queuecontract.Queue, error) {
+func (c demoHoldingConnector) Connect(context.Context, string, queuecontract.ConnectorConfig) (queuecontract.Queue, error) {
 	return c.queue, nil
 }
 

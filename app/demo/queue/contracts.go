@@ -26,7 +26,6 @@ func runEncryptionMissingKey(ctx context.Context, connection string) (result Res
 
 	connector := &demoMemoryConnector{}
 	driver := fmt.Sprintf("demo-encryption-missing-%d", time.Now().UnixNano())
-	queue.Extend(driver, connector)
 	manager, err := queue.NewManager(queue.Config{
 		Default: "missing-key",
 		Connections: map[string]queue.ConnectionConfig{
@@ -37,6 +36,7 @@ func runEncryptionMissingKey(ctx context.Context, connection string) (result Res
 	if err != nil {
 		return Result{}, fmt.Errorf("queue demo encryption-missing-key manager: %w", err)
 	}
+	manager.Extend(driver, func() (queuecontract.Connector, error) { return connector, nil })
 	defer func() {
 		if closeErr := manager.Close(); err == nil && closeErr != nil {
 			err = fmt.Errorf("queue demo encryption-missing-key close manager: %w", closeErr)
@@ -49,8 +49,10 @@ func runEncryptionMissingKey(ctx context.Context, connection string) (result Res
 	if !errors.Is(dispatchErr, encryption.ErrInvalidKey) {
 		return Result{}, fmt.Errorf("queue demo encryption-missing-key dispatch: got %v, want %w", dispatchErr, encryption.ErrInvalidKey)
 	}
-	if bodies := connector.queue.recordedBodies(); len(bodies) != 0 {
-		return Result{}, fmt.Errorf("queue demo encryption-missing-key recorded %d payloads, want 0", len(bodies))
+	if connector.queue != nil {
+		if bodies := connector.queue.recordedBodies(); len(bodies) != 0 {
+			return Result{}, fmt.Errorf("queue demo encryption-missing-key recorded %d payloads, want 0", len(bodies))
+		}
 	}
 	steps := []string{"app-key:rejected", "dispatch:rejected", "transport:empty"}
 	return Result{Case: "encryption-missing-key", Connection: connection, Queue: "demo-encryption-missing-key", Processed: true, Steps: steps}, nil
@@ -210,7 +212,6 @@ func runCustomConsumerIntent(ctx context.Context, connection string) (result Res
 
 func newDemoContractManager(label string, transport queuecontract.Queue) (*queue.Manager, error) {
 	driver := fmt.Sprintf("demo-%s-%d", label, time.Now().UnixNano())
-	queue.Extend(driver, demoStaticConnector{transport: transport})
 	manager, err := queue.NewManager(queue.Config{
 		Default: "custom",
 		Connections: map[string]queue.ConnectionConfig{
@@ -220,6 +221,9 @@ func newDemoContractManager(label string, transport queuecontract.Queue) (*queue
 	if err != nil {
 		return nil, fmt.Errorf("queue demo %s manager: %w", label, err)
 	}
+	manager.Extend(driver, func() (queuecontract.Connector, error) {
+		return demoStaticConnector{transport: transport}, nil
+	})
 	return manager, nil
 }
 
@@ -239,7 +243,7 @@ type demoStaticConnector struct {
 	transport queuecontract.Queue
 }
 
-func (c demoStaticConnector) Connect(context.Context, string, map[string]any) (queuecontract.Queue, error) {
+func (c demoStaticConnector) Connect(context.Context, string, queuecontract.ConnectorConfig) (queuecontract.Queue, error) {
 	return c.transport, nil
 }
 
