@@ -18,7 +18,7 @@ usage() {
     cat <<'EOF'
 PrismGo dev-harness-lite state helper
 
-  wf.sh lite-new <slug> <dev,framework,docs> [owner] [--workspace normal|worktree]
+  wf.sh lite-new <slug> <repo[,repo...]> [owner] [--workspace normal|worktree]
                  [--timing on|off] [--loop-mode context|continuous] [--loop-limit N]
   wf.sh status [<id>] [--cleared]
   wf.sh sect <id> <section-prefix>
@@ -117,7 +117,11 @@ normalize_repos() {
     [[ ${#values[@]} -gt 0 ]] || die "at least one repo is required"
     for repo in "${values[@]}"; do
         repo="${repo//[[:space:]]/}"
-        case "${repo}" in demo|framework|docs) ;; *) die "unknown repo: ${repo}" ;; esac
+        [[ -n "${repo}" ]] || die "repository path must not be empty"
+        [[ "${repo}" != /* && "${repo}" != "." && "${repo}" != ".." &&
+            "${repo}" != ../* && "${repo}" != */../* && "${repo}" != */.. &&
+            "${repo}" != ./* && "${repo}" != */./* && "${repo}" != */. ]] || \
+            die "repository path must stay within the workspace: ${repo}"
         [[ "${seen}" == *",${repo},"* ]] && continue
         normalized="${normalized:+${normalized}, }${repo}"; seen+="${repo},"
     done
@@ -241,7 +245,7 @@ increment_attempt() {
 
 cmd_lite_new() {
     local slug="${1:-}" repo_input="${2:-}" owner="${3:-agent}" workspace="normal" timing="on"
-    local loop_mode="context" loop_limit="500" id card repos
+    local loop_mode="context" loop_limit="500" id card repos card_body
     [[ "${slug}" =~ ^[a-z0-9]+(-[a-z0-9]+)*$ ]] || die "slug must be kebab-case"
     [[ -n "${repo_input}" ]] || die "usage: wf.sh lite-new <slug> <repos> [owner] [options]"
     shift 2
@@ -260,10 +264,17 @@ cmd_lite_new() {
     case "${loop_mode}" in context|continuous) ;; *) die "loop-mode must be context or continuous" ;; esac
     [[ "${loop_limit}" =~ ^[1-9][0-9]*$ ]] || die "loop-limit must be a positive integer"
     repos="$(normalize_repos "${repo_input}")"; id="$(next_id)"; card="${tasks_dir}/${id}-${slug}.md"
-    sed -e "s/{{ID}}/${id}/g" -e "s/{{SLUG}}/${slug}/g" -e "s/{{OWNER}}/${owner}/g" \
-        -e "s/{{REPOS}}/${repos}/g" -e "s/{{WORKSPACE}}/${workspace}/g" -e "s/{{TIMING}}/${timing}/g" \
-        -e "s/{{LOOP_MODE}}/${loop_mode}/g" -e "s/{{LOOP_LIMIT}}/${loop_limit}/g" -e "s/{{DATE}}/${today}/g" \
-        "${template}" >"${card}"
+    card_body="$(<"${template}")"
+    card_body="${card_body//\{\{ID\}\}/${id}}"
+    card_body="${card_body//\{\{SLUG\}\}/${slug}}"
+    card_body="${card_body//\{\{OWNER\}\}/${owner}}"
+    card_body="${card_body//\{\{REPOS\}\}/${repos}}"
+    card_body="${card_body//\{\{WORKSPACE\}\}/${workspace}}"
+    card_body="${card_body//\{\{TIMING\}\}/${timing}}"
+    card_body="${card_body//\{\{LOOP_MODE\}\}/${loop_mode}}"
+    card_body="${card_body//\{\{LOOP_LIMIT\}\}/${loop_limit}}"
+    card_body="${card_body//\{\{DATE\}\}/${today}}"
+    printf '%s\n' "${card_body}" >"${card}"
     timing_event "${card}" lite-new "card created"
     bash "${board_script}" >/dev/null
     echo "created ${card}"

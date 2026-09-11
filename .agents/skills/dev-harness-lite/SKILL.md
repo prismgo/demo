@@ -48,6 +48,9 @@ $W lite-new <slug> <demo,framework,docs> <owner> --workspace <normal|worktree> \
   --timing <on|off> --loop-mode <context|continuous> [--loop-limit 500]
 ```
 
+`<repos>` 接受工作区根目录下任意独立 Git 仓库的相对路径（例如
+`demo,framework,docs,ext/rabbitmq`），不使用固定仓库白名单；拒绝绝对路径和 `..` 越界路径。
+
 命令只生成轻量卡并加入 board，不生成详细计划或证据目录。随后用 `wf fill` 写卡，完成后再 `$W branch <id>`，
 然后按 S1 末尾强制暂停。分支固定为 `lite/<slug>`，每个受影响仓使用同名分支；多仓准备结果逐项写入
 `branched_repos`，外部 Git 操作导致中断时修复对应仓后重跑即可续做。

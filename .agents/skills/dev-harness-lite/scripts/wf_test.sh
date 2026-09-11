@@ -25,7 +25,7 @@ grep -Fq 'budget_used: 0' "${card}"
 grep -Fq 'pause_state: none' "${card}"
 
 if bash "${wf}" lite-new Bad_Slug demo >/dev/null 2>&1; then echo "invalid slug accepted" >&2; exit 1; fi
-if bash "${wf}" lite-new bad-repo framework,api >/dev/null 2>&1; then echo "invalid repo accepted" >&2; exit 1; fi
+if bash "${wf}" lite-new bad-repo framework,../api >/dev/null 2>&1; then echo "repository traversal accepted" >&2; exit 1; fi
 if bash "${wf}" lite-new bad-mode demo --workspace other >/dev/null 2>&1; then echo "invalid workspace accepted" >&2; exit 1; fi
 
 printf '%s\n' '缓存读取遵循公开契约；非目标：不改数据库。' | bash "${wf}" fill 0001 需求描述 >/dev/null
@@ -239,5 +239,19 @@ for pid in "${pids[@]}"; do wait "${pid}"; done
 [[ "$(find "${fixture}/demo/.dev/_task/tasks" -maxdepth 1 -name '*.md' | wc -l | tr -d ' ')" == 6 ]]
 [[ "$(find "${fixture}/demo/.dev/_task/tasks" -maxdepth 1 -name '*.md' -printf '%f\n' | cut -d- -f1 | sort -u | wc -l | tr -d ' ')" == 6 ]]
 bash "${wf}" board --check >/dev/null
+
+# Repository lists accept independent nested Git repositories in the workspace.
+mkdir -p "${fixture}/ext/rabbitmq"
+git -C "${fixture}/ext/rabbitmq" init -q -b main
+git -C "${fixture}/ext/rabbitmq" config user.email test@example.com
+git -C "${fixture}/ext/rabbitmq" config user.name test
+printf 'fixture\n' >"${fixture}/ext/rabbitmq/README.md"
+git -C "${fixture}/ext/rabbitmq" add README.md
+git -C "${fixture}/ext/rabbitmq" commit -qm init
+nested_output="$(bash "${wf}" lite-new nested-repo ext/rabbitmq codex --timing off --loop-mode continuous)"
+[[ "${nested_output}" == *"0009-nested-repo.md"* ]]
+grep -Fq 'repos: [ext/rabbitmq]' "${fixture}/demo/.dev/_task/tasks/0009-nested-repo.md"
+bash "${wf}" branch 0009 >/dev/null
+[[ "$(git -C "${fixture}/ext/rabbitmq" branch --show-current)" == 'lite/nested-repo' ]]
 
 echo "dev-harness-lite S1-S4 workflow tests: PASS"
