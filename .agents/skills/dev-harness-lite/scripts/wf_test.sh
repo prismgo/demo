@@ -210,6 +210,29 @@ printf '%s\n' '等待 S2。' | bash "${wf}" fill 0002 Handoff >/dev/null
 bash "${wf}" branch 0002 >/dev/null
 wt="${fixture}/.worktrees/0002-worktree-flow/framework"
 [[ "$(git -C "${wt}" branch --show-current)" == 'lite/worktree-flow' ]]
+
+# Mid-flight scope expansion in worktree mode keeps the primary checkout on
+# main and prepares the added repository in the task's worktree directory.
+mkdir -p "${fixture}/ext/late"
+git -C "${fixture}/ext/late" init -q -b main
+git -C "${fixture}/ext/late" config user.email test@example.com
+git -C "${fixture}/ext/late" config user.name test
+printf 'fixture\n' >"${fixture}/ext/late/README.md"
+git -C "${fixture}/ext/late" add README.md
+git -C "${fixture}/ext/late" commit -qm init
+late_wt="${fixture}/.worktrees/0002-worktree-flow/ext/late"
+mkdir -p "$(dirname "${late_wt}")"
+printf 'conflict\n' >"${late_wt}"
+if bash "${wf}" lite-add-repos 0002 ext/late >/dev/null 2>&1; then
+    echo "worktree repo addition succeeded despite conflicting target path" >&2
+    exit 1
+fi
+rm "${late_wt}"
+bash "${wf}" lite-add-repos 0002 ext/late >/dev/null
+[[ "$(git -C "${fixture}/ext/late" branch --show-current)" == main ]]
+[[ "$(git -C "${late_wt}" branch --show-current)" == 'lite/worktree-flow' ]]
+grep -Fq 'repos: [framework, ext/late]' "${card2}"
+grep -Fq 'branched_repos: [framework, ext/late]' "${card2}"
 bash "${wf}" pause 0002 'waiting for compact after S1' >/dev/null
 bash "${wf}" status 0002 --cleared >/dev/null
 bash "${wf}" lite-progress 0002 S2 '进入 F1' >/dev/null

@@ -148,7 +148,7 @@ func TestCatalogEntries(t *testing.T) {
 		"make-directory", "files", "all-files", "directories", "all-directories", "delete-directory",
 		"public-url", "storage-link", "storage-link-options", "storage-unlink",
 		"temporary-url", "temporary-url-capability", "temporary-upload-url", "temporary-upload-capability", "verify-temporary-url",
-		"local-visibility", "oss-visibility", "oss-driver",
+		"local-visibility", "oss-visibility",
 		"custom-driver", "custom-driver-lifecycle", "driver-contract", "optional-driver-capabilities", "driver-factory-context",
 		"manual-manager", "manager-from-config", "errors", "local-capabilities", "oss-capabilities",
 		"laravel-compatibility", "best-practices",
@@ -200,11 +200,11 @@ func TestCatalogFeatureSummaries(t *testing.T) {
 	if !ok {
 		t.Fatal("SummaryFor(filesystem) found = false")
 	}
-	if filesystem.Implemented != 0 || filesystem.Planned != 67 || filesystem.Manual != 0 || filesystem.Total != 67 || filesystem.Remaining != 67 {
-		t.Fatalf("filesystem summary = %#v, want implemented=0 planned=67 manual=0 total=67 remaining=67", filesystem)
+	if filesystem.Implemented != 1 || filesystem.Planned != 66 || filesystem.Manual != 0 || filesystem.Total != 67 || filesystem.Remaining != 66 {
+		t.Fatalf("filesystem summary = %#v, want implemented=1 planned=66 manual=0 total=67 remaining=66", filesystem)
 	}
-	if filesystem.Status != FeatureStatusPlanned || filesystem.Since != SinceInitial {
-		t.Fatalf("filesystem status/since = %q/%q, want %q/%q", filesystem.Status, filesystem.Since, FeatureStatusPlanned, SinceInitial)
+	if filesystem.Status != FeatureStatusInProgress || filesystem.Since != SinceInitial {
+		t.Fatalf("filesystem status/since = %q/%q, want %q/%q", filesystem.Status, filesystem.Since, FeatureStatusInProgress, SinceInitial)
 	}
 
 	translation, ok := SummaryFor("translation")

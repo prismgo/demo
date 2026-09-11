@@ -282,14 +282,14 @@ cmd_lite_new() {
 }
 
 cmd_lite_add_repos() {
-    local id="${1:-}" repo_input="${2:-}" option="${3:-}" file branch existing requested combined repo repo_path current
+    local id="${1:-}" repo_input="${2:-}" option="${3:-}" file branch workspace existing requested combined repo repo_path current
     local -a added=()
     [[ -n "${id}" && -n "${repo_input}" ]] || die "usage: wf.sh lite-add-repos <id> <repo[,repo...]> [--allow-dirty]"
     [[ -z "${option}" || "${option}" == --allow-dirty ]] || die "unknown lite-add-repos option: ${option}"
     file="$(active_card "${id}")"; ensure_not_paused "${file}"
     case "$(field "${file}" stage)" in S1|S2) ;; *) die "lite-add-repos requires stage S1 or S2" ;; esac
-    [[ "$(field "${file}" workspace)" == normal ]] || die "lite-add-repos currently requires normal workspace"
-    branch="$(field "${file}" branch)"; existing="$(field "${file}" repos)"; requested="$(normalize_repos "${repo_input}")"
+    workspace="$(field "${file}" workspace)"; branch="$(field "${file}" branch)"
+    existing="$(field "${file}" repos)"; requested="$(normalize_repos "${repo_input}")"
 
     requested="${requested// /}"
     IFS=',' read -r -a repos <<<"${requested}"
@@ -300,14 +300,26 @@ cmd_lite_add_repos() {
         [[ "${option}" == --allow-dirty || -z "$(git -C "${repo_path}" status --short)" ]] || \
             die "dirty repository cannot be added without --allow-dirty: ${repo}"
         current="$(git -C "${repo_path}" branch --show-current)"
-        [[ "${current}" == "${branch}" ]] || die "repository must already be on ${branch}: ${repo} (${current})"
+        if [[ "${workspace}" == normal ]]; then
+            [[ "${current}" == "${branch}" ]] || die "repository must already be on ${branch}: ${repo} (${current})"
+        else
+            [[ "${current}" == main ]] || die "worktree mode requires the primary checkout on main: ${repo} (${current})"
+        fi
         added+=("${repo}")
     done
 
-    (( ${#added[@]} > 0 )) || { echo "repositories already tracked: ${requested}"; return; }
+    if (( ${#added[@]} == 0 )); then
+        if [[ "${workspace}" == worktree ]]; then cmd_branch "${id}"; fi
+        echo "repositories already tracked: ${requested}"
+        return
+    fi
     combined="$(normalize_repos "${existing},${requested}")"
     rewrite_field "${file}" repos "[${combined}]"
-    for repo in "${added[@]}"; do mark_repo_branched "${file}" "${repo}"; done
+    if [[ "${workspace}" == worktree ]]; then
+        cmd_branch "${id}"
+    else
+        for repo in "${added[@]}"; do mark_repo_branched "${file}" "${repo}"; done
+    fi
     echo "added repositories to ${id}: ${added[*]}"
 }
 
