@@ -41,7 +41,7 @@ The Demo project has four main responsibilities:
 
 ## Catalog Progress Map
 
-The catalog currently covers **29 modules and 1432 entries**: 524 implemented, 905 planned, and 3 manually verified. The table below is a snapshot taken when this README was updated. `app/demo/catalog/` is the single source of truth; use `demo:list` for live progress.
+The catalog currently covers **29 modules and 1432 entries**: 571 implemented, 858 planned, and 3 manually verified. The table below is a snapshot taken when this README was updated. `app/demo/catalog/` is the single source of truth; use `demo:list` for live progress.
 
 | Module | Coverage | Progress | Remaining | Status |
 |---|---|---:|---:|---|
@@ -49,7 +49,7 @@ The catalog currently covers **29 modules and 1432 entries**: 524 implemented, 9
 | `commands` | Application commands and options | 101/101 | 0 | Implemented |
 | `config` | Environment and application configuration | 62/62 | 0 | Implemented |
 | `console` | Artisan-style commands and terminal IO | 70/70 | 0 | Implemented |
-| `container` | Dependency binding and resolution | 0/47 | 47 | Planned |
+| `container` | Dependency binding and resolution | 47/47 | 0 | Implemented |
 | `cookie` | Cookie values and queued writes | 0/50 | 50 | Planned |
 | `database` | Connections, models, migrations, and indexes | 0/62 | 62 | Planned |
 | `encryption` | Application data encryption | 0/1 | 1 | Planned |
@@ -89,6 +89,9 @@ go run ./demo demo:event queued-redis --connection=redis
 go run ./demo demo:console list
 go run ./demo demo:console signature --json
 go run ./demo demo:cache get --json
+go run ./demo demo:container list
+go run ./demo demo:container list-entries --json
+go run ./demo demo:container singleton --json
 go run ./demo demo:commands list
 go run ./demo demo:commands serve-reload --json
 ```

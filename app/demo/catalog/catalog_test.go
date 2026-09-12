@@ -58,13 +58,20 @@ func TestCatalogEntries(t *testing.T) {
 	for _, slug := range []string{
 		"architecture", "dependency-resolution", "use-cases", "bind", "transient-lifecycle", "singleton", "singleton-retry",
 		"instance", "nil-instance", "alias", "alias-close-order", "with-closer", "with-context-closer", "with-close-group",
-		"make", "make-order", "factory", "typed-make", "typed-mismatch", "value", "value-zero",
+		"make", "make-order", "factory",
+	} {
+		if item, ok := Find("container", slug); !ok || item.Status != StatusImplemented {
+			t.Fatalf("container catalog entry %q = %#v, found=%v; want implemented", slug, item, ok)
+		}
+	}
+	for _, slug := range []string{
+		"typed-make", "typed-mismatch", "value", "value-zero",
 		"call", "call-positional", "call-results", "call-limits", "has", "bound", "resolved", "list", "forget", "forget-no-close",
 		"close-groups", "close-group", "close-order", "closer-ownership", "close-pre-cancel", "close-success", "close-retry", "close-mid-cancel",
 		"missing-loader", "missing-loader-error", "facade", "provider-lifecycle", "error-not-registered", "error-nil-result", "error-no-current", "laravel-mapping",
 	} {
-		if item, ok := Find("container", slug); !ok || item.Status != StatusPlanned {
-			t.Fatalf("container catalog entry %q = %#v, found=%v; want planned", slug, item, ok)
+		if item, ok := Find("container", slug); !ok || item.Status != StatusImplemented {
+			t.Fatalf("container catalog entry %q = %#v, found=%v; want implemented", slug, item, ok)
 		}
 	}
 	for _, slug := range []string{
@@ -343,8 +350,8 @@ func TestCatalogFeatureSummaries(t *testing.T) {
 	}
 
 	containerSummary, ok := SummaryFor("container")
-	if !ok || containerSummary.Implemented != 0 || containerSummary.Planned != 47 || containerSummary.Manual != 0 || containerSummary.Total != 47 || containerSummary.Remaining != 47 || containerSummary.Status != FeatureStatusPlanned {
-		t.Fatalf("container summary = %#v, found=%v; want 47 planned entries and no implemented or manual entries", containerSummary, ok)
+	if !ok || containerSummary.Implemented != 47 || containerSummary.Planned != 0 || containerSummary.Manual != 0 || containerSummary.Total != 47 || containerSummary.Remaining != 0 || containerSummary.Status != FeatureStatusImplemented {
+		t.Fatalf("container summary = %#v, found=%v; want 47 implemented and no planned or manual entries", containerSummary, ok)
 	}
 
 	config, ok := SummaryFor("config")
