@@ -292,12 +292,9 @@ func TestCatalogEntries(t *testing.T) {
 		}
 	}
 	for _, slug := range []string{
-		"architecture", "config", "local-prerequisites", "oss-prerequisites",
-		"top-level-config", "local-config", "public-config", "oss-config", "links-config", "disk-config",
-		"facade", "named-disk", "cloud", "interface-selection",
-		"get", "json", "open-stream", "read-stream", "download", "file-existence", "directory-existence",
-		"put", "put-reader", "prepend-append", "put-options", "put-file", "put-file-as", "upload-fields",
-		"copy-move", "cross-disk-guard", "delete", "size", "last-modified", "file-info", "mime-type", "checksum", "path",
+		"oss-prerequisites",
+		"oss-config",
+		"last-modified", "file-info", "mime-type", "checksum", "path",
 		"make-directory", "files", "all-files", "directories", "all-directories", "delete-directory",
 		"public-url", "storage-link", "storage-link-options", "storage-unlink",
 		"temporary-url", "temporary-url-capability", "temporary-upload-url", "temporary-upload-capability", "verify-temporary-url",
@@ -306,8 +303,8 @@ func TestCatalogEntries(t *testing.T) {
 		"manual-manager", "manager-from-config", "errors", "local-capabilities", "oss-capabilities",
 		"laravel-compatibility", "best-practices",
 	} {
-		if item, ok := Find("filesystem", slug); !ok || item.Status != StatusPlanned {
-			t.Fatalf("filesystem catalog entry %q = %#v, %v; want planned", slug, item, ok)
+		if item, ok := Find("filesystem", slug); !ok || item.Status != StatusImplemented {
+			t.Fatalf("filesystem catalog entry %q = %#v, %v; want implemented", slug, item, ok)
 		}
 	}
 	if got := Filter("redis", LevelIntegration, StatusPlanned); len(got) != 54 {
@@ -363,11 +360,11 @@ func TestCatalogFeatureSummaries(t *testing.T) {
 	if !ok {
 		t.Fatal("SummaryFor(filesystem) found = false")
 	}
-	if filesystem.Implemented != 1 || filesystem.Planned != 66 || filesystem.Manual != 0 || filesystem.Total != 67 || filesystem.Remaining != 66 {
-		t.Fatalf("filesystem summary = %#v, want implemented=1 planned=66 manual=0 total=67 remaining=66", filesystem)
+	if filesystem.Implemented != 67 || filesystem.Planned != 0 || filesystem.Manual != 0 || filesystem.Total != 67 || filesystem.Remaining != 0 {
+		t.Fatalf("filesystem summary = %#v, want implemented=67 planned=0 manual=0 total=67 remaining=0", filesystem)
 	}
-	if filesystem.Status != FeatureStatusInProgress || filesystem.Since != SinceInitial {
-		t.Fatalf("filesystem status/since = %q/%q, want %q/%q", filesystem.Status, filesystem.Since, FeatureStatusInProgress, SinceInitial)
+	if filesystem.Status != FeatureStatusImplemented || filesystem.Since != SinceInitial {
+		t.Fatalf("filesystem status/since = %q/%q, want %q/%q", filesystem.Status, filesystem.Since, FeatureStatusImplemented, SinceInitial)
 	}
 
 	horizonSummary, ok := SummaryFor("horizon")

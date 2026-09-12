@@ -10,6 +10,7 @@ import (
 
 	"github.com/prismgo/framework/filesystem"
 
+	filesystemdemo "prismgo-demo/app/demo/filesystem"
 	"prismgo-demo/bootstrap"
 )
 
@@ -89,5 +90,46 @@ func TestFilesystemDemoOSSDriver(t *testing.T) {
 	}
 	if exists {
 		t.Fatalf("deleted OSS object %s/%s exists = true, want false", prefix, key)
+	}
+}
+
+func TestFilesystemDemoOSSPrerequisites(t *testing.T) {
+	runOSSScenario(t, "oss-prerequisites", "OSS credentials configured")
+}
+func TestFilesystemDemoOSSConfiguration(t *testing.T) {
+	runOSSScenario(t, "oss-config", "driver=oss; bucket_configured=true; endpoint_configured=true")
+}
+func TestFilesystemDemoTemporaryUploadURL(t *testing.T) {
+	runOSSScenario(t, "temporary-upload-url", "method=PUT; signed_url=true")
+}
+func TestFilesystemDemoOSSVisibility(t *testing.T) {
+	runOSSScenario(t, "oss-visibility", "visibility=public")
+}
+func TestFilesystemDemoOSSCapabilities(t *testing.T) {
+	runOSSScenario(t, "oss-capabilities", "temporary_url=true; temporary_upload=true")
+}
+
+func runOSSScenario(t *testing.T, name, want string) {
+	t.Helper()
+	for _, key := range []string{"FILESYSTEM_OSS_BUCKET", "FILESYSTEM_OSS_ENDPOINT", "FILESYSTEM_OSS_ACCESS_KEY_ID", "FILESYSTEM_OSS_ACCESS_KEY_SECRET"} {
+		if strings.TrimSpace(os.Getenv(key)) == "" {
+			t.Skipf("%s is not set; real OSS scenario %q cannot run", key, name)
+		}
+	}
+	t.Setenv("FILESYSTEM_OSS_PREFIX", fmt.Sprintf("prismgo-demo-tests/%s-%d", name, time.Now().UnixNano()))
+	app := bootstrap.NewApplication()
+	if err := app.Boot(); err != nil {
+		t.Fatalf("boot OSS application for %q error = %v, want nil", name, err)
+	}
+	t.Cleanup(func() {
+		if err := app.Close(); err != nil {
+			t.Errorf("close OSS application for %q error = %v, want nil", name, err)
+		}
+	})
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+	result, err := filesystemdemo.Run(ctx, name)
+	if err != nil || !strings.Contains(result.Value, want) {
+		t.Fatalf("OSS filesystem scenario %q result = %#v, error = %v; want value containing %q", name, result, err, want)
 	}
 }

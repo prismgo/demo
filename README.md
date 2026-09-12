@@ -40,7 +40,7 @@ Demo 项目主要承担四件事：
 
 ## Catalog 进度地图
 
-Catalog 当前覆盖 **29 个模块、1432 个条目**：已实现 571 个、计划中 858 个、手工验证 3 个。以下是 README 更新时的快照；`app/demo/catalog/` 是唯一数据源，实时进度以 `demo:list` 输出为准。
+Catalog 当前覆盖 **29 个模块、1432 个条目**：已实现 637 个、计划中 792 个、手工验证 3 个。以下是 README 更新时的快照；`app/demo/catalog/` 是唯一数据源，实时进度以 `demo:list` 输出为准。
 
 | 模块 | 覆盖范围 | 进度 | 剩余 | 状态 |
 |---|---|---:|---:|---|
@@ -55,7 +55,7 @@ Catalog 当前覆盖 **29 个模块、1432 个条目**：已实现 571 个、计
 | `event` | 同步、异步与队列事件 | 57/57 | 0 | 已实现 |
 | `exception` | 异常报告与渲染 | 77/77 | 0 | 已实现 |
 | `facade` | 框架 Facade 访问 | 0/1 | 1 | 计划中 |
-| `filesystem` | 本地、公共与云文件系统 | 1/67 | 66 | 进行中 |
+| `filesystem` | 本地、公共与云文件系统 | 67/67 | 0 | 已实现 |
 | `horizon` | 队列监控与 Worker 管理 | 1/1 | 0 | 已实现 |
 | `http-server` | HTTP 服务启动与生命周期 | 0/29 | 29 | 计划中 |
 | `installation` | 应用安装流程 | 0/1 | — | 手工验证 |
@@ -93,6 +93,14 @@ go run ./demo demo:container list-entries --json
 go run ./demo demo:container singleton --json
 go run ./demo demo:commands list
 go run ./demo demo:commands serve-reload --json
+go run ./demo demo:filesystem list
+go run ./demo demo:filesystem all-directories --json
+```
+
+在 `demo/` 中运行本地 OSS HTTP 集成验收（不需要云端凭证）：
+
+```bash
+PRISMGO_FILESYSTEM_LOCAL_OSS_TEST=1 go test ./app/demo/filesystem -run TestFilesystemDemoLocalOSSIntegration -count=1
 ```
 
 状态含义：`已实现` 表示模块全部条目已落地；`进行中` 表示部分条目已落地；`计划中` 表示尚无已实现条目；`手工验证` 表示由安装器、Lens 等外部流程验证，因此不计入“剩余”数量。

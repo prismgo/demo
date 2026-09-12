@@ -14,6 +14,7 @@ func CommandFactories() []console.CommandFactory {
 		func() console.Command { return demo.NewShowCommand() },
 		func() console.Command { return demo.NewQueueCommand() },
 		func() console.Command { return demo.NewCacheCommand() },
+		func() console.Command { return demo.NewFilesystemCommand() },
 		func() console.Command { return demo.NewEventCommand() },
 		func() console.Command { return demo.NewConfigCommand() },
 		func() console.Command { return demo.NewContainerCommand() },

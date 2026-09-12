@@ -41,7 +41,7 @@ The Demo project has four main responsibilities:
 
 ## Catalog Progress Map
 
-The catalog currently covers **29 modules and 1432 entries**: 571 implemented, 858 planned, and 3 manually verified. The table below is a snapshot taken when this README was updated. `app/demo/catalog/` is the single source of truth; use `demo:list` for live progress.
+The catalog currently covers **29 modules and 1432 entries**: 637 implemented, 792 planned, and 3 manually verified. The table below is a snapshot taken when this README was updated. `app/demo/catalog/` is the single source of truth; use `demo:list` for live progress.
 
 | Module | Coverage | Progress | Remaining | Status |
 |---|---|---:|---:|---|
@@ -56,7 +56,7 @@ The catalog currently covers **29 modules and 1432 entries**: 571 implemented, 8
 | `event` | Synchronous, asynchronous, and queued events | 57/57 | 0 | Implemented |
 | `exception` | Exception reporting and rendering | 77/77 | 0 | Implemented |
 | `facade` | Framework facade access | 0/1 | 1 | Planned |
-| `filesystem` | Local, public, and cloud filesystems | 1/67 | 66 | In progress |
+| `filesystem` | Local, public, and cloud filesystems | 67/67 | 0 | Implemented |
 | `horizon` | Queue monitoring and worker management | 1/1 | 0 | Implemented |
 | `http-server` | HTTP server startup and lifecycle | 0/29 | 29 | Planned |
 | `installation` | Application installation workflow | 0/1 | — | Manual |
@@ -94,6 +94,14 @@ go run ./demo demo:container list-entries --json
 go run ./demo demo:container singleton --json
 go run ./demo demo:commands list
 go run ./demo demo:commands serve-reload --json
+go run ./demo demo:filesystem list
+go run ./demo demo:filesystem all-directories --json
+```
+
+Run the local OSS HTTP integration check from `demo/` without cloud credentials:
+
+```bash
+PRISMGO_FILESYSTEM_LOCAL_OSS_TEST=1 go test ./app/demo/filesystem -run TestFilesystemDemoLocalOSSIntegration -count=1
 ```
 
 Status meanings: `Implemented` means every entry in the module is complete; `In progress` means some entries are complete; `Planned` means no entries are implemented yet; `Manual` means an external workflow such as the installer or Lens performs verification, so it is not counted as remaining work.
