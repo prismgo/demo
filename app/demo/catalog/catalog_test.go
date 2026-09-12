@@ -85,16 +85,16 @@ func TestCatalogEntries(t *testing.T) {
 		"architecture", "config", "driver-prerequisites", "top-level-config",
 		"memory-config", "redis-config", "file-config", "failover-config", "lock-config", "flexible-config",
 		"facade", "named-store", "repository", "missing-store",
-		"get", "fallbacks", "typed-retrieval", "existence",
-		"put", "forever", "add", "put-many", "remember", "remember-forever", "flexible", "touch", "many", "pull",
-		"forget", "forget-many", "flush", "counters",
-		"lock", "lock-callback", "lock-block", "lock-restore", "lock-flush", "funnel", "without-overlapping",
-		"tags-memory", "tags-redis", "tags-unsupported", "memo", "failover", "custom-driver", "resource-lifecycle",
+		"get", "fallbacks", "typed-retrieval", "existence", "put", "forever",
+		"add", "put-many", "remember", "remember-forever", "flexible", "touch", "many", "pull",
+		"forget", "forget-many", "flush", "counters", "lock", "lock-callback", "lock-block", "lock-restore",
+		"lock-flush", "funnel", "without-overlapping", "tags-memory",
+		"tags-redis", "tags-unsupported", "memo", "failover", "custom-driver", "resource-lifecycle",
 		"events", "event-contract", "deferred", "key-prefixes", "encoding", "errors",
 		"memory-capabilities", "file-capabilities", "redis-capabilities", "failover-capabilities", "laravel-compatibility",
 	} {
-		if item, ok := Find("cache", slug); !ok || item.Status != StatusPlanned {
-			t.Fatalf("cache catalog entry %q = %#v, %v; want planned", slug, item, ok)
+		if item, ok := Find("cache", slug); !ok || item.Status != StatusImplemented {
+			t.Fatalf("cache catalog entry %q = %#v, %v; want implemented", slug, item, ok)
 		}
 	}
 	for _, slug := range []string{
@@ -331,11 +331,11 @@ func TestCatalogFeatureSummaries(t *testing.T) {
 	if !ok {
 		t.Fatal("SummaryFor(cache) found = false")
 	}
-	if cache.Implemented != 0 || cache.Planned != 57 || cache.Manual != 0 || cache.Total != 57 || cache.Remaining != 57 {
-		t.Fatalf("cache summary = %#v, want implemented=0 planned=57 manual=0 total=57 remaining=57", cache)
+	if cache.Implemented != 57 || cache.Planned != 0 || cache.Manual != 0 || cache.Total != 57 || cache.Remaining != 0 {
+		t.Fatalf("cache summary = %#v, want implemented=57 planned=0 manual=0 total=57 remaining=0", cache)
 	}
-	if cache.Status != FeatureStatusPlanned || cache.Since != SinceInitial {
-		t.Fatalf("cache status/since = %q/%q, want %q/%q", cache.Status, cache.Since, FeatureStatusPlanned, SinceInitial)
+	if cache.Status != FeatureStatusImplemented || cache.Since != SinceInitial {
+		t.Fatalf("cache status/since = %q/%q, want %q/%q", cache.Status, cache.Since, FeatureStatusInProgress, SinceInitial)
 	}
 
 	containerSummary, ok := SummaryFor("container")
