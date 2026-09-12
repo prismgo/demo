@@ -40,7 +40,7 @@ Demo 项目主要承担四件事：
 
 ## Catalog 进度地图
 
-Catalog 当前覆盖 **29 个模块、1432 个条目**：已实现 390 个、计划中 1039 个、手工验证 3 个。以下是 README 更新时的快照；`app/demo/catalog/` 是唯一数据源，实时进度以 `demo:list` 输出为准。
+Catalog 当前覆盖 **29 个模块、1432 个条目**：已实现 447 个、计划中 982 个、手工验证 3 个。以下是 README 更新时的快照；`app/demo/catalog/` 是唯一数据源，实时进度以 `demo:list` 输出为准。
 
 | 模块 | 覆盖范围 | 进度 | 剩余 | 状态 |
 |---|---|---:|---:|---|
@@ -52,7 +52,7 @@ Catalog 当前覆盖 **29 个模块、1432 个条目**：已实现 390 个、计
 | `cookie` | Cookie 值与排队写入 | 0/50 | 50 | 计划中 |
 | `database` | 数据库连接、模型、迁移与索引维护 | 0/62 | 62 | 计划中 |
 | `encryption` | 应用数据加密 | 0/1 | 1 | 计划中 |
-| `event` | 同步、异步与队列事件 | 0/57 | 57 | 计划中 |
+| `event` | 同步、异步与队列事件 | 57/57 | 0 | 已实现 |
 | `exception` | 异常报告与渲染 | 0/77 | 77 | 计划中 |
 | `facade` | 框架 Facade 访问 | 0/1 | 1 | 计划中 |
 | `filesystem` | 本地、公共与云文件系统 | 1/67 | 66 | 进行中 |
@@ -83,6 +83,8 @@ go run ./demo demo:show queue --status=planned
 go run ./demo demo:show queue --level=integration
 go run ./demo demo:list --json
 go run ./demo demo:cache list
+go run ./demo demo:event list
+go run ./demo demo:event queued-redis --connection=redis
 go run ./demo demo:console list
 go run ./demo demo:console signature --json
 go run ./demo demo:cache get --json

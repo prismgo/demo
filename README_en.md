@@ -41,7 +41,7 @@ The Demo project has four main responsibilities:
 
 ## Catalog Progress Map
 
-The catalog currently covers **29 modules and 1432 entries**: 390 implemented, 1039 planned, and 3 manually verified. The table below is a snapshot taken when this README was updated. `app/demo/catalog/` is the single source of truth; use `demo:list` for live progress.
+The catalog currently covers **29 modules and 1432 entries**: 447 implemented, 982 planned, and 3 manually verified. The table below is a snapshot taken when this README was updated. `app/demo/catalog/` is the single source of truth; use `demo:list` for live progress.
 
 | Module | Coverage | Progress | Remaining | Status |
 |---|---|---:|---:|---|
@@ -53,7 +53,7 @@ The catalog currently covers **29 modules and 1432 entries**: 390 implemented, 1
 | `cookie` | Cookie values and queued writes | 0/50 | 50 | Planned |
 | `database` | Connections, models, migrations, and indexes | 0/62 | 62 | Planned |
 | `encryption` | Application data encryption | 0/1 | 1 | Planned |
-| `event` | Synchronous, asynchronous, and queued events | 0/57 | 57 | Planned |
+| `event` | Synchronous, asynchronous, and queued events | 57/57 | 0 | Implemented |
 | `exception` | Exception reporting and rendering | 0/77 | 77 | Planned |
 | `facade` | Framework facade access | 0/1 | 1 | Planned |
 | `filesystem` | Local, public, and cloud filesystems | 1/67 | 66 | In progress |
@@ -84,6 +84,8 @@ go run ./demo demo:show queue --status=planned
 go run ./demo demo:show queue --level=integration
 go run ./demo demo:list --json
 go run ./demo demo:cache list
+go run ./demo demo:event list
+go run ./demo demo:event queued-redis --connection=redis
 go run ./demo demo:console list
 go run ./demo demo:console signature --json
 go run ./demo demo:cache get --json

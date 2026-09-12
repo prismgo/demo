@@ -97,7 +97,7 @@ func TestCatalogEntries(t *testing.T) {
 			t.Fatalf("cache catalog entry %q = %#v, %v; want implemented", slug, item, ok)
 		}
 	}
-	for _, slug := range []string{
+	for index, slug := range []string{
 		"architecture", "manual-registration", "struct-registration", "closure-listener",
 		"wildcard-prefix", "wildcard-all", "wildcard-exact-operations",
 		"event-definition", "event-naming", "payload-boundaries",
@@ -114,8 +114,12 @@ func TestCatalogEntries(t *testing.T) {
 		"subscriber-interface", "should-queue-interface", "async-listener-interface", "queue-options-interface",
 		"provider-register", "provider-boot", "laravel-compatibility",
 	} {
-		if item, ok := Find("event", slug); !ok || item.Status != StatusPlanned {
-			t.Fatalf("event catalog entry %q = %#v, %v; want planned", slug, item, ok)
+		want := StatusPlanned
+		if index < 57 {
+			want = StatusImplemented
+		}
+		if item, ok := Find("event", slug); !ok || item.Status != want {
+			t.Fatalf("event catalog entry %q = %#v, %v; want %s", slug, item, ok, want)
 		}
 	}
 	for _, slug := range []string{
@@ -385,11 +389,11 @@ func TestCatalogFeatureSummaries(t *testing.T) {
 	if !ok {
 		t.Fatal("SummaryFor(event) found = false")
 	}
-	if event.Implemented != 0 || event.Planned != 57 || event.Manual != 0 || event.Total != 57 || event.Remaining != 57 {
-		t.Fatalf("event summary = %#v, want implemented=0 planned=57 manual=0 total=57 remaining=57", event)
+	if event.Implemented != 57 || event.Planned != 0 || event.Manual != 0 || event.Total != 57 || event.Remaining != 0 {
+		t.Fatalf("event summary = %#v, want implemented=57 planned=0 manual=0 total=57 remaining=0", event)
 	}
-	if event.Status != FeatureStatusPlanned || event.Since != SinceInitial {
-		t.Fatalf("event status/since = %q/%q, want %q/%q", event.Status, event.Since, FeatureStatusPlanned, SinceInitial)
+	if event.Status != FeatureStatusImplemented || event.Since != SinceInitial {
+		t.Fatalf("event status/since = %q/%q, want %q/%q", event.Status, event.Since, FeatureStatusImplemented, SinceInitial)
 	}
 
 	sessionSummary, ok := SummaryFor("session")
