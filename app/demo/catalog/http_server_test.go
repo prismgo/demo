@@ -24,8 +24,8 @@ func TestHTTPServerDocumentationCoverage(t *testing.T) {
 		}
 	}
 	for _, item := range entries {
-		if item.Status != StatusPlanned {
-			t.Errorf("HTTP server entry %q status = %q, want %q", item.Case, item.Status, StatusPlanned)
+		if item.Status != StatusImplemented {
+			t.Errorf("HTTP server entry %q status = %q, want %q", item.Case, item.Status, StatusImplemented)
 		}
 	}
 

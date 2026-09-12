@@ -40,7 +40,7 @@ Demo 项目主要承担四件事：
 
 ## Catalog 进度地图
 
-Catalog 当前覆盖 **29 个模块、1432 个条目**：已实现 637 个、计划中 792 个、手工验证 3 个。以下是 README 更新时的快照；`app/demo/catalog/` 是唯一数据源，实时进度以 `demo:list` 输出为准。
+Catalog 当前覆盖 **29 个模块、1432 个条目**：已实现 666 个、计划中 763 个、手工验证 3 个。以下是 README 更新时的快照；`app/demo/catalog/` 是唯一数据源，实时进度以 `demo:list` 输出为准。
 
 | 模块 | 覆盖范围 | 进度 | 剩余 | 状态 |
 |---|---|---:|---:|---|
@@ -57,7 +57,7 @@ Catalog 当前覆盖 **29 个模块、1432 个条目**：已实现 637 个、计
 | `facade` | 框架 Facade 访问 | 0/1 | 1 | 计划中 |
 | `filesystem` | 本地、公共与云文件系统 | 67/67 | 0 | 已实现 |
 | `horizon` | 队列监控与 Worker 管理 | 1/1 | 0 | 已实现 |
-| `http-server` | HTTP 服务启动与生命周期 | 0/29 | 29 | 计划中 |
+| `http-server` | HTTP 服务启动与生命周期 | 29/29 | 0 | 已实现 |
 | `installation` | 应用安装流程 | 0/1 | — | 手工验证 |
 | `lens` | Lens 开发流程 | 0/1 | — | 手工验证 |
 | `lifecycle` | 应用启动与关闭 | 0/57 | 57 | 计划中 |
@@ -93,6 +93,8 @@ go run ./demo demo:container list-entries --json
 go run ./demo demo:container singleton --json
 go run ./demo demo:commands list
 go run ./demo demo:commands serve-reload --json
+go run ./demo demo:http-server list
+go run ./demo demo:http-server routes --json
 go run ./demo demo:filesystem list
 go run ./demo demo:filesystem all-directories --json
 ```

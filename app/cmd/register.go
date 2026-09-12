@@ -22,5 +22,6 @@ func CommandFactories() []console.CommandFactory {
 		func() console.Command { return demo.NewTranslationCommand() },
 		func() console.Command { return demo.NewConsoleCommand() },
 		func() console.Command { return demo.NewCommandsCommand() },
+		func() console.Command { return demo.NewHTTPServerCommand() },
 	}
 }
