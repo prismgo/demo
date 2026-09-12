@@ -41,12 +41,12 @@ The Demo project has four main responsibilities:
 
 ## Catalog Progress Map
 
-The catalog currently covers **29 modules and 1432 entries**: 178 implemented, 1251 planned, and 3 manually verified. The table below is a snapshot taken when this README was updated. `app/demo/catalog/` is the single source of truth; use `demo:list` for live progress.
+The catalog currently covers **29 modules and 1432 entries**: 258 implemented, 1171 planned, and 3 manually verified. The table below is a snapshot taken when this README was updated. `app/demo/catalog/` is the single source of truth; use `demo:list` for live progress.
 
 | Module | Coverage | Progress | Remaining | Status |
 |---|---|---:|---:|---|
 | `cache` | Cache stores, tags, and locks | 57/57 | 0 | Implemented |
-| `commands` | Application commands and options | 21/101 | 80 | In progress |
+| `commands` | Application commands and options | 101/101 | 0 | Implemented |
 | `config` | Environment and application configuration | 0/62 | 62 | Planned |
 | `console` | Artisan-style commands and terminal IO | 0/70 | 70 | Planned |
 | `container` | Dependency binding and resolution | 0/47 | 47 | Planned |
@@ -192,5 +192,11 @@ The Demo's default tests use isolated drivers and do not require Docker:
 cd demo
 GOWORK=off go test . ./app/... ./bootstrap/... ./config/... ./database/... ./routes/...
 ```
+
+The `commands` migration and Seeder scenarios need a dedicated MySQL test database. Run `./demo/dev up mysql`, create an empty database whose name starts with `prismgo_commands_`, grant access to the test user, then set `PRISMGO_COMMANDS_MYSQL_TEST_DSN` and run `go test ./app/demo/commands -run TestCommandsDemoMySQLIntegration -v`. The scenarios clear tables in that dedicated database before and after each run; do not point them at the shared `prismgo_test` database.
+
+The `commands` queue scenarios use real Redis. Run `./demo/dev up redis`, load `demo/.dev/runtime/test.env`, then run `go test ./app/demo/commands -run TestCommandsDemoRedisIntegration -v`. Each scenario uses a unique key prefix and cleans it up afterward.
+
+The `commands` `fresh-drop-types` scenario uses real PostgreSQL. Run `./demo/dev up postgres`, load `demo/.dev/runtime/test.env`, then run `go test ./app/demo/commands -run TestCommandsDemoPostgresIntegration -v`. The test creates an isolated `prismgo_commands_` schema, verifies that the enum and table are removed, then drops that schema.
 
 See the [local test environment guide](.dev/docs/local-test-environment.md) for service addresses, environment variables, security notes, and troubleshooting.

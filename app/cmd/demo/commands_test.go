@@ -9,7 +9,7 @@ import (
 	"prismgo-demo/app/demo/catalog"
 )
 
-func TestCommandsDemoCommandListsTwentyScenarios(t *testing.T) {
+func TestCommandsDemoCommandListsOneHundredScenarios(t *testing.T) {
 	command := NewCommandsCommand()
 	var output bytes.Buffer
 	input := demoInput{arguments: map[string]string{"case": "list"}, bools: map[string]bool{"json": true}}
@@ -20,8 +20,8 @@ func TestCommandsDemoCommandListsTwentyScenarios(t *testing.T) {
 	if err := json.Unmarshal(output.Bytes(), &entries); err != nil {
 		t.Fatalf("decode commands list error = %v, want nil; output = %q", err, output.String())
 	}
-	if len(entries) != 20 {
-		t.Fatalf("commands list entries = %d, want 20", len(entries))
+	if len(entries) != 100 {
+		t.Fatalf("commands list entries = %d, want 100", len(entries))
 	}
 	for _, entry := range entries {
 		if entry.Case == "list" || entry.Status != catalog.StatusImplemented {

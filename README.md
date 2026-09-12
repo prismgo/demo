@@ -40,12 +40,12 @@ Demo 项目主要承担四件事：
 
 ## Catalog 进度地图
 
-Catalog 当前覆盖 **29 个模块、1432 个条目**：已实现 178 个、计划中 1251 个、手工验证 3 个。以下是 README 更新时的快照；`app/demo/catalog/` 是唯一数据源，实时进度以 `demo:list` 输出为准。
+Catalog 当前覆盖 **29 个模块、1432 个条目**：已实现 258 个、计划中 1171 个、手工验证 3 个。以下是 README 更新时的快照；`app/demo/catalog/` 是唯一数据源，实时进度以 `demo:list` 输出为准。
 
 | 模块 | 覆盖范围 | 进度 | 剩余 | 状态 |
 |---|---|---:|---:|---|
 | `cache` | 缓存存储、标签与锁 | 57/57 | 0 | 已实现 |
-| `commands` | 应用命令与选项 | 21/101 | 80 | 进行中 |
+| `commands` | 应用命令与选项 | 101/101 | 0 | 已实现 |
 | `config` | 环境与应用配置 | 0/62 | 62 | 计划中 |
 | `console` | Artisan 风格命令与终端 IO | 0/70 | 70 | 计划中 |
 | `container` | 依赖绑定与解析 | 0/47 | 47 | 计划中 |
@@ -191,5 +191,11 @@ Demo 自身的默认测试使用隔离驱动，不需要启动 Docker：
 cd demo
 GOWORK=off go test . ./app/... ./bootstrap/... ./config/... ./database/... ./routes/...
 ```
+
+`commands` 的迁移与 Seeder 场景需要专用 MySQL 测试库。先执行 `./demo/dev up mysql`，创建名称以 `prismgo_commands_` 开头的空数据库并授权测试用户，再设置 `PRISMGO_COMMANDS_MYSQL_TEST_DSN` 运行 `go test ./app/demo/commands -run TestCommandsDemoMySQLIntegration -v`。场景会在运行前后清空该专用库的表；不要指向共享的 `prismgo_test`。
+
+`commands` 的队列场景使用真实 Redis。执行 `./demo/dev up redis`、加载 `demo/.dev/runtime/test.env` 后运行 `go test ./app/demo/commands -run TestCommandsDemoRedisIntegration -v`；场景使用独立键前缀并在结束时清理。
+
+`commands` 的 `fresh-drop-types` 场景使用真实 PostgreSQL。执行 `./demo/dev up postgres`、加载 `demo/.dev/runtime/test.env` 后运行 `go test ./app/demo/commands -run TestCommandsDemoPostgresIntegration -v`；测试创建独立的 `prismgo_commands_` schema，验证枚举类型和表被清除后删除该 schema。
 
 完整的服务地址、环境变量、安全提示和排障方法见[本地测试环境说明](.dev/docs/local-test-environment.md)。

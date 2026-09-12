@@ -24,6 +24,10 @@ func init() {
 				|
 			*/
 			"connections": map[string]interface{}{
+				"postgres": map[string]interface{}{
+					"driver": "postgres",
+					"dsn":    Env("POSTGRES_DSN", ""),
+				},
 				"sqlite": map[string]interface{}{
 					"driver":             "sqlite",
 					"database":           Env("DB_DATABASE", "storage/database.sqlite"),

@@ -492,8 +492,8 @@ func TestCatalogFeatureSummaries(t *testing.T) {
 	}
 
 	commands, ok := SummaryFor("commands")
-	if !ok || commands.Status != FeatureStatusInProgress || commands.Implemented != 21 || commands.Planned != 80 || commands.Total != 101 {
-		t.Fatalf("commands summary = %#v, %v; want in progress with 21 implemented and 80 planned entries", commands, ok)
+	if !ok || commands.Status != FeatureStatusImplemented || commands.Implemented != 101 || commands.Planned != 0 || commands.Total != 101 {
+		t.Fatalf("commands summary = %#v, %v; want all 101 commands entries implemented", commands, ok)
 	}
 	installation, ok := SummaryFor("installation")
 	if !ok || installation.Status != FeatureStatusManual || installation.Remaining != 0 {

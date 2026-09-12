@@ -25,6 +25,7 @@ type Result struct {
 }
 
 // Run executes a commands example with the supplied Demo binary in an isolated directory.
+// MySQL scenarios also require a dedicated database named with the prismgo_commands_ prefix.
 func Run(ctx context.Context, executable, name string) (Result, error) {
 	if executable == "" {
 		return Result{}, fmt.Errorf("commands demo: executable is required")
@@ -48,6 +49,30 @@ func Run(ctx context.Context, executable, name string) (Result, error) {
 		return runServer(ctx, executable, root, name)
 	case "generator-name", "generator-force", "generator-fullpath", "make-command", "make-controller", "make-event", "make-job":
 		return runGenerator(ctx, executable, root, name)
+	case "make-listener", "make-middleware", "make-migration", "make-model", "make-provider", "make-resource", "make-seeder",
+		"model-migration", "model-controller", "model-resource", "model-seeder", "model-api", "model-table", "model-composition",
+		"model-unsupported-options", "controller-model", "controller-api", "controller-resource", "command-signature", "listener-queued":
+		return runGeneratorOptions(ctx, executable, root, name)
+	case "listener-async", "listener-event", "listener-mode-conflict", "migration-create", "migration-table",
+		"migration-path", "migration-realpath", "migration-inference", "stub-publish", "stub-override", "stub-force", "migration-registration":
+		return runMoreGenerators(ctx, executable, root, name)
+	case "migrate", "migrate-install", "migrate-status", "migrate-rollback", "migrate-reset", "migrate-refresh", "migrate-fresh", "db-seed":
+		return runMySQLMigration(ctx, executable, root, name)
+	case "database-option", "migration-force", "migration-path-option", "migration-realpath-option", "migration-pretend",
+		"migration-seed", "migration-seeder", "migrate-step", "rollback-step", "rollback-batch", "fresh-drop-views", "seed-class":
+		return runMySQLMigration(ctx, executable, root, name)
+	case "production-guard", "sqlite-extension", "sqlite-fresh":
+		return runLocalMigration(ctx, executable, root, name)
+	case "fresh-drop-types":
+		return runPostgresMigration(ctx, executable, root, name)
+	case "queue", "queue-work", "queue-failed", "queue-retry", "queue-forget", "queue-flush", "queue-restart",
+		"worker-connection", "worker-queue", "worker-once", "worker-stop-when-empty", "worker-sleep", "worker-timeout",
+		"worker-tries", "worker-backoff", "worker-max-jobs", "worker-max-time", "worker-retry-after":
+		return runQueueCommand(ctx, executable, root, name)
+	case "cron", "cron-shutdown":
+		return runCronCommand(ctx, executable, root, name)
+	case "key-generate", "key-show", "key-force", "key-format":
+		return runKeyCommand(ctx, executable, root, name)
 	default:
 		return Result{}, fmt.Errorf("commands demo: unknown case %q", name)
 	}

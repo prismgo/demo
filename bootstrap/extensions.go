@@ -11,6 +11,7 @@ import (
 func Extensions() []provider.ServiceProvider {
 	return []provider.ServiceProvider{
 		sqlite.ServiceProvider{},
+		postgresDemoProvider{},
 		rabbitmq.ServiceProvider{},
 		oss.ServiceProvider{},
 	}

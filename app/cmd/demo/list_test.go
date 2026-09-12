@@ -23,7 +23,7 @@ func TestDemoListCommandShowsFeatureOverview(t *testing.T) {
 		"PrismGo Framework: v0.2.2 (local workspace)",
 		"Feature", "Description", "Since", "Progress", "Remaining", "Status",
 		"Queues, jobs, and workers", "59/59", "implemented",
-		"Modules: 29 | Implemented: 178/1432 | Planned: 1251 | Manual: 3",
+		"Modules: 29 | Implemented: 258/1432 | Planned: 1171 | Manual: 3",
 		"go run ./demo demo:show <feature>",
 	} {
 		if !strings.Contains(output.String(), expected) {
@@ -52,8 +52,8 @@ func TestDemoListCommandJSONAndFeatureStatusFilter(t *testing.T) {
 	if result.Framework != "v0.2.2" {
 		t.Fatalf("framework = %q, want v0.2.2", result.Framework)
 	}
-	if len(result.Features) != 4 || result.Features[0].Feature != "cache" || result.Features[1].Feature != "horizon" || result.Features[2].Feature != "queue" || result.Features[3].Feature != "translation" {
-		t.Fatalf("features = %#v, want cache, horizon, queue, and translation implemented", result.Features)
+	if len(result.Features) != 5 || result.Features[0].Feature != "cache" || result.Features[1].Feature != "commands" || result.Features[2].Feature != "horizon" || result.Features[3].Feature != "queue" || result.Features[4].Feature != "translation" {
+		t.Fatalf("features = %#v, want cache, commands, horizon, queue, and translation implemented", result.Features)
 	}
 	if strings.Contains(output.String(), "\x1b[") {
 		t.Fatalf("JSON contains ANSI decoration: %q", output.String())
@@ -72,7 +72,7 @@ func TestDemoListCommandColorsFeatureStatuses(t *testing.T) {
 	}
 	for _, expected := range []string{
 		"\x1b[32mimplemented\x1b[0m",
-		"\x1b[33mcommands\x1b[0m",
+		"\x1b[32mcommands\x1b[0m",
 		"\x1b[32mhorizon\x1b[0m",
 		"\x1b[32mqueue\x1b[0m",
 		"\x1b[32mcache\x1b[0m",
@@ -111,8 +111,8 @@ func TestDemoShowCommandJSONAndFilters(t *testing.T) {
 	if err := json.Unmarshal(output.Bytes(), &result); err != nil {
 		t.Fatalf("decode JSON: %v\n%s", err, output.String())
 	}
-	if result.Framework != "v0.2.2" || len(result.Entries) != 126 {
-		t.Fatalf("detail output framework/entries = %q/%d, want v0.2.2/126", result.Framework, len(result.Entries))
+	if result.Framework != "v0.2.2" || len(result.Entries) != 105 {
+		t.Fatalf("detail output framework/entries = %q/%d, want v0.2.2/105", result.Framework, len(result.Entries))
 	}
 	for _, item := range result.Entries {
 		if item.Level != catalog.LevelIntegration || item.Status != catalog.StatusPlanned || item.Since != catalog.SinceInitial {
