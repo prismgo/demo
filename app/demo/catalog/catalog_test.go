@@ -261,19 +261,6 @@ func TestCatalogEntries(t *testing.T) {
 		}
 	}
 	for _, slug := range []string{
-		"architecture", "config", "single-driver", "daily-driver", "stderr-driver", "null-driver",
-		"top-level-config", "channel-config", "deployment-config", "stack", "stack-channel-isolation", "levels",
-		"facade", "formatted-facade", "fatal", "with-field", "with-fields", "with-error", "error-stacktrace",
-		"context-extractor", "context-noop", "named-channel", "missing-channel", "channel-context",
-		"resolve-manager", "default-name", "driver-contract", "custom-driver", "custom-driver-replacement",
-		"custom-formatter", "formatter-params", "line-formatter", "text-formatter", "json-formatter",
-		"manual-manager", "provider-lifecycle", "provider-cleanup", "resource-cleanup", "closed-writes", "global-logrus",
-	} {
-		if item, ok := Find("logger", slug); !ok || item.Status != StatusPlanned {
-			t.Fatalf("logger catalog entry %q = %#v, %v; want planned", slug, item, ok)
-		}
-	}
-	for _, slug := range []string{
 		"architecture", "requirements", "cron-command", "signal-shutdown", "registration", "deployment",
 		"timezone", "debug-logging", "overlap-cache", "exception-config",
 		"command", "command-validation", "call", "every", "second-frequencies", "minute-frequencies",
@@ -426,11 +413,11 @@ func TestCatalogFeatureSummaries(t *testing.T) {
 	if !ok {
 		t.Fatal("SummaryFor(logger) found = false")
 	}
-	if logger.Implemented != 0 || logger.Planned != 40 || logger.Manual != 0 || logger.Total != 40 || logger.Remaining != 40 {
-		t.Fatalf("logger summary = %#v, want implemented=0 planned=40 manual=0 total=40 remaining=40", logger)
+	if logger.Implemented != 40 || logger.Planned != 0 || logger.Manual != 0 || logger.Total != 40 || logger.Remaining != 0 {
+		t.Fatalf("logger summary = %#v, want implemented=40 planned=0 manual=0 total=40 remaining=0", logger)
 	}
-	if logger.Status != FeatureStatusPlanned || logger.Since != SinceInitial {
-		t.Fatalf("logger status/since = %q/%q, want %q/%q", logger.Status, logger.Since, FeatureStatusPlanned, SinceInitial)
+	if logger.Status != FeatureStatusImplemented || logger.Since != SinceInitial {
+		t.Fatalf("logger status/since = %q/%q, want %q/%q", logger.Status, logger.Since, FeatureStatusImplemented, SinceInitial)
 	}
 
 	timer, ok := SummaryFor("timer")
