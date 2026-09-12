@@ -41,14 +41,14 @@ The Demo project has four main responsibilities:
 
 ## Catalog Progress Map
 
-The catalog currently covers **29 modules and 1432 entries**: 258 implemented, 1171 planned, and 3 manually verified. The table below is a snapshot taken when this README was updated. `app/demo/catalog/` is the single source of truth; use `demo:list` for live progress.
+The catalog currently covers **29 modules and 1432 entries**: 278 implemented, 1151 planned, and 3 manually verified. The table below is a snapshot taken when this README was updated. `app/demo/catalog/` is the single source of truth; use `demo:list` for live progress.
 
 | Module | Coverage | Progress | Remaining | Status |
 |---|---|---:|---:|---|
 | `cache` | Cache stores, tags, and locks | 57/57 | 0 | Implemented |
 | `commands` | Application commands and options | 101/101 | 0 | Implemented |
 | `config` | Environment and application configuration | 0/62 | 62 | Planned |
-| `console` | Artisan-style commands and terminal IO | 0/70 | 70 | Planned |
+| `console` | Artisan-style commands and terminal IO | 20/70 | 50 | In progress |
 | `container` | Dependency binding and resolution | 0/47 | 47 | Planned |
 | `cookie` | Cookie values and queued writes | 0/50 | 50 | Planned |
 | `database` | Connections, models, migrations, and indexes | 0/62 | 62 | Planned |
@@ -84,6 +84,8 @@ go run ./demo demo:show queue --status=planned
 go run ./demo demo:show queue --level=integration
 go run ./demo demo:list --json
 go run ./demo demo:cache list
+go run ./demo demo:console list
+go run ./demo demo:console signature --json
 go run ./demo demo:cache get --json
 go run ./demo demo:commands list
 go run ./demo demo:commands serve-reload --json
