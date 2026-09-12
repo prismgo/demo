@@ -71,6 +71,8 @@ func init() {
 			"timezone":        Env("APP_TIMEZONE", "UTC"),
 			"locale":          Env("APP_LOCALE", "en"),
 			"fallback_locale": Env("APP_FALLBACK_LOCALE", "en"),
+			"cipher":          Env("APP_CIPHER", "AES-256-GCM"),
+			"previous_keys":   Env("APP_PREVIOUS_KEYS", ""),
 
 			/*
 				|--------------------------------------------------------------------------

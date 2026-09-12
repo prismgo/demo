@@ -344,8 +344,8 @@ func TestCatalogFeatureSummaries(t *testing.T) {
 	}
 
 	config, ok := SummaryFor("config")
-	if !ok || config.Implemented != 0 || config.Planned != 62 || config.Manual != 0 || config.Total != 62 || config.Remaining != 62 || config.Status != FeatureStatusPlanned {
-		t.Fatalf("config summary = %#v, found=%v; want 62 planned entries and no implemented or manual entries", config, ok)
+	if !ok || config.Implemented != 62 || config.Planned != 0 || config.Manual != 0 || config.Total != 62 || config.Remaining != 0 || config.Status != FeatureStatusImplemented {
+		t.Fatalf("config summary = %#v, found=%v; want all 62 config entries implemented", config, ok)
 	}
 
 	filesystem, ok := SummaryFor("filesystem")

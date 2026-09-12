@@ -41,13 +41,13 @@ The Demo project has four main responsibilities:
 
 ## Catalog Progress Map
 
-The catalog currently covers **29 modules and 1432 entries**: 328 implemented, 1101 planned, and 3 manually verified. The table below is a snapshot taken when this README was updated. `app/demo/catalog/` is the single source of truth; use `demo:list` for live progress.
+The catalog currently covers **29 modules and 1432 entries**: 390 implemented, 1039 planned, and 3 manually verified. The table below is a snapshot taken when this README was updated. `app/demo/catalog/` is the single source of truth; use `demo:list` for live progress.
 
 | Module | Coverage | Progress | Remaining | Status |
 |---|---|---:|---:|---|
 | `cache` | Cache stores, tags, and locks | 57/57 | 0 | Implemented |
 | `commands` | Application commands and options | 101/101 | 0 | Implemented |
-| `config` | Environment and application configuration | 0/62 | 62 | Planned |
+| `config` | Environment and application configuration | 62/62 | 0 | Implemented |
 | `console` | Artisan-style commands and terminal IO | 70/70 | 0 | Implemented |
 | `container` | Dependency binding and resolution | 0/47 | 47 | Planned |
 | `cookie` | Cookie values and queued writes | 0/50 | 50 | Planned |
