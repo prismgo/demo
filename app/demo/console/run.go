@@ -14,10 +14,12 @@ import (
 
 // Result records the actual definition or input observed by a console scenario.
 type Result struct {
-	Case       string             `json:"case"`
-	Signature  string             `json:"signature,omitempty"`
-	Definition console.Definition `json:"definition"`
-	Values     []string           `json:"values,omitempty"`
+	Case        string             `json:"case"`
+	Signature   string             `json:"signature,omitempty"`
+	Definition  console.Definition `json:"definition"`
+	Values      []string           `json:"values,omitempty"`
+	Output      string             `json:"output,omitempty"`
+	ErrorOutput string             `json:"error_output,omitempty"`
 }
 
 var signatures = map[string]string{
@@ -43,11 +45,37 @@ func Scenarios() []string {
 		"default-argument", "required-array-argument", "optional-array-argument", "argument-description",
 		"argument-validation", "boolean-option", "value-option", "default-option", "short-option",
 		"array-option", "option-description", "option-validation", "must-definition", "parse-signature", "argument",
+		"arguments", "missing-argument", "option", "option-strings", "option-bool", "option-int",
+		"has-option", "optional-option-value", "line", "new-line", "info-comment-question-success",
+		"warn-error", "alert", "table", "progress", "ask", "secret", "confirm", "choice", "choice-multiple",
+		"choice-defaults-attempts", "anticipate", "handle-context", "from-context", "from-command", "cobra-command",
+		"context-methods", "trap", "trap-release", "fail", "manual-failure", "call", "call-silently", "call-input",
+		"isolatable", "missing-input", "missing-input-custom", "ansi-detection", "quiet-silent", "list-formats",
+		"list-namespace", "list-raw-short", "argument-list", "normalize-definition", "clone-definition",
+		"definition-usage", "bind-flags", "package-output", "package-exit", "laravel-compatibility",
 	}
 }
 
 // Run executes a console example against the local framework checkout.
 func Run(caseName string) (Result, error) {
+	if isInputScenario(caseName) {
+		return runInputScenario(caseName)
+	}
+	if isIOScenario(caseName) {
+		return runIOScenario(caseName)
+	}
+	if isContextScenario(caseName) {
+		return runContextScenario(caseName)
+	}
+	if isKernelScenario(caseName) {
+		return runKernelScenario(caseName)
+	}
+	if isRenderScenario(caseName) {
+		return runRenderScenario(caseName)
+	}
+	if caseName == "package-output" || caseName == "package-exit" {
+		return runPackageScenario(caseName)
+	}
 	result := Result{Case: caseName}
 	if signature, ok := signatures[caseName]; ok {
 		definition, err := console.ParseSignature(signature)

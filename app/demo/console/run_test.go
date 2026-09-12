@@ -171,8 +171,8 @@ func TestConsoleDemoUnknownScenario(t *testing.T) {
 
 func TestConsoleDemoScenariosReturnsCopy(t *testing.T) {
 	cases := Scenarios()
-	if len(cases) != 20 {
-		t.Fatalf("Scenarios length = %d, want 20", len(cases))
+	if len(cases) != 70 {
+		t.Fatalf("Scenarios length = %d, want 70", len(cases))
 	}
 	cases[0] = "changed"
 	if Scenarios()[0] != "architecture" {

@@ -58,6 +58,12 @@ func (c *ConsoleCommand) Handle(ctx console.CommandContext) error {
 	for _, value := range result.Values {
 		rows = append(rows, []string{"observed", value})
 	}
+	if result.Output != "" {
+		rows = append(rows, []string{"stdout", fmt.Sprintf("%q", result.Output)})
+	}
+	if result.ErrorOutput != "" {
+		rows = append(rows, []string{"stderr", fmt.Sprintf("%q", result.ErrorOutput)})
+	}
 	for _, argument := range result.Definition.Arguments {
 		rows = append(rows, []string{"argument", fmt.Sprintf("%s required=%t array=%t", argument.Name, argument.Required, argument.IsArray)})
 	}

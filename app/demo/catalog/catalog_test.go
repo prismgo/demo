@@ -681,17 +681,9 @@ func TestConsoleDocumentationCoverage(t *testing.T) {
 	if len(entries) != 70 {
 		t.Fatalf("console catalog entries = %d, want 70", len(entries))
 	}
-	implemented := make(map[string]bool, 20)
-	for _, item := range consoleEntries()[:20] {
-		implemented[item.Case] = true
-	}
 	for _, item := range entries {
-		want := StatusPlanned
-		if implemented[item.Case] {
-			want = StatusImplemented
-		}
-		if item.Status != want {
-			t.Errorf("console entry %q status = %q, want %q", item.Case, item.Status, want)
+		if item.Status != StatusImplemented {
+			t.Errorf("console entry %q status = %q, want %q", item.Case, item.Status, StatusImplemented)
 		}
 	}
 

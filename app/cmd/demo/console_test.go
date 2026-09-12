@@ -52,3 +52,25 @@ func TestConsoleDemoCommandRejectsUnknownScenario(t *testing.T) {
 		t.Errorf("handle demo:console missing error = %v, want unknown scenario", err)
 	}
 }
+
+func TestConsoleDemoCommandShowsCapturedStreams(t *testing.T) {
+	command := NewConsoleCommand()
+	for _, tt := range []struct {
+		caseName string
+		want     string
+	}{
+		{caseName: "line", want: "stdout"},
+		{caseName: "warn-error", want: "stderr"},
+	} {
+		t.Run(tt.caseName, func(t *testing.T) {
+			var output bytes.Buffer
+			input := demoInput{arguments: map[string]string{"case": tt.caseName}}
+			if err := command.Handle(commandContext(command, input, &output)); err != nil {
+				t.Fatalf("handle demo:console %s error = %v, want nil", tt.caseName, err)
+			}
+			if !strings.Contains(output.String(), tt.want) {
+				t.Errorf("demo:console %s output = %q, want %q row", tt.caseName, output.String(), tt.want)
+			}
+		})
+	}
+}
