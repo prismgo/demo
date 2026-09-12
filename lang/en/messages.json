@@ -1,0 +1,15 @@
+{
+  "welcome": "Welcome to PrismGo!",
+  "english_only": "English only",
+  "greeting": "Hello, :Name!",
+  "name_styles": ":name|:NAME|:Name",
+  "receipt": "Total: :price (:Name)",
+  "apples": "One apple|:count apples",
+  "invitations": "{0} No invitations|{1} One invitation|[2,*] :count invitations",
+  "minutes_ago": "{1} :value minute ago|[2,*] :value minutes ago",
+  "notifications": "{0} There are none|{1} There is one|[2,*] There are :count notifications",
+  "auth": {
+    "failed": "These credentials do not match our records.",
+    "throttle": "Too many login attempts."
+  }
+}

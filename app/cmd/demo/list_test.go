@@ -23,7 +23,7 @@ func TestDemoListCommandShowsFeatureOverview(t *testing.T) {
 		"PrismGo Framework: v0.2.2 (local workspace)",
 		"Feature", "Description", "Since", "Progress", "Remaining", "Status",
 		"Queues, jobs, and workers", "59/59", "implemented",
-		"Modules: 29 | Implemented: 62/476 | Planned: 411 | Manual: 3",
+		"Modules: 29 | Implemented: 101/476 | Planned: 372 | Manual: 3",
 		"go run ./demo demo:show <feature>",
 	} {
 		if !strings.Contains(output.String(), expected) {
@@ -52,8 +52,8 @@ func TestDemoListCommandJSONAndFeatureStatusFilter(t *testing.T) {
 	if result.Framework != "v0.2.2" {
 		t.Fatalf("framework = %q, want v0.2.2", result.Framework)
 	}
-	if len(result.Features) != 3 || result.Features[1].Feature != "horizon" || result.Features[2].Feature != "queue" {
-		t.Fatalf("features = %#v, want commands, horizon, and queue implemented", result.Features)
+	if len(result.Features) != 4 || result.Features[1].Feature != "horizon" || result.Features[2].Feature != "queue" || result.Features[3].Feature != "translation" {
+		t.Fatalf("features = %#v, want commands, horizon, queue, and translation implemented", result.Features)
 	}
 	if strings.Contains(output.String(), "\x1b[") {
 		t.Fatalf("JSON contains ANSI decoration: %q", output.String())
