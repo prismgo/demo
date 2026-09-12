@@ -83,6 +83,10 @@ func Run(name string) (Result, error) {
 		value = fmt.Sprintf("canceled=%t", h.ShouldReport(context.Canceled, 500))
 	case "default-render", "renderer-chain", "problem-renderer", "response-renderer", "response-fallback", "panic-recovery", "gin-errors", "status-report", "request-id", "problem-response", "problem-optional", "problem-fields", "http-error", "public-detail":
 		value, err = renderCase(name)
+	case "safe-response", "request-fields", "diagnostic-fields", "business-fields", "handler-defaults", "handler-flags", "options", "with-dont-report", "with-level", "with-reporter", "with-recovery", "with-logging", "with-client-logging", "with-panic-stack", "with-debug", "with-debug-resolver", "with-context", "with-renderer", "with-response-renderer", "predicate-type", "level-resolver-type", "reporter-type", "context-extractor-type", "renderer-type", "response-renderer-type", "resolve", "facade-report", "facade-render", "build-register", "handler-report":
+		value, err = secondBatch(name)
+	case "handler-render", "should-report", "handler-level", "handler-debug", "apply-options", "cli-report", "routine-report", "queue-report", "horizon-report", "event-report", "non-http-fields", "scrub-keys", "scrub-nested", "scrub-service-key", "wrap-handler", "replace-handler", "laravel-mapping":
+		value, err = thirdBatch(name)
 	default:
 		return Result{}, fmt.Errorf("unknown exception scenario %q", name)
 	}

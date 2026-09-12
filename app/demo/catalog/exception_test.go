@@ -18,14 +18,11 @@ func TestExceptionDocumentationCoverage(t *testing.T) {
 			implemented++
 		}
 	}
-	if implemented != 30 {
-		t.Fatalf("implemented exception entries = %d, want 30", implemented)
+	if implemented != 77 {
+		t.Fatalf("implemented exception entries = %d, want 77", implemented)
 	}
 	for index, item := range exceptionEntries() {
-		want := StatusPlanned
-		if index < 30 {
-			want = StatusImplemented
-		}
+		want := StatusImplemented
 		if item.Status != want {
 			t.Errorf("exception entry %q status = %q, want %q (index %d)", item.Case, item.Status, want, index)
 		}

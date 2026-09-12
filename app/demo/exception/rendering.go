@@ -17,6 +17,7 @@ import (
 type requestOptions struct {
 	useMiddleware bool
 	requestID     string
+	target        string
 	register      func(*gin.Engine)
 }
 
@@ -41,7 +42,11 @@ func serve(handler *exception.Handler, options requestOptions) (httpResult, erro
 		engine.Use(httpmiddleware.Exception(handler))
 	}
 	options.register(engine)
-	request := httptest.NewRequest(http.MethodGet, "/failure", nil)
+	target := options.target
+	if target == "" {
+		target = "/failure"
+	}
+	request := httptest.NewRequest(http.MethodGet, target, nil)
 	if options.requestID != "" {
 		request.Header.Set("X-Request-ID", options.requestID)
 	}

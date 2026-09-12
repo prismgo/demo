@@ -41,7 +41,7 @@ The Demo project has four main responsibilities:
 
 ## Catalog Progress Map
 
-The catalog currently covers **29 modules and 1432 entries**: 477 implemented, 952 planned, and 3 manually verified. The table below is a snapshot taken when this README was updated. `app/demo/catalog/` is the single source of truth; use `demo:list` for live progress.
+The catalog currently covers **29 modules and 1432 entries**: 524 implemented, 905 planned, and 3 manually verified. The table below is a snapshot taken when this README was updated. `app/demo/catalog/` is the single source of truth; use `demo:list` for live progress.
 
 | Module | Coverage | Progress | Remaining | Status |
 |---|---|---:|---:|---|
@@ -54,7 +54,7 @@ The catalog currently covers **29 modules and 1432 entries**: 477 implemented, 9
 | `database` | Connections, models, migrations, and indexes | 0/62 | 62 | Planned |
 | `encryption` | Application data encryption | 0/1 | 1 | Planned |
 | `event` | Synchronous, asynchronous, and queued events | 57/57 | 0 | Implemented |
-| `exception` | Exception reporting and rendering | 30/77 | 47 | In progress |
+| `exception` | Exception reporting and rendering | 77/77 | 0 | Implemented |
 | `facade` | Framework facade access | 0/1 | 1 | Planned |
 | `filesystem` | Local, public, and cloud filesystems | 1/67 | 66 | In progress |
 | `horizon` | Queue monitoring and worker management | 1/1 | 0 | Implemented |

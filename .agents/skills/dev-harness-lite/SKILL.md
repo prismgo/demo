@@ -163,7 +163,7 @@ $W lite-archive <id>
 
 最终报告不超过 15 行：改动、文件、DoD 逐条结果、review、各仓 commit hash、未运行/跳过项和非目标。
 
-## 铁律与省时省 token 机制
+## 铁律
 
 - S1 写完卡必须停下；状态只能用 `wf.sh` 改，普通进度用 `lite-progress`，Feature 完成用 `lite-check`。
 - 停下等用户前把 `pause` 串进收口命令，不单发计时命令：`$W status <id> && $W pause <id> "<等什么>"`。

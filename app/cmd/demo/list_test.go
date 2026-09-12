@@ -23,7 +23,7 @@ func TestDemoListCommandShowsFeatureOverview(t *testing.T) {
 		"PrismGo Framework: v0.2.2 (local workspace)",
 		"Feature", "Description", "Since", "Progress", "Remaining", "Status",
 		"Queues, jobs, and workers", "59/59", "implemented",
-		"Modules: 29 | Implemented: 477/1432 | Planned: 952 | Manual: 3",
+		"Modules: 29 | Implemented: 524/1432 | Planned: 905 | Manual: 3",
 		"go run ./demo demo:show <feature>",
 	} {
 		if !strings.Contains(output.String(), expected) {
@@ -52,8 +52,8 @@ func TestDemoListCommandJSONAndFeatureStatusFilter(t *testing.T) {
 	if result.Framework != "v0.2.2" {
 		t.Fatalf("framework = %q, want v0.2.2", result.Framework)
 	}
-	if len(result.Features) != 8 || result.Features[0].Feature != "cache" || result.Features[1].Feature != "commands" || result.Features[2].Feature != "config" || result.Features[3].Feature != "console" || result.Features[4].Feature != "event" || result.Features[5].Feature != "horizon" || result.Features[6].Feature != "queue" || result.Features[7].Feature != "translation" {
-		t.Fatalf("features = %#v, want cache, commands, config, console, event, horizon, queue, and translation implemented", result.Features)
+	if len(result.Features) != 9 || result.Features[0].Feature != "cache" || result.Features[1].Feature != "commands" || result.Features[2].Feature != "config" || result.Features[3].Feature != "console" || result.Features[4].Feature != "event" || result.Features[5].Feature != "exception" || result.Features[6].Feature != "horizon" || result.Features[7].Feature != "queue" || result.Features[8].Feature != "translation" {
+		t.Fatalf("features = %#v, want cache, commands, config, console, event, exception, horizon, queue, and translation implemented", result.Features)
 	}
 	if strings.Contains(output.String(), "\x1b[") {
 		t.Fatalf("JSON contains ANSI decoration: %q", output.String())
