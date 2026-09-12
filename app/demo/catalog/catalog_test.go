@@ -793,8 +793,8 @@ func TestCookieDocumentationCoverage(t *testing.T) {
 	}
 
 	summary, ok := SummaryFor("cookie")
-	if !ok || summary.Total != 50 || summary.Planned != 50 || summary.Remaining != 50 {
-		t.Fatalf("cookie summary = %#v, found=%v; want total=50 planned=50 remaining=50", summary, ok)
+	if !ok || summary.Total != 50 || summary.Implemented != 50 || summary.Planned != 0 || summary.Remaining != 0 {
+		t.Fatalf("cookie summary = %#v, found=%v; want total=50 implemented=50 planned=0 remaining=0", summary, ok)
 	}
 }
 

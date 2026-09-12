@@ -40,7 +40,7 @@ Demo 项目主要承担四件事：
 
 ## Catalog 进度地图
 
-Catalog 当前覆盖 **29 个模块、1432 个条目**：已实现 666 个、计划中 763 个、手工验证 3 个。以下是 README 更新时的快照；`app/demo/catalog/` 是唯一数据源，实时进度以 `demo:list` 输出为准。
+Catalog 当前覆盖 **29 个模块、1432 个条目**：已实现 716 个、计划中 713 个、手工验证 3 个。以下是 README 更新时的快照；`app/demo/catalog/` 是唯一数据源，实时进度以 `demo:list` 输出为准。
 
 | 模块 | 覆盖范围 | 进度 | 剩余 | 状态 |
 |---|---|---:|---:|---|
@@ -49,7 +49,7 @@ Catalog 当前覆盖 **29 个模块、1432 个条目**：已实现 666 个、计
 | `config` | 环境与应用配置 | 62/62 | 0 | 已实现 |
 | `console` | Artisan 风格命令与终端 IO | 70/70 | 0 | 已实现 |
 | `container` | 依赖绑定与解析 | 47/47 | 0 | 已实现 |
-| `cookie` | Cookie 值与排队写入 | 0/50 | 50 | 计划中 |
+| `cookie` | Cookie 值与排队写入 | 50/50 | 0 | 已实现 |
 | `database` | 数据库连接、模型、迁移与索引维护 | 0/62 | 62 | 计划中 |
 | `encryption` | 应用数据加密 | 0/1 | 1 | 计划中 |
 | `event` | 同步、异步与队列事件 | 57/57 | 0 | 已实现 |
@@ -91,6 +91,8 @@ go run ./demo demo:cache get --json
 go run ./demo demo:container list
 go run ./demo demo:container list-entries --json
 go run ./demo demo:container singleton --json
+go run ./demo demo:cookie list
+go run ./demo demo:cookie session-queue --json
 go run ./demo demo:commands list
 go run ./demo demo:commands serve-reload --json
 go run ./demo demo:http-server list

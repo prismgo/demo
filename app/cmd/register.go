@@ -18,6 +18,7 @@ func CommandFactories() []console.CommandFactory {
 		func() console.Command { return demo.NewEventCommand() },
 		func() console.Command { return demo.NewConfigCommand() },
 		func() console.Command { return demo.NewContainerCommand() },
+		func() console.Command { return demo.NewCookieCommand() },
 		func() console.Command { return demo.NewExceptionCommand() },
 		func() console.Command { return demo.NewTranslationCommand() },
 		func() console.Command { return demo.NewConsoleCommand() },
