@@ -41,12 +41,12 @@ type Summary struct {
 
 var features = []Feature{
 	{Name: "cache", Description: "Cache stores, tags, and locks", Since: SinceInitial},
-	{Name: "commands", Description: "Console command discovery", Since: SinceInitial},
+	{Name: "commands", Description: "Application commands and options", Since: SinceInitial},
 	{Name: "config", Description: "Environment and application configuration", Since: SinceInitial},
 	{Name: "console", Description: "Artisan-style commands and terminal IO", Since: SinceInitial},
 	{Name: "container", Description: "Dependency binding and resolution", Since: SinceInitial},
 	{Name: "cookie", Description: "Cookie values and queued writes", Since: SinceInitial},
-	{Name: "database", Description: "Database connections and pools", Since: SinceInitial},
+	{Name: "database", Description: "Connections, models, migrations, and indexes", Since: SinceInitial},
 	{Name: "encryption", Description: "Application data encryption", Since: SinceInitial},
 	{Name: "event", Description: "Synchronous, asynchronous, and queued events", Since: SinceInitial},
 	{Name: "exception", Description: "Exception reporting and rendering", Since: SinceInitial},

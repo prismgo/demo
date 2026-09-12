@@ -40,35 +40,35 @@ Demo 项目主要承担四件事：
 
 ## Catalog 进度地图
 
-Catalog 当前覆盖 **29 个模块、476 个条目**：已实现 101 个、计划中 372 个、手工验证 3 个。以下是 README 更新时的快照；`app/demo/catalog/` 是唯一数据源，实时进度以 `demo:list` 输出为准。
+Catalog 当前覆盖 **29 个模块、1432 个条目**：已实现 101 个、计划中 1328 个、手工验证 3 个。以下是 README 更新时的快照；`app/demo/catalog/` 是唯一数据源，实时进度以 `demo:list` 输出为准。
 
 | 模块 | 覆盖范围 | 进度 | 剩余 | 状态 |
 |---|---|---:|---:|---|
 | `cache` | 缓存存储、标签与锁 | 0/57 | 57 | 计划中 |
-| `commands` | Console 命令发现 | 1/1 | 0 | 已实现 |
-| `config` | 环境与应用配置 | 0/1 | 1 | 计划中 |
-| `console` | Artisan 风格命令与终端 IO | 0/1 | 1 | 计划中 |
-| `container` | 依赖绑定与解析 | 0/1 | 1 | 计划中 |
-| `cookie` | Cookie 值与排队写入 | 0/1 | 1 | 计划中 |
-| `database` | 数据库连接与连接池 | 0/1 | 1 | 计划中 |
+| `commands` | 应用命令与选项 | 1/101 | 100 | 进行中 |
+| `config` | 环境与应用配置 | 0/62 | 62 | 计划中 |
+| `console` | Artisan 风格命令与终端 IO | 0/70 | 70 | 计划中 |
+| `container` | 依赖绑定与解析 | 0/47 | 47 | 计划中 |
+| `cookie` | Cookie 值与排队写入 | 0/50 | 50 | 计划中 |
+| `database` | 数据库连接、模型、迁移与索引维护 | 0/62 | 62 | 计划中 |
 | `encryption` | 应用数据加密 | 0/1 | 1 | 计划中 |
 | `event` | 同步、异步与队列事件 | 0/57 | 57 | 计划中 |
-| `exception` | 异常报告与渲染 | 0/1 | 1 | 计划中 |
+| `exception` | 异常报告与渲染 | 0/77 | 77 | 计划中 |
 | `facade` | 框架 Facade 访问 | 0/1 | 1 | 计划中 |
 | `filesystem` | 本地、公共与云文件系统 | 1/67 | 66 | 进行中 |
 | `horizon` | 队列监控与 Worker 管理 | 1/1 | 0 | 已实现 |
-| `http-server` | HTTP 服务启动与生命周期 | 0/1 | 1 | 计划中 |
+| `http-server` | HTTP 服务启动与生命周期 | 0/29 | 29 | 计划中 |
 | `installation` | 应用安装流程 | 0/1 | — | 手工验证 |
 | `lens` | Lens 开发流程 | 0/1 | — | 手工验证 |
-| `lifecycle` | 应用启动与关闭 | 0/1 | 1 | 计划中 |
+| `lifecycle` | 应用启动与关闭 | 0/57 | 57 | 计划中 |
 | `logger` | 多通道应用日志 | 0/40 | 40 | 计划中 |
 | `queue` | 队列、任务与 Worker | 59/59 | 0 | 已实现 |
 | `ratelimit` | 请求与操作限流 | 0/74 | 74 | 计划中 |
-| `redis` | Redis 连接与操作 | 0/1 | 1 | 计划中 |
-| `route` | HTTP 路由注册 | 0/1 | 1 | 计划中 |
-| `schema` | 数据库 Schema 与迁移构建器 | 0/1 | 1 | 计划中 |
-| `service-provider` | Service Provider 注册与生命周期 | 0/1 | 1 | 计划中 |
-| `session` | 服务端 Session 存储 | 0/1 | 1 | 计划中 |
+| `redis` | Redis 连接与操作 | 0/93 | 93 | 计划中 |
+| `route` | HTTP 路由注册 | 0/87 | 87 | 计划中 |
+| `schema` | 数据库 Schema 与迁移构建器 | 0/143 | 143 | 计划中 |
+| `service-provider` | Service Provider 注册与生命周期 | 0/42 | 42 | 计划中 |
+| `session` | 服务端 Session 存储 | 0/50 | 50 | 计划中 |
 | `starter` | 生成应用的起始模板 | 0/1 | — | 手工验证 |
 | `support` | 通用框架辅助函数 | 0/1 | 1 | 计划中 |
 | `timer` | 定时任务定义 | 0/62 | 62 | 计划中 |

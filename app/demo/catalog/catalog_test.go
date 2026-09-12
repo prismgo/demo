@@ -12,8 +12,8 @@ func TestCatalogEntries(t *testing.T) {
 	if err := Validate(entries); err != nil {
 		t.Fatalf("validate catalog entries: %v", err)
 	}
-	if len(entries) != 476 {
-		t.Fatalf("catalog has %d entries, want 476", len(entries))
+	if len(entries) != 1432 {
+		t.Fatalf("catalog has %d entries, want 1432", len(entries))
 	}
 	if item, ok := Find("commands", "list"); !ok || item.Status != StatusImplemented {
 		t.Fatalf("implemented demo:list entry = %#v, %v", item, ok)
@@ -56,6 +56,32 @@ func TestCatalogEntries(t *testing.T) {
 		}
 	}
 	for _, slug := range []string{
+		"architecture", "dependency-resolution", "use-cases", "bind", "transient-lifecycle", "singleton", "singleton-retry",
+		"instance", "nil-instance", "alias", "alias-close-order", "with-closer", "with-context-closer", "with-close-group",
+		"make", "make-order", "factory", "typed-make", "typed-mismatch", "value", "value-zero",
+		"call", "call-positional", "call-results", "call-limits", "has", "bound", "resolved", "list", "forget", "forget-no-close",
+		"close-groups", "close-group", "close-order", "closer-ownership", "close-pre-cancel", "close-success", "close-retry", "close-mid-cancel",
+		"missing-loader", "missing-loader-error", "facade", "provider-lifecycle", "error-not-registered", "error-nil-result", "error-no-current", "laravel-mapping",
+	} {
+		if item, ok := Find("container", slug); !ok || item.Status != StatusPlanned {
+			t.Fatalf("container catalog entry %q = %#v, found=%v; want planned", slug, item, ok)
+		}
+	}
+	for _, slug := range []string{
+		"architecture", "contract", "register-contract", "container-access", "preserve-binding",
+		"bind", "singleton", "instance", "alias", "with-closer", "close-group",
+		"boot-order", "boot-listeners", "commands", "command-inputs", "command-deferred",
+		"publishes", "publish-tags", "publish-environment",
+		"application-registration", "base-order", "default-order", "extension-order", "application-order",
+		"named-identity", "implicit-identity", "duplicate-identity",
+		"deferrable-contract", "provides", "deferred-resolution", "deferred-map-cleanup", "deferred-late-boot", "deferred-empty", "deferred-conflict", "deferred-termination",
+		"terminable-contract", "worker-lifecycle", "terminate-order", "terminate-eligibility", "terminate-context", "closer-order", "full-lifecycle",
+	} {
+		if item, ok := Find("service-provider", slug); !ok || item.Status != StatusPlanned {
+			t.Fatalf("service-provider catalog entry %q = %#v, %v; want planned", slug, item, ok)
+		}
+	}
+	for _, slug := range []string{
 		"architecture", "config", "driver-prerequisites", "top-level-config",
 		"memory-config", "redis-config", "file-config", "failover-config", "lock-config", "flexible-config",
 		"facade", "named-store", "repository", "missing-store",
@@ -93,6 +119,47 @@ func TestCatalogEntries(t *testing.T) {
 		}
 	}
 	for _, slug := range []string{
+		"application-entry", "run-context",
+		"base-providers", "default-providers", "extension-providers", "application-providers", "exception-handler",
+		"provider-layering", "register-phase", "boot-phase", "booted-runner-order",
+		"deferred-provider-map", "deferred-provider-resolution", "dynamic-provider",
+		"http-pipeline", "request-id", "access-log", "exception-middleware", "business-middleware", "request-error-log",
+		"handle-command", "console-starting", "command-resolution", "command-execution", "shared-application",
+		"runner-shutdown", "signal-shutdown", "root-context-cancel", "terminating-event-order", "terminable-providers",
+		"cleanup-functions", "resource-close-order", "shutdown-error-reporting", "terminated-event-order", "close-retry",
+		"best-effort-events", "app-booting-event", "app-booted-event", "app-terminating-event", "app-terminated-event",
+		"provider-registering-event", "provider-registered-event", "provider-booting-event", "provider-booted-event",
+		"server-starting-event", "server-started-event", "server-stopping-event", "server-stopped-event",
+		"request-received-event", "request-handled-event", "request-failed-event", "request-finished-event",
+		"console-application-starting-event", "console-command-starting-event", "console-command-finished-event",
+		"listeners", "payload-boundaries",
+	} {
+		if item, ok := Find("lifecycle", slug); !ok || item.Status != StatusPlanned {
+			t.Fatalf("lifecycle catalog entry %q = %#v, %v; want planned", slug, item, ok)
+		}
+	}
+	for _, slug := range []string{
+		"architecture", "config", "file-driver", "redis-driver", "top-level-config", "cookie-config",
+		"file-config", "redis-config", "lock-config", "manager-config",
+		"middleware", "recovery", "response-buffering", "store-from", "custom-manager",
+		"get", "all", "subsets", "has", "exists", "missing", "put", "counters",
+		"flash", "now", "reflash", "keep", "forget", "flush", "pull", "regenerate", "invalidate",
+		"blocking", "file-lock", "redis-lock", "id-cookie", "expire-on-close", "queued-cookies",
+		"encryption", "encryptor", "custom-encryptor", "sensitive-error",
+		"driver-contract", "locker-contract", "extend", "extend-validation", "unknown-driver",
+		"errors", "recoverable-errors", "laravel-compatibility",
+	} {
+		if item, ok := Find("session", slug); !ok || item.Status != StatusPlanned {
+			t.Fatalf("session catalog entry %q = %#v, %v; want planned", slug, item, ok)
+		}
+	}
+	for _, slug := range []string{"redis-driver", "redis-lock"} {
+		item, ok := Find("session", slug)
+		if !ok || item.Level != LevelIntegration || len(item.Requirements) != 1 || item.Requirements[0] != "redis" {
+			t.Fatalf("session Redis entry %q = %#v, %v; want integration requiring redis", slug, item, ok)
+		}
+	}
+	for _, slug := range []string{
 		"architecture", "config", "store-resolution", "memory-store", "redis-store", "config-registration",
 		"auto-initialization", "quick-start", "explicit-limiter",
 		"named-registration", "named-lookup", "unregistered-pass-through", "multi-rule-counters", "multi-rule-block",
@@ -110,6 +177,76 @@ func TestCatalogEntries(t *testing.T) {
 	} {
 		if item, ok := Find("ratelimit", slug); !ok || item.Status != StatusPlanned {
 			t.Fatalf("ratelimit catalog entry %q = %#v, %v; want planned", slug, item, ok)
+		}
+	}
+	for _, slug := range []string{
+		"architecture", "config", "client-identifiers", "named-config", "address-precedence", "database-precedence", "authentication",
+		"url", "tls", "client-name", "timeouts", "max-retries", "environment",
+		"client", "named-client", "connection", "strings", "hashes", "lists", "sets", "sorted-sets", "counters", "keys", "native-client",
+		"transaction", "lua", "pipeline", "publish", "subscribe", "psubscribe",
+		"manager", "manager-repository", "manager-application", "default-connection", "named-connection", "default-connection-method", "lazy-connection",
+		"multiple-connections", "connection-reuse", "connections-snapshot", "snapshot-lazy", "purge", "purge-rebuild",
+		"close", "close-errors", "close-cancellation",
+		"command-executed-event", "command-failed-event", "batch-executed-event", "batch-failed-event", "event-payloads", "event-sensitive-parameters",
+		"global-command-listener", "global-failure-listener", "global-batch-listener",
+		"connection-listener", "connection-failure-listener", "listener-panic", "disable-events", "enable-events",
+		"provider-registration", "provider-event-bridge", "container-factory", "container-connection", "container-named-connection", "lifecycle-close",
+		"cache-driver", "cache-basic", "cache-ttl", "cache-atomic", "cache-bulk", "cache-tags", "cache-flush",
+		"queue-driver", "queue-ready", "queue-delayed", "queue-blocking-pop", "queue-failed",
+		"horizon-config", "horizon-processes", "horizon-control", "horizon-metrics", "horizon-queue-lengths", "horizon-summaries",
+		"horizon-job-diagnostics", "horizon-observability", "horizon-orphans",
+		"facade-manager", "manager-close-option", "manager-contract", "connection-contract", "event-aliases", "event-wrappers",
+	} {
+		if item, ok := Find("redis", slug); !ok || item.Status != StatusPlanned {
+			t.Fatalf("redis catalog entry %q = %#v, %v; want planned", slug, item, ok)
+		}
+	}
+	for _, slug := range []string{
+		"architecture", "facade", "mount", "isolated-router",
+		"http-methods", "match", "any",
+		"laravel-parameters", "gin-parameters", "parameter-read", "optional-parameters", "wildcard-parameters",
+		"where", "where-number", "where-alpha", "where-alphanumeric", "where-uuid", "where-ulid", "where-in",
+		"group-constraints", "global-pattern", "constraint-override",
+		"route-name", "url", "url-escaping", "url-missing-parameter", "group-name-prefix", "duplicate-route-name",
+		"group-prefix", "group-chain", "nested-groups",
+		"group-middleware", "route-middleware", "named-middleware", "middleware-function-name", "route-without-middleware", "registrar-without-middleware",
+		"bind", "model", "binding-context", "missing-handler", "default-missing",
+		"controller-action", "controller-validation",
+		"api-resource", "resource", "resource-create", "resource-edit", "resource-only", "resource-except", "resource-names", "resource-parameters",
+		"api-resources", "nested-resource", "resource-controller-contract", "create-controller-contract", "edit-controller-contract",
+		"redirect", "permanent-redirect", "static", "fallback", "domain", "domain-placeholder",
+		"rate-limiter", "limit", "throttle-route", "throttle-group", "throttle-unknown", "throttle-over-limit",
+		"current-route", "route-info", "list", "list-command", "handler-order",
+		"resolve", "reset", "clone", "add", "router-group", "route-scope-bindings", "registrar-scope-bindings", "registrar-overrides", "facade-contract",
+		"provider-registration", "provider-preserves-router", "provider-singleton", "best-practices",
+	} {
+		if item, ok := Find("route", slug); !ok || item.Status != StatusPlanned {
+			t.Fatalf("route catalog entry %q = %#v, %v; want planned", slug, item, ok)
+		}
+	}
+	for _, slug := range []string{
+		"architecture", "sqlite-extension", "sqlite-connection-scope",
+		"default-string-length", "default-time-precision", "default-morph-key-type", "morph-using-uuids", "morph-using-ulids", "explicit-tag-precedence",
+		"bind", "new", "named-connection", "facade",
+		"create", "create-validation", "create-dialect-options", "table", "add-column", "change-column", "rename-column", "drop-column", "drop-columns", "raw",
+		"rename", "drop", "builder-drop-columns", "drop-all-tables", "drop-all-views", "drop-all-types",
+		"id", "increments", "signed-integers", "unsigned-integers", "string-char", "text-types", "uuid-ulid", "network-addresses", "remember-token",
+		"boolean", "floating-point", "decimal", "date", "datetime", "time", "timestamp", "year", "timestamps", "soft-deletes",
+		"binary", "json", "enum-set", "spatial-types", "vector", "foreign-id", "foreign-id-for", "morphs", "nullable-morphs", "nullable-timestamps",
+		"nullable", "not-null", "unsigned", "auto-increment", "primary-modifier", "unique-modifier", "index-modifier", "default", "comment", "first", "after",
+		"charset", "collation", "use-current", "use-current-on-update", "invisible", "stored-as", "virtual-as", "from", "instant", "lock", "change-semantics",
+		"drop-remember-token", "drop-timestamps", "drop-timestamps-tz", "drop-soft-deletes", "drop-soft-deletes-tz", "drop-morphs", "drop-constrained-foreign-id", "drop-foreign-id-for",
+		"primary-index", "unique-index", "index", "fulltext-index", "spatial-index", "named-indexes", "index-naming", "rename-index",
+		"drop-index", "drop-unique", "drop-primary", "drop-fulltext", "drop-spatial-index",
+		"constrained", "constrained-explicit", "foreign", "foreign-actions", "cascade-actions", "restrict-actions", "null-actions", "no-action-actions", "foreign-name", "foreign-dialect", "drop-foreign",
+		"table-view-existence", "tables", "table-listing", "views", "schemas", "types", "schema-filter", "has-columns", "columns", "column-type", "has-index", "indexes", "foreign-keys", "metadata-types",
+		"when-has-column", "when-missing-column", "when-missing-index",
+		"disable-foreign-keys", "enable-foreign-keys", "without-foreign-keys", "foreign-key-toggle-dialects",
+		"create-database", "drop-database", "ensure-extension", "ensure-vector-extension",
+		"sync-models", "sync-models-columns", "sync-models-defaults", "sync-models-boundaries", "dialect-compatibility", "laravel-compatibility",
+	} {
+		if item, ok := Find("schema", slug); !ok || item.Status != StatusPlanned {
+			t.Fatalf("schema catalog entry %q = %#v, %v; want planned", slug, item, ok)
 		}
 	}
 	for _, slug := range []string{
@@ -162,8 +299,8 @@ func TestCatalogEntries(t *testing.T) {
 			t.Fatalf("filesystem catalog entry %q = %#v, %v; want planned", slug, item, ok)
 		}
 	}
-	if got := Filter("redis", LevelIntegration, StatusPlanned); len(got) != 1 {
-		t.Fatalf("redis integration filter returned %d entries, want 1", len(got))
+	if got := Filter("redis", LevelIntegration, StatusPlanned); len(got) != 54 {
+		t.Fatalf("redis integration filter returned %d entries, want 54", len(got))
 	}
 	if got := Filter("queue", "", StatusImplemented); len(got) != 59 {
 		t.Fatalf("implemented queue entries = %d, want 59", len(got))
@@ -199,6 +336,16 @@ func TestCatalogFeatureSummaries(t *testing.T) {
 	}
 	if cache.Status != FeatureStatusPlanned || cache.Since != SinceInitial {
 		t.Fatalf("cache status/since = %q/%q, want %q/%q", cache.Status, cache.Since, FeatureStatusPlanned, SinceInitial)
+	}
+
+	containerSummary, ok := SummaryFor("container")
+	if !ok || containerSummary.Implemented != 0 || containerSummary.Planned != 47 || containerSummary.Manual != 0 || containerSummary.Total != 47 || containerSummary.Remaining != 47 || containerSummary.Status != FeatureStatusPlanned {
+		t.Fatalf("container summary = %#v, found=%v; want 47 planned entries and no implemented or manual entries", containerSummary, ok)
+	}
+
+	config, ok := SummaryFor("config")
+	if !ok || config.Implemented != 0 || config.Planned != 62 || config.Manual != 0 || config.Total != 62 || config.Remaining != 62 || config.Status != FeatureStatusPlanned {
+		t.Fatalf("config summary = %#v, found=%v; want 62 planned entries and no implemented or manual entries", config, ok)
 	}
 
 	filesystem, ok := SummaryFor("filesystem")
@@ -245,6 +392,28 @@ func TestCatalogFeatureSummaries(t *testing.T) {
 		t.Fatalf("event status/since = %q/%q, want %q/%q", event.Status, event.Since, FeatureStatusPlanned, SinceInitial)
 	}
 
+	sessionSummary, ok := SummaryFor("session")
+	if !ok {
+		t.Fatal("SummaryFor(session) found = false, want true")
+	}
+	if sessionSummary.Implemented != 0 || sessionSummary.Planned != 50 || sessionSummary.Manual != 0 || sessionSummary.Total != 50 || sessionSummary.Remaining != 50 {
+		t.Fatalf("session summary = %#v, want implemented=0 planned=50 manual=0 total=50 remaining=50", sessionSummary)
+	}
+	if sessionSummary.Status != FeatureStatusPlanned || sessionSummary.Since != SinceInitial {
+		t.Fatalf("session status/since = %q/%q, want %q/%q", sessionSummary.Status, sessionSummary.Since, FeatureStatusPlanned, SinceInitial)
+	}
+
+	lifecycle, ok := SummaryFor("lifecycle")
+	if !ok {
+		t.Fatal("SummaryFor(lifecycle) found = false")
+	}
+	if lifecycle.Implemented != 0 || lifecycle.Planned != 57 || lifecycle.Manual != 0 || lifecycle.Total != 57 || lifecycle.Remaining != 57 {
+		t.Fatalf("lifecycle summary = %#v, want implemented=0 planned=57 manual=0 total=57 remaining=57", lifecycle)
+	}
+	if lifecycle.Status != FeatureStatusPlanned || lifecycle.Since != SinceInitial {
+		t.Fatalf("lifecycle status/since = %q/%q, want %q/%q", lifecycle.Status, lifecycle.Since, FeatureStatusPlanned, SinceInitial)
+	}
+
 	logger, ok := SummaryFor("logger")
 	if !ok {
 		t.Fatal("SummaryFor(logger) found = false")
@@ -278,13 +447,399 @@ func TestCatalogFeatureSummaries(t *testing.T) {
 		t.Fatalf("ratelimit status/since = %q/%q, want %q/%q", ratelimit.Status, ratelimit.Since, FeatureStatusPlanned, SinceInitial)
 	}
 
+	redis, ok := SummaryFor("redis")
+	if !ok {
+		t.Fatal("SummaryFor(redis) found = false")
+	}
+	if redis.Implemented != 0 || redis.Planned != 93 || redis.Manual != 0 || redis.Total != 93 || redis.Remaining != 93 {
+		t.Fatalf("redis summary = %#v, want implemented=0 planned=93 manual=0 total=93 remaining=93", redis)
+	}
+	if redis.Status != FeatureStatusPlanned || redis.Since != SinceInitial {
+		t.Fatalf("redis status/since = %q/%q, want %q/%q", redis.Status, redis.Since, FeatureStatusPlanned, SinceInitial)
+	}
+
+	routeSummary, ok := SummaryFor("route")
+	if !ok {
+		t.Fatal("SummaryFor(route) found = false")
+	}
+	if routeSummary.Implemented != 0 || routeSummary.Planned != 87 || routeSummary.Manual != 0 || routeSummary.Total != 87 || routeSummary.Remaining != 87 {
+		t.Fatalf("route summary = %#v, want implemented=0 planned=87 manual=0 total=87 remaining=87", routeSummary)
+	}
+	if routeSummary.Status != FeatureStatusPlanned || routeSummary.Since != SinceInitial {
+		t.Fatalf("route status/since = %q/%q, want %q/%q", routeSummary.Status, routeSummary.Since, FeatureStatusPlanned, SinceInitial)
+	}
+
+	schemaSummary, ok := SummaryFor("schema")
+	if !ok {
+		t.Fatal("SummaryFor(schema) found = false")
+	}
+	if schemaSummary.Implemented != 0 || schemaSummary.Planned != 143 || schemaSummary.Manual != 0 || schemaSummary.Total != 143 || schemaSummary.Remaining != 143 {
+		t.Fatalf("schema summary = %#v, want implemented=0 planned=143 manual=0 total=143 remaining=143", schemaSummary)
+	}
+	if schemaSummary.Status != FeatureStatusPlanned || schemaSummary.Since != SinceInitial {
+		t.Fatalf("schema status/since = %q/%q, want %q/%q", schemaSummary.Status, schemaSummary.Since, FeatureStatusPlanned, SinceInitial)
+	}
+
+	serviceProvider, ok := SummaryFor("service-provider")
+	if !ok {
+		t.Fatal("SummaryFor(service-provider) found = false")
+	}
+	if serviceProvider.Implemented != 0 || serviceProvider.Planned != 42 || serviceProvider.Manual != 0 || serviceProvider.Total != 42 || serviceProvider.Remaining != 42 {
+		t.Fatalf("service-provider summary = %#v, want implemented=0 planned=42 manual=0 total=42 remaining=42", serviceProvider)
+	}
+	if serviceProvider.Status != FeatureStatusPlanned || serviceProvider.Since != SinceInitial {
+		t.Fatalf("service-provider status/since = %q/%q, want %q/%q", serviceProvider.Status, serviceProvider.Since, FeatureStatusPlanned, SinceInitial)
+	}
+
 	commands, ok := SummaryFor("commands")
-	if !ok || commands.Status != FeatureStatusImplemented {
-		t.Fatalf("commands summary = %#v, %v; want implemented", commands, ok)
+	if !ok || commands.Status != FeatureStatusInProgress || commands.Implemented != 1 || commands.Planned != 100 || commands.Total != 101 {
+		t.Fatalf("commands summary = %#v, %v; want in progress with 1 implemented and 100 planned entries", commands, ok)
 	}
 	installation, ok := SummaryFor("installation")
 	if !ok || installation.Status != FeatureStatusManual || installation.Remaining != 0 {
 		t.Fatalf("installation summary = %#v, %v; want manual with no remaining planned entries", installation, ok)
+	}
+}
+
+func TestConfigDocumentationCoverage(t *testing.T) {
+	entries := Filter("config", "", "")
+	docsRoot, ok := FindDocsRoot(".")
+	if !ok {
+		t.Skip("sibling docs checkout is not available")
+	}
+
+	for _, locale := range []struct {
+		path    string
+		heading func(Entry) string
+	}{
+		{path: filepath.Join(docsRoot, "zh_CN", "config.md"), heading: func(item Entry) string { return item.HeadingZH }},
+		{path: filepath.Join(docsRoot, "en", "config.md"), heading: func(item Entry) string { return item.HeadingEN }},
+	} {
+		content, err := os.ReadFile(locale.path)
+		if err != nil {
+			t.Fatalf("read config documentation %s: %v", locale.path, err)
+		}
+		configRows := 0
+		for _, line := range strings.Split(string(content), "\n") {
+			line = strings.TrimSpace(line)
+			if strings.HasPrefix(line, "## ") || strings.HasPrefix(line, "### ") {
+				heading := strings.TrimSpace(strings.TrimLeft(line, "#"))
+				found := false
+				for _, item := range entries {
+					if locale.heading(item) == heading {
+						found = true
+						break
+					}
+				}
+				if !found {
+					t.Errorf("config document %s heading %q has no catalog entry; actual entries=%d, want heading mapped", locale.path, heading, len(entries))
+				}
+			}
+			if !strings.HasPrefix(line, "| `app.") {
+				continue
+			}
+			columns := strings.Split(line, "|")
+			if len(columns) < 4 {
+				t.Fatalf("config document %s row %q has %d columns, want at least 4", locale.path, line, len(columns))
+			}
+			path := strings.Trim(strings.TrimSpace(columns[1]), "`")
+			env := strings.Trim(strings.TrimSpace(columns[2]), "`")
+			section := path + " and " + env
+			found := false
+			for _, item := range entries {
+				if item.Section == section {
+					found = true
+					break
+				}
+			}
+			if !found {
+				t.Errorf("config document %s row %q has no catalog entry; want section %q", locale.path, line, section)
+			}
+			configRows++
+		}
+		if configRows != 24 {
+			t.Errorf("config document %s has %d application configuration rows, want 24", locale.path, configRows)
+		}
+	}
+}
+
+func TestDatabaseDocumentationCoverage(t *testing.T) {
+	entries := Filter("database", "", "")
+	if len(entries) != 62 {
+		t.Fatalf("database catalog entries = %d, want 62", len(entries))
+	}
+	docsRoot, ok := FindDocsRoot(".")
+	if !ok {
+		t.Skip("sibling docs checkout is not available")
+	}
+
+	for _, locale := range []struct {
+		path    string
+		heading func(Entry) string
+	}{
+		{path: filepath.Join(docsRoot, "zh_CN", "database.md"), heading: func(item Entry) string { return item.HeadingZH }},
+		{path: filepath.Join(docsRoot, "en", "database.md"), heading: func(item Entry) string { return item.HeadingEN }},
+	} {
+		content, err := os.ReadFile(locale.path)
+		if err != nil {
+			t.Fatalf("read database documentation %s: %v", locale.path, err)
+		}
+		lines := strings.Split(string(content), "\n")
+		for i, line := range lines {
+			line = strings.TrimSpace(line)
+			if strings.HasPrefix(line, "## ") || strings.HasPrefix(line, "### ") || strings.HasPrefix(line, "#### ") {
+				level := len(line) - len(strings.TrimLeft(line, "#"))
+				leaf := true
+				for _, next := range lines[i+1:] {
+					next = strings.TrimSpace(next)
+					if !strings.HasPrefix(next, "#") {
+						continue
+					}
+					nextLevel := len(next) - len(strings.TrimLeft(next, "#"))
+					leaf = nextLevel <= level
+					break
+				}
+				if leaf {
+					heading := strings.TrimSpace(strings.TrimLeft(line, "#"))
+					found := false
+					for _, item := range entries {
+						if locale.heading(item) == heading {
+							found = true
+							break
+						}
+					}
+					if !found {
+						t.Errorf("database document %s leaf heading %q has no catalog entry; actual entries=%d, want heading mapped", locale.path, heading, len(entries))
+					}
+				}
+			}
+			if !strings.HasPrefix(line, "| `database.") {
+				continue
+			}
+			columns := strings.Split(line, "|")
+			if len(columns) < 4 {
+				t.Fatalf("database document %s row %q has %d columns, want at least 4", locale.path, line, len(columns))
+			}
+			path := strings.Trim(strings.TrimSpace(columns[1]), "`")
+			found := false
+			for _, item := range entries {
+				if strings.HasPrefix(item.Section, path) {
+					found = true
+					break
+				}
+			}
+			if !found {
+				t.Errorf("database document %s config row %q has no catalog entry; want section starting with %q", locale.path, line, path)
+			}
+		}
+	}
+}
+
+func TestCommandsDocumentationCoverage(t *testing.T) {
+	entries := Filter("commands", "", "")
+	if len(entries) != 101 {
+		t.Fatalf("commands catalog entries = %d, want 101", len(entries))
+	}
+
+	docsRoot, ok := FindDocsRoot(".")
+	if !ok {
+		t.Skip("sibling docs checkout is not available")
+	}
+	for _, locale := range []struct {
+		path    string
+		heading func(Entry) string
+	}{
+		{path: filepath.Join(docsRoot, "zh_CN", "commands.md"), heading: func(item Entry) string { return item.HeadingZH }},
+		{path: filepath.Join(docsRoot, "en", "commands.md"), heading: func(item Entry) string { return item.HeadingEN }},
+	} {
+		content, err := os.ReadFile(locale.path)
+		if err != nil {
+			t.Fatalf("read commands documentation %s: %v", locale.path, err)
+		}
+		for _, line := range strings.Split(string(content), "\n") {
+			line = strings.TrimSpace(line)
+			if !strings.HasPrefix(line, "## ") && !strings.HasPrefix(line, "### ") {
+				continue
+			}
+			heading := strings.TrimSpace(strings.TrimLeft(line, "#"))
+			found := false
+			for _, item := range entries {
+				if locale.heading(item) == heading {
+					found = true
+					break
+				}
+			}
+			if !found {
+				t.Errorf("commands document %s heading %q has no catalog entry; want a mapped entry", locale.path, heading)
+			}
+		}
+	}
+}
+
+func TestConsoleDocumentationCoverage(t *testing.T) {
+	entries := Filter("console", "", "")
+	if len(entries) != 70 {
+		t.Fatalf("console catalog entries = %d, want 70", len(entries))
+	}
+	for _, item := range entries {
+		if item.Status != StatusPlanned {
+			t.Errorf("console entry %q status = %q, want %q", item.Case, item.Status, StatusPlanned)
+		}
+	}
+
+	docsRoot, ok := FindDocsRoot(".")
+	if !ok {
+		t.Skip("sibling docs checkout is not available")
+	}
+	for _, locale := range []struct {
+		path    string
+		heading func(Entry) string
+	}{
+		{path: filepath.Join(docsRoot, "zh_CN", "console.md"), heading: func(item Entry) string { return item.HeadingZH }},
+		{path: filepath.Join(docsRoot, "en", "console.md"), heading: func(item Entry) string { return item.HeadingEN }},
+	} {
+		content, err := os.ReadFile(locale.path)
+		if err != nil {
+			t.Fatalf("read console documentation %s: %v", locale.path, err)
+		}
+		lines := strings.Split(string(content), "\n")
+		for index, line := range lines {
+			line = strings.TrimSpace(line)
+			if !strings.HasPrefix(line, "## ") && !strings.HasPrefix(line, "### ") {
+				continue
+			}
+			if strings.HasPrefix(line, "## ") {
+				hasChild := false
+				for _, next := range lines[index+1:] {
+					next = strings.TrimSpace(next)
+					if strings.HasPrefix(next, "## ") {
+						break
+					}
+					if strings.HasPrefix(next, "### ") {
+						hasChild = true
+						break
+					}
+				}
+				if hasChild {
+					continue
+				}
+			}
+			heading := strings.TrimSpace(strings.TrimLeft(line, "#"))
+			found := false
+			for _, item := range entries {
+				if locale.heading(item) == heading {
+					found = true
+					break
+				}
+			}
+			if !found {
+				t.Errorf("console documentation %s heading %q has no catalog entry; actual entries=%d, want heading mapped", locale.path, heading, len(entries))
+			}
+		}
+	}
+}
+
+func TestCookieDocumentationCoverage(t *testing.T) {
+	sections := []struct {
+		zh string
+		en string
+	}{
+		{zh: "简介", en: "Introduction"},
+		{zh: "默认值", en: "Default Values"},
+		{zh: "服务提供者", en: "Service Provider"},
+		{zh: "中间件", en: "Middleware"},
+		{zh: "基础创建", en: "Basic Creation"},
+		{zh: "长期 Cookie", en: "Forever Cookies"},
+		{zh: "构造参数与选项", en: "Constructor Parameters and Options"},
+		{zh: "显式过期时间与 Max-Age", en: "Explicit Expiry Time and Max-Age"},
+		{zh: "直接附加到响应", en: "Direct Attachment"},
+		{zh: "Attach 选项", en: "Attach Options"},
+		{zh: "排队 Cookie", en: "Queuing Cookies"},
+		{zh: "查询已排队 Cookie", en: "Querying Queued Cookies"},
+		{zh: "移除排队项", en: "Removing Queued Items"},
+		{zh: "请求级 vs 进程级 API", en: "Request-Level vs Process-Level API"},
+		{zh: "基础读取", en: "Basic Retrieval"},
+		{zh: "带安全扩展读取", en: "Retrieval with Security Extensions"},
+		{zh: "删除 Cookie", en: "Deleting Cookies"},
+		{zh: "SameSite 策略", en: "SameSite Policy"},
+		{zh: "安全契约接口", en: "Security Contract Interfaces"},
+		{zh: "写出与读取顺序", en: "Outgoing and Incoming Order"},
+		{zh: "默认透传实现", en: "Default Passthrough Implementation"},
+		{zh: "错误脱敏", en: "Error Sanitization"},
+		{zh: "错误常量", en: "Error Constants"},
+		{zh: "与 Laravel Cookie 的对应关系", en: "Laravel Cookie Mapping"},
+	}
+
+	entries := Filter("cookie", "", "")
+	for _, section := range sections {
+		found := false
+		for _, item := range entries {
+			if item.HeadingZH == section.zh && item.HeadingEN == section.en {
+				found = true
+				break
+			}
+		}
+		if !found {
+			t.Errorf("cookie catalog missing zh=%q en=%q heading pair: actual entries=%d, want pair present", section.zh, section.en, len(entries))
+		}
+	}
+
+	summary, ok := SummaryFor("cookie")
+	if !ok || summary.Total != 50 || summary.Planned != 50 || summary.Remaining != 50 {
+		t.Fatalf("cookie summary = %#v, found=%v; want total=50 planned=50 remaining=50", summary, ok)
+	}
+}
+
+func TestContainerDocumentationCoverage(t *testing.T) {
+	entries := Filter("container", "", "")
+	docsRoot, ok := FindDocsRoot(".")
+	if !ok {
+		t.Skip("sibling docs checkout is not available")
+	}
+
+	for _, locale := range []struct {
+		path    string
+		heading func(Entry) string
+	}{
+		{path: filepath.Join(docsRoot, "zh_CN", "container.md"), heading: func(item Entry) string { return item.HeadingZH }},
+		{path: filepath.Join(docsRoot, "en", "container.md"), heading: func(item Entry) string { return item.HeadingEN }},
+	} {
+		content, err := os.ReadFile(locale.path)
+		if err != nil {
+			t.Fatalf("read container documentation %s: %v", locale.path, err)
+		}
+		lines := strings.Split(string(content), "\n")
+		for index, line := range lines {
+			line = strings.TrimSpace(line)
+			depth := len(line) - len(strings.TrimLeft(line, "#"))
+			if depth < 2 || depth > 4 || len(line) <= depth || line[depth] != ' ' {
+				continue
+			}
+			hasChild := false
+			for _, next := range lines[index+1:] {
+				next = strings.TrimSpace(next)
+				nextDepth := len(next) - len(strings.TrimLeft(next, "#"))
+				if nextDepth < 2 || nextDepth > 4 || len(next) <= nextDepth || next[nextDepth] != ' ' {
+					continue
+				}
+				hasChild = nextDepth > depth
+				break
+			}
+			if hasChild {
+				continue
+			}
+			heading := strings.TrimSpace(line[depth:])
+			found := false
+			for _, item := range entries {
+				if locale.heading(item) == heading {
+					found = true
+					break
+				}
+			}
+			if !found {
+				t.Errorf("container documentation %s leaf heading %q has no catalog entry; actual entries=%d, want heading mapped", locale.path, heading, len(entries))
+			}
+		}
 	}
 }
 

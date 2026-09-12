@@ -41,35 +41,35 @@ The Demo project has four main responsibilities:
 
 ## Catalog Progress Map
 
-The catalog currently covers **29 modules and 476 entries**: 101 implemented, 372 planned, and 3 manually verified. The table below is a snapshot taken when this README was updated. `app/demo/catalog/` is the single source of truth; use `demo:list` for live progress.
+The catalog currently covers **29 modules and 1432 entries**: 101 implemented, 1328 planned, and 3 manually verified. The table below is a snapshot taken when this README was updated. `app/demo/catalog/` is the single source of truth; use `demo:list` for live progress.
 
 | Module | Coverage | Progress | Remaining | Status |
 |---|---|---:|---:|---|
 | `cache` | Cache stores, tags, and locks | 0/57 | 57 | Planned |
-| `commands` | Console command discovery | 1/1 | 0 | Implemented |
-| `config` | Environment and application configuration | 0/1 | 1 | Planned |
-| `console` | Artisan-style commands and terminal IO | 0/1 | 1 | Planned |
-| `container` | Dependency binding and resolution | 0/1 | 1 | Planned |
-| `cookie` | Cookie values and queued writes | 0/1 | 1 | Planned |
-| `database` | Database connections and pools | 0/1 | 1 | Planned |
+| `commands` | Application commands and options | 1/101 | 100 | In progress |
+| `config` | Environment and application configuration | 0/62 | 62 | Planned |
+| `console` | Artisan-style commands and terminal IO | 0/70 | 70 | Planned |
+| `container` | Dependency binding and resolution | 0/47 | 47 | Planned |
+| `cookie` | Cookie values and queued writes | 0/50 | 50 | Planned |
+| `database` | Connections, models, migrations, and indexes | 0/62 | 62 | Planned |
 | `encryption` | Application data encryption | 0/1 | 1 | Planned |
 | `event` | Synchronous, asynchronous, and queued events | 0/57 | 57 | Planned |
-| `exception` | Exception reporting and rendering | 0/1 | 1 | Planned |
+| `exception` | Exception reporting and rendering | 0/77 | 77 | Planned |
 | `facade` | Framework facade access | 0/1 | 1 | Planned |
 | `filesystem` | Local, public, and cloud filesystems | 1/67 | 66 | In progress |
 | `horizon` | Queue monitoring and worker management | 1/1 | 0 | Implemented |
-| `http-server` | HTTP server startup and lifecycle | 0/1 | 1 | Planned |
+| `http-server` | HTTP server startup and lifecycle | 0/29 | 29 | Planned |
 | `installation` | Application installation workflow | 0/1 | — | Manual |
 | `lens` | Lens development workflow | 0/1 | — | Manual |
-| `lifecycle` | Application bootstrap and shutdown | 0/1 | 1 | Planned |
+| `lifecycle` | Application bootstrap and shutdown | 0/57 | 57 | Planned |
 | `logger` | Multi-channel application logging | 0/40 | 40 | Planned |
 | `queue` | Queues, jobs, and workers | 59/59 | 0 | Implemented |
 | `ratelimit` | Request and action rate limiting | 0/74 | 74 | Planned |
-| `redis` | Redis connections and operations | 0/1 | 1 | Planned |
-| `route` | HTTP route registration | 0/1 | 1 | Planned |
-| `schema` | Database schema and migration builder | 0/1 | 1 | Planned |
-| `service-provider` | Service provider registration and lifecycle | 0/1 | 1 | Planned |
-| `session` | Server-side session storage | 0/1 | 1 | Planned |
+| `redis` | Redis connections and operations | 0/93 | 93 | Planned |
+| `route` | HTTP route registration | 0/87 | 87 | Planned |
+| `schema` | Database schema and migration builder | 0/143 | 143 | Planned |
+| `service-provider` | Service provider registration and lifecycle | 0/42 | 42 | Planned |
+| `session` | Server-side session storage | 0/50 | 50 | Planned |
 | `starter` | Generated application starter | 0/1 | — | Manual |
 | `support` | General framework helpers | 0/1 | 1 | Planned |
 | `timer` | Scheduled task definitions | 0/62 | 62 | Planned |
