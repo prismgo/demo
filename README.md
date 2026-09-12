@@ -40,12 +40,12 @@ Demo 项目主要承担四件事：
 
 ## Catalog 进度地图
 
-Catalog 当前覆盖 **29 个模块、1432 个条目**：已实现 158 个、计划中 1271 个、手工验证 3 个。以下是 README 更新时的快照；`app/demo/catalog/` 是唯一数据源，实时进度以 `demo:list` 输出为准。
+Catalog 当前覆盖 **29 个模块、1432 个条目**：已实现 178 个、计划中 1251 个、手工验证 3 个。以下是 README 更新时的快照；`app/demo/catalog/` 是唯一数据源，实时进度以 `demo:list` 输出为准。
 
 | 模块 | 覆盖范围 | 进度 | 剩余 | 状态 |
 |---|---|---:|---:|---|
 | `cache` | 缓存存储、标签与锁 | 57/57 | 0 | 已实现 |
-| `commands` | 应用命令与选项 | 1/101 | 100 | 进行中 |
+| `commands` | 应用命令与选项 | 21/101 | 80 | 进行中 |
 | `config` | 环境与应用配置 | 0/62 | 62 | 计划中 |
 | `console` | Artisan 风格命令与终端 IO | 0/70 | 70 | 计划中 |
 | `container` | 依赖绑定与解析 | 0/47 | 47 | 计划中 |
@@ -84,6 +84,8 @@ go run ./demo demo:show queue --level=integration
 go run ./demo demo:list --json
 go run ./demo demo:cache list
 go run ./demo demo:cache get --json
+go run ./demo demo:commands list
+go run ./demo demo:commands serve-reload --json
 ```
 
 状态含义：`已实现` 表示模块全部条目已落地；`进行中` 表示部分条目已落地；`计划中` 表示尚无已实现条目；`手工验证` 表示由安装器、Lens 等外部流程验证，因此不计入“剩余”数量。

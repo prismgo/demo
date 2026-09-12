@@ -23,7 +23,7 @@ func TestDemoListCommandShowsFeatureOverview(t *testing.T) {
 		"PrismGo Framework: v0.2.2 (local workspace)",
 		"Feature", "Description", "Since", "Progress", "Remaining", "Status",
 		"Queues, jobs, and workers", "59/59", "implemented",
-		"Modules: 29 | Implemented: 158/1432 | Planned: 1271 | Manual: 3",
+		"Modules: 29 | Implemented: 178/1432 | Planned: 1251 | Manual: 3",
 		"go run ./demo demo:show <feature>",
 	} {
 		if !strings.Contains(output.String(), expected) {
