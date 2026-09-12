@@ -12,9 +12,22 @@ func TestExceptionDocumentationCoverage(t *testing.T) {
 	if len(entries) != 77 {
 		t.Fatalf("exception catalog entries = %d, want 77", len(entries))
 	}
+	implemented := 0
 	for _, item := range entries {
-		if item.Status != StatusPlanned {
-			t.Errorf("exception entry %q status = %q, want %q", item.Case, item.Status, StatusPlanned)
+		if item.Status == StatusImplemented {
+			implemented++
+		}
+	}
+	if implemented != 30 {
+		t.Fatalf("implemented exception entries = %d, want 30", implemented)
+	}
+	for index, item := range exceptionEntries() {
+		want := StatusPlanned
+		if index < 30 {
+			want = StatusImplemented
+		}
+		if item.Status != want {
+			t.Errorf("exception entry %q status = %q, want %q (index %d)", item.Case, item.Status, want, index)
 		}
 	}
 
