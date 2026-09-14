@@ -40,7 +40,7 @@ Demo 项目主要承担四件事：
 
 ## Catalog 进度地图
 
-Catalog 当前覆盖 **29 个模块、1432 个条目**：已实现 756 个、计划中 673 个、手工验证 3 个。以下是 README 更新时的快照；`app/demo/catalog/` 是唯一数据源，实时进度以 `demo:list` 输出为准。
+Catalog 当前覆盖 **29 个模块、1432 个条目**：已实现 786 个、计划中 643 个、手工验证 3 个。以下是 README 更新时的快照；`app/demo/catalog/` 是唯一数据源，实时进度以 `demo:list` 输出为准。
 
 | 模块 | 覆盖范围 | 进度 | 剩余 | 状态 |
 |---|---|---:|---:|---|
@@ -68,7 +68,7 @@ Catalog 当前覆盖 **29 个模块、1432 个条目**：已实现 756 个、计
 | `route` | HTTP 路由注册 | 0/87 | 87 | 计划中 |
 | `schema` | 数据库 Schema 与迁移构建器 | 0/143 | 143 | 计划中 |
 | `service-provider` | Service Provider 注册与生命周期 | 0/42 | 42 | 计划中 |
-| `session` | 服务端 Session 存储 | 0/50 | 50 | 计划中 |
+| `session` | 服务端 Session 存储 | 30/50 | 20 | 进行中 |
 | `starter` | 生成应用的起始模板 | 0/1 | — | 手工验证 |
 | `support` | 通用框架辅助函数 | 0/1 | 1 | 计划中 |
 | `timer` | 定时任务定义 | 0/62 | 62 | 计划中 |
@@ -93,6 +93,9 @@ go run ./demo demo:container list-entries --json
 go run ./demo demo:container singleton --json
 go run ./demo demo:cookie list
 go run ./demo demo:cookie session-queue --json
+go run ./demo demo:session list
+go run ./demo demo:session flash --json
+go run ./demo demo:session redis-driver --connection=redis
 go run ./demo demo:commands list
 go run ./demo demo:commands serve-reload --json
 go run ./demo demo:http-server list
@@ -214,6 +217,8 @@ GOWORK=off go test . ./app/... ./bootstrap/... ./config/... ./database/... ./rou
 `commands` 的迁移与 Seeder 场景需要专用 MySQL 测试库。先执行 `./demo/dev up mysql`，创建名称以 `prismgo_commands_` 开头的空数据库并授权测试用户，再设置 `PRISMGO_COMMANDS_MYSQL_TEST_DSN` 运行 `go test ./app/demo/commands -run TestCommandsDemoMySQLIntegration -v`。场景会在运行前后清空该专用库的表；不要指向共享的 `prismgo_test`。
 
 `commands` 的队列场景使用真实 Redis。执行 `./demo/dev up redis`、加载 `demo/.dev/runtime/test.env` 后运行 `go test ./app/demo/commands -run TestCommandsDemoRedisIntegration -v`；场景使用独立键前缀并在结束时清理。
+
+`session` 的 `redis-driver` 场景同样使用真实 Redis。加载 `demo/.dev/runtime/test.env` 后运行 `go test ./app/demo/session -run TestSessionDemoRedisDriver -v`，或执行 `go run ./demo demo:session redis-driver --connection=redis`；场景使用唯一 `prismgo_demo_session_*` 前缀并在结束时清理键。
 
 `commands` 的 `fresh-drop-types` 场景使用真实 PostgreSQL。执行 `./demo/dev up postgres`、加载 `demo/.dev/runtime/test.env` 后运行 `go test ./app/demo/commands -run TestCommandsDemoPostgresIntegration -v`；测试创建独立的 `prismgo_commands_` schema，验证枚举类型和表被清除后删除该 schema。
 

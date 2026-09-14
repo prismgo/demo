@@ -7,11 +7,12 @@ import (
 	"net/http/httptest"
 	"testing"
 
+	"prismgo-demo/app/http/controllers"
+	_ "prismgo-demo/config"
+
 	"github.com/gin-gonic/gin"
 	"github.com/prismgo/framework/foundation"
 	"github.com/prismgo/framework/route"
-	"prismgo-demo/app/http/controllers"
-	_ "prismgo-demo/config"
 )
 
 func TestRegisterAddsHealthAndWelcomeRoutes(t *testing.T) {
@@ -50,6 +51,64 @@ func TestRegisterAddsHealthAndWelcomeRoutes(t *testing.T) {
 	if payload["framework"] != "PrismGo" {
 		t.Fatalf("framework = %q, want PrismGo", payload["framework"])
 	}
+
+	assertSessionDemoFlow(t, engine)
+}
+
+// assertSessionDemoFlow drives the /api/session-demo group across three requests.
+func assertSessionDemoFlow(t *testing.T, engine *gin.Engine) {
+	t.Helper()
+
+	update := performSessionRequest(t, engine, http.MethodPost, "/api/session-demo/profile", nil)
+	if update.Code != http.StatusNoContent {
+		t.Fatalf("session update status = %d, want %d", update.Code, http.StatusNoContent)
+	}
+	idCookie := sessionCookie(t, update)
+
+	first := performSessionRequest(t, engine, http.MethodGet, "/api/session-demo/profile", []*http.Cookie{idCookie})
+	var flashBody map[string]any
+	if err := json.Unmarshal(first.Body.Bytes(), &flashBody); err != nil {
+		t.Fatalf("decode flash payload: %v\nbody = %q", err, first.Body.String())
+	}
+	if flashBody["user_id"].(float64) != 1001 || flashBody["notice"] != "saved" {
+		t.Fatalf("first profile body = %v, want user_id 1001 and notice saved", flashBody)
+	}
+	if again := sessionCookie(t, first); again.Value != idCookie.Value {
+		t.Fatalf("session id cookie changed between requests: got %q, want %q", again.Value, idCookie.Value)
+	}
+
+	second := performSessionRequest(t, engine, http.MethodGet, "/api/session-demo/profile", []*http.Cookie{idCookie})
+	var clearedBody map[string]any
+	if err := json.Unmarshal(second.Body.Bytes(), &clearedBody); err != nil {
+		t.Fatalf("decode cleared payload: %v\nbody = %q", err, second.Body.String())
+	}
+	if clearedBody["user_id"].(float64) != 1001 || clearedBody["notice"] != "" {
+		t.Fatalf("second profile body = %v, want user_id 1001 and empty notice", clearedBody)
+	}
+}
+
+// performSessionRequest executes one request carrying the provided cookies.
+func performSessionRequest(t *testing.T, engine *gin.Engine, method string, path string, cookies []*http.Cookie) *httptest.ResponseRecorder {
+	t.Helper()
+	recorder := httptest.NewRecorder()
+	request := httptest.NewRequest(method, path, nil)
+	for _, cookie := range cookies {
+		request.AddCookie(cookie)
+	}
+	engine.ServeHTTP(recorder, request)
+	return recorder
+}
+
+// sessionCookie extracts the prismgo_session cookie from a response.
+func sessionCookie(t *testing.T, recorder *httptest.ResponseRecorder) *http.Cookie {
+	t.Helper()
+	for _, cookie := range recorder.Result().Cookies() {
+		if cookie.Name == "prismgo_session" {
+			return cookie
+		}
+	}
+	t.Fatalf("response has no prismgo_session cookie; Set-Cookie headers = %q", recorder.Result().Header.Values("Set-Cookie"))
+	return nil
 }
 
 func performRequest(engine *gin.Engine, method string, path string) *httptest.ResponseRecorder {

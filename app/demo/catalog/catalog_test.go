@@ -154,7 +154,14 @@ func TestCatalogEntries(t *testing.T) {
 		"file-config", "redis-config", "lock-config", "manager-config",
 		"middleware", "recovery", "response-buffering", "store-from", "custom-manager",
 		"get", "all", "subsets", "has", "exists", "missing", "put", "counters",
-		"flash", "now", "reflash", "keep", "forget", "flush", "pull", "regenerate", "invalidate",
+		"flash", "now", "reflash", "keep", "forget", "flush", "pull",
+	} {
+		if item, ok := Find("session", slug); !ok || item.Status != StatusImplemented {
+			t.Fatalf("session catalog entry %q = %#v, %v; want implemented", slug, item, ok)
+		}
+	}
+	for _, slug := range []string{
+		"regenerate", "invalidate",
 		"blocking", "file-lock", "redis-lock", "id-cookie", "expire-on-close", "queued-cookies",
 		"encryption", "encryptor", "custom-encryptor", "sensitive-error",
 		"driver-contract", "locker-contract", "extend", "extend-validation", "unknown-driver",
@@ -391,11 +398,11 @@ func TestCatalogFeatureSummaries(t *testing.T) {
 	if !ok {
 		t.Fatal("SummaryFor(session) found = false, want true")
 	}
-	if sessionSummary.Implemented != 0 || sessionSummary.Planned != 50 || sessionSummary.Manual != 0 || sessionSummary.Total != 50 || sessionSummary.Remaining != 50 {
-		t.Fatalf("session summary = %#v, want implemented=0 planned=50 manual=0 total=50 remaining=50", sessionSummary)
+	if sessionSummary.Implemented != 30 || sessionSummary.Planned != 20 || sessionSummary.Manual != 0 || sessionSummary.Total != 50 || sessionSummary.Remaining != 20 {
+		t.Fatalf("session summary = %#v, want implemented=30 planned=20 manual=0 total=50 remaining=20", sessionSummary)
 	}
-	if sessionSummary.Status != FeatureStatusPlanned || sessionSummary.Since != SinceInitial {
-		t.Fatalf("session status/since = %q/%q, want %q/%q", sessionSummary.Status, sessionSummary.Since, FeatureStatusPlanned, SinceInitial)
+	if sessionSummary.Status != FeatureStatusInProgress || sessionSummary.Since != SinceInitial {
+		t.Fatalf("session status/since = %q/%q, want %q/%q", sessionSummary.Status, sessionSummary.Since, FeatureStatusInProgress, SinceInitial)
 	}
 
 	lifecycle, ok := SummaryFor("lifecycle")

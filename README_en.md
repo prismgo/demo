@@ -41,7 +41,7 @@ The Demo project has four main responsibilities:
 
 ## Catalog Progress Map
 
-The catalog currently covers **29 modules and 1432 entries**: 756 implemented, 673 planned, and 3 manually verified. The table below is a snapshot taken when this README was updated. `app/demo/catalog/` is the single source of truth; use `demo:list` for live progress.
+The catalog currently covers **29 modules and 1432 entries**: 786 implemented, 643 planned, and 3 manually verified. The table below is a snapshot taken when this README was updated. `app/demo/catalog/` is the single source of truth; use `demo:list` for live progress.
 
 | Module | Coverage | Progress | Remaining | Status |
 |---|---|---:|---:|---|
@@ -69,7 +69,7 @@ The catalog currently covers **29 modules and 1432 entries**: 756 implemented, 6
 | `route` | HTTP route registration | 0/87 | 87 | Planned |
 | `schema` | Database schema and migration builder | 0/143 | 143 | Planned |
 | `service-provider` | Service provider registration and lifecycle | 0/42 | 42 | Planned |
-| `session` | Server-side session storage | 0/50 | 50 | Planned |
+| `session` | Server-side session storage | 30/50 | 20 | In progress |
 | `starter` | Generated application starter | 0/1 | — | Manual |
 | `support` | General framework helpers | 0/1 | 1 | Planned |
 | `timer` | Scheduled task definitions | 0/62 | 62 | Planned |
@@ -94,6 +94,9 @@ go run ./demo demo:container list-entries --json
 go run ./demo demo:container singleton --json
 go run ./demo demo:cookie list
 go run ./demo demo:cookie session-queue --json
+go run ./demo demo:session list
+go run ./demo demo:session flash --json
+go run ./demo demo:session redis-driver --connection=redis
 go run ./demo demo:commands list
 go run ./demo demo:commands serve-reload --json
 go run ./demo demo:http-server list
@@ -215,6 +218,8 @@ GOWORK=off go test . ./app/... ./bootstrap/... ./config/... ./database/... ./rou
 The `commands` migration and Seeder scenarios need a dedicated MySQL test database. Run `./demo/dev up mysql`, create an empty database whose name starts with `prismgo_commands_`, grant access to the test user, then set `PRISMGO_COMMANDS_MYSQL_TEST_DSN` and run `go test ./app/demo/commands -run TestCommandsDemoMySQLIntegration -v`. The scenarios clear tables in that dedicated database before and after each run; do not point them at the shared `prismgo_test` database.
 
 The `commands` queue scenarios use real Redis. Run `./demo/dev up redis`, load `demo/.dev/runtime/test.env`, then run `go test ./app/demo/commands -run TestCommandsDemoRedisIntegration -v`. Each scenario uses a unique key prefix and cleans it up afterward.
+
+The `session` `redis-driver` scenario also uses real Redis. Load `demo/.dev/runtime/test.env` and run `go test ./app/demo/session -run TestSessionDemoRedisDriver -v`, or execute `go run ./demo demo:session redis-driver --connection=redis`. The scenario uses a unique `prismgo_demo_session_*` prefix and deletes its keys when it finishes.
 
 The `commands` `fresh-drop-types` scenario uses real PostgreSQL. Run `./demo/dev up postgres`, load `demo/.dev/runtime/test.env`, then run `go test ./app/demo/commands -run TestCommandsDemoPostgresIntegration -v`. The test creates an isolated `prismgo_commands_` schema, verifies that the enum and table are removed, then drops that schema.
 
