@@ -53,7 +53,7 @@ func run(name string) (string, error) {
 	case "get", "all", "subsets", "has", "exists", "missing", "put", "counters", "forget", "flush", "pull":
 		return storeScenario(name)
 	default:
-		return "", fmt.Errorf("unknown scenario %q", name)
+		return runBatch(name)
 	}
 }
 

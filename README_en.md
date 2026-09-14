@@ -41,7 +41,7 @@ The Demo project has four main responsibilities:
 
 ## Catalog Progress Map
 
-The catalog currently covers **29 modules and 1432 entries**: 786 implemented, 643 planned, and 3 manually verified. The table below is a snapshot taken when this README was updated. `app/demo/catalog/` is the single source of truth; use `demo:list` for live progress.
+The catalog currently covers **29 modules and 1432 entries**: 806 implemented, 623 planned, and 3 manually verified. The table below is a snapshot taken when this README was updated. `app/demo/catalog/` is the single source of truth; use `demo:list` for live progress.
 
 | Module | Coverage | Progress | Remaining | Status |
 |---|---|---:|---:|---|
@@ -69,7 +69,7 @@ The catalog currently covers **29 modules and 1432 entries**: 786 implemented, 6
 | `route` | HTTP route registration | 0/87 | 87 | Planned |
 | `schema` | Database schema and migration builder | 0/143 | 143 | Planned |
 | `service-provider` | Service provider registration and lifecycle | 0/42 | 42 | Planned |
-| `session` | Server-side session storage | 30/50 | 20 | In progress |
+| `session` | Server-side session storage | 50/50 | 0 | Implemented |
 | `starter` | Generated application starter | 0/1 | — | Manual |
 | `support` | General framework helpers | 0/1 | 1 | Planned |
 | `timer` | Scheduled task definitions | 0/62 | 62 | Planned |
@@ -95,8 +95,9 @@ go run ./demo demo:container singleton --json
 go run ./demo demo:cookie list
 go run ./demo demo:cookie session-queue --json
 go run ./demo demo:session list
-go run ./demo demo:session flash --json
+go run ./demo demo:session regenerate --json
 go run ./demo demo:session redis-driver --connection=redis
+go run ./demo demo:session redis-lock --connection=redis
 go run ./demo demo:commands list
 go run ./demo demo:commands serve-reload --json
 go run ./demo demo:http-server list
@@ -219,7 +220,7 @@ The `commands` migration and Seeder scenarios need a dedicated MySQL test databa
 
 The `commands` queue scenarios use real Redis. Run `./demo/dev up redis`, load `demo/.dev/runtime/test.env`, then run `go test ./app/demo/commands -run TestCommandsDemoRedisIntegration -v`. Each scenario uses a unique key prefix and cleans it up afterward.
 
-The `session` `redis-driver` scenario also uses real Redis. Load `demo/.dev/runtime/test.env` and run `go test ./app/demo/session -run TestSessionDemoRedisDriver -v`, or execute `go run ./demo demo:session redis-driver --connection=redis`. The scenario uses a unique `prismgo_demo_session_*` prefix and deletes its keys when it finishes.
+The `session` `redis-driver` and `redis-lock` scenarios also use real Redis. Load `demo/.dev/runtime/test.env` and run `go test ./app/demo/session -run 'TestSessionDemoRedis(Driver|Lock)' -v`, or execute `go run ./demo demo:session redis-driver --connection=redis` and `go run ./demo demo:session redis-lock --connection=redis`. The scenarios use a unique `prismgo_demo_session_*` prefix and delete their keys when they finish.
 
 The `commands` `fresh-drop-types` scenario uses real PostgreSQL. Run `./demo/dev up postgres`, load `demo/.dev/runtime/test.env`, then run `go test ./app/demo/commands -run TestCommandsDemoPostgresIntegration -v`. The test creates an isolated `prismgo_commands_` schema, verifies that the enum and table are removed, then drops that schema.
 

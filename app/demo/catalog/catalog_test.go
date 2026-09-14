@@ -155,20 +155,14 @@ func TestCatalogEntries(t *testing.T) {
 		"middleware", "recovery", "response-buffering", "store-from", "custom-manager",
 		"get", "all", "subsets", "has", "exists", "missing", "put", "counters",
 		"flash", "now", "reflash", "keep", "forget", "flush", "pull",
-	} {
-		if item, ok := Find("session", slug); !ok || item.Status != StatusImplemented {
-			t.Fatalf("session catalog entry %q = %#v, %v; want implemented", slug, item, ok)
-		}
-	}
-	for _, slug := range []string{
 		"regenerate", "invalidate",
 		"blocking", "file-lock", "redis-lock", "id-cookie", "expire-on-close", "queued-cookies",
 		"encryption", "encryptor", "custom-encryptor", "sensitive-error",
 		"driver-contract", "locker-contract", "extend", "extend-validation", "unknown-driver",
 		"errors", "recoverable-errors", "laravel-compatibility",
 	} {
-		if item, ok := Find("session", slug); !ok || item.Status != StatusPlanned {
-			t.Fatalf("session catalog entry %q = %#v, %v; want planned", slug, item, ok)
+		if item, ok := Find("session", slug); !ok || item.Status != StatusImplemented {
+			t.Fatalf("session catalog entry %q = %#v, %v; want implemented", slug, item, ok)
 		}
 	}
 	for _, slug := range []string{"redis-driver", "redis-lock"} {
@@ -398,11 +392,11 @@ func TestCatalogFeatureSummaries(t *testing.T) {
 	if !ok {
 		t.Fatal("SummaryFor(session) found = false, want true")
 	}
-	if sessionSummary.Implemented != 30 || sessionSummary.Planned != 20 || sessionSummary.Manual != 0 || sessionSummary.Total != 50 || sessionSummary.Remaining != 20 {
-		t.Fatalf("session summary = %#v, want implemented=30 planned=20 manual=0 total=50 remaining=20", sessionSummary)
+	if sessionSummary.Implemented != 50 || sessionSummary.Planned != 0 || sessionSummary.Manual != 0 || sessionSummary.Total != 50 || sessionSummary.Remaining != 0 {
+		t.Fatalf("session summary = %#v, want implemented=50 planned=0 manual=0 total=50 remaining=0", sessionSummary)
 	}
-	if sessionSummary.Status != FeatureStatusInProgress || sessionSummary.Since != SinceInitial {
-		t.Fatalf("session status/since = %q/%q, want %q/%q", sessionSummary.Status, sessionSummary.Since, FeatureStatusInProgress, SinceInitial)
+	if sessionSummary.Status != FeatureStatusImplemented || sessionSummary.Since != SinceInitial {
+		t.Fatalf("session status/since = %q/%q, want %q/%q", sessionSummary.Status, sessionSummary.Since, FeatureStatusImplemented, SinceInitial)
 	}
 
 	lifecycle, ok := SummaryFor("lifecycle")

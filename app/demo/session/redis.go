@@ -25,6 +25,8 @@ func runRedis(name string) (string, error) {
 	switch name {
 	case "redis-driver":
 		return redisDriverScenario()
+	case "redis-lock":
+		return redisLockScenario()
 	default:
 		return "", fmt.Errorf("unknown redis scenario %q", name)
 	}
@@ -128,6 +130,63 @@ func redisDriverScenario() (string, error) {
 // redisSessionKey renders the payload key the redis driver stores for one session ID.
 func redisSessionKey(prefix, id string) string {
 	return prefix + ":sessions:" + id
+}
+
+// redisLockScenario verifies Redis lock ownership, contention, release, and
+// expiration takeover against the instance named by PRISMGO_REDIS_TEST_URL.
+func redisLockScenario() (string, error) {
+	rawURL := strings.TrimSpace(os.Getenv("PRISMGO_REDIS_TEST_URL"))
+	if rawURL == "" {
+		return "", errors.New("PRISMGO_REDIS_TEST_URL is required for the redis-lock scenario")
+	}
+	opts, err := redis.ParseURL(rawURL)
+	if err != nil {
+		return "", fmt.Errorf("parse PRISMGO_REDIS_TEST_URL: %w", err)
+	}
+	client := redis.NewClient(opts)
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+	if err := client.Ping(ctx).Err(); err != nil {
+		_ = client.Close()
+		return "", fmt.Errorf("ping redis: %w", err)
+	}
+	prefix := fmt.Sprintf("prismgo_demo_session_lock_%d", time.Now().UnixNano())
+	cfg := session.DefaultConfig()
+	cfg.Redis.Prefix = prefix
+	driver, err := session.NewRedisDriverFromClient(client, cfg)
+	if err != nil {
+		cleanupRedis(ctx, client, prefix, nil)
+		return "", err
+	}
+	defer cleanupRedis(ctx, client, prefix, []*session.RedisDriver{driver})
+
+	id := newDemoSessionID()
+	lock, err := driver.Lock(ctx, id, 10*time.Second, 200*time.Millisecond)
+	if err != nil {
+		return "", err
+	}
+	_, contendErr := driver.Lock(ctx, id, 10*time.Second, 100*time.Millisecond)
+	contention := errors.Is(contendErr, session.ErrLockTimeout)
+	if err := lock.Release(ctx); err != nil {
+		return "", err
+	}
+	doubleRelease := errors.Is(lock.Release(ctx), session.ErrLockNotHeld)
+
+	stale, err := driver.Lock(ctx, id, 100*time.Millisecond, 200*time.Millisecond)
+	if err != nil {
+		return "", err
+	}
+	time.Sleep(300 * time.Millisecond)
+	fresh, err := driver.Lock(ctx, id, 10*time.Second, 200*time.Millisecond)
+	if err != nil {
+		return "", err
+	}
+	staleRelease := errors.Is(stale.Release(ctx), session.ErrLockNotHeld)
+	if err := fresh.Release(ctx); err != nil {
+		return "", err
+	}
+	return fmt.Sprintf("contention=%t released=true re-release-not-held=%t expired-takeover=true stale-release-not-held=%t",
+		contention, doubleRelease, staleRelease), nil
 }
 
 // cleanupRedis removes every key created under the demo prefix and closes the client.

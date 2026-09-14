@@ -147,6 +147,82 @@ func TestSessionDemoPull(t *testing.T) {
 	expectValue(t, "pull", "pulled=hello exists=false fallback=fallback")
 }
 
+func TestSessionDemoRegenerate(t *testing.T) {
+	expectValue(t, "regenerate", "rotated=true retained=1001 old-destroyed=true")
+}
+
+func TestSessionDemoInvalidate(t *testing.T) {
+	expectValue(t, "invalidate", "rotated=true cleared=true empty=true old-destroyed=true")
+}
+
+func TestSessionDemoBlocking(t *testing.T) {
+	expectValue(t, "blocking", "blocked-timeout=true resumed=true")
+}
+
+func TestSessionDemoFileLock(t *testing.T) {
+	expectValue(t, "file-lock", "held=true contention=true released=true re-release-not-held=true expired-takeover=true stale-release-not-held=true")
+}
+
+func TestSessionDemoIDCookie(t *testing.T) {
+	expectValue(t, "id-cookie", "name=admin_session path=/app domain=example.test secure=true httpOnly=true sameSite=strict maxAge-positive=true server=true")
+}
+
+func TestSessionDemoExpireOnClose(t *testing.T) {
+	expectValue(t, "expire-on-close", "browser-session=true server-persistent=true")
+}
+
+func TestSessionDemoQueuedCookies(t *testing.T) {
+	expectValue(t, "queued-cookies", "order=prismgo_session,locale")
+}
+
+func TestSessionDemoEncryption(t *testing.T) {
+	expectValue(t, "encryption", "encrypted=true cookie-opaque=true restored=1001")
+}
+
+func TestSessionDemoEncryptor(t *testing.T) {
+	expectValue(t, "encryptor", "encrypt-copy=true decrypt-copy=true")
+}
+
+func TestSessionDemoCustomEncryptor(t *testing.T) {
+	expectValue(t, "custom-encryptor", "marker=true restored=1001")
+}
+
+func TestSessionDemoSensitiveError(t *testing.T) {
+	expectValue(t, "sensitive-error", "encrypt-redacted=true encrypt-typed=true decrypt-redacted=true decrypt-typed=true")
+}
+
+func TestSessionDemoDriverContract(t *testing.T) {
+	expectValue(t, "driver-contract", "file=true redis=true custom=true wrote=true destroyed=true")
+}
+
+func TestSessionDemoLockerContract(t *testing.T) {
+	expectValue(t, "locker-contract", "locker=file,redis lock-release=true")
+}
+
+func TestSessionDemoExtend(t *testing.T) {
+	expectValue(t, "extend", "driver=demo-memory resolved=true restored=1001")
+}
+
+func TestSessionDemoExtendValidation(t *testing.T) {
+	expectValue(t, "extend-validation", "empty-ignored=true nil-ignored=true override=second")
+}
+
+func TestSessionDemoUnknownDriver(t *testing.T) {
+	expectValue(t, "unknown-driver", "resolve=true manager=true")
+}
+
+func TestSessionDemoErrors(t *testing.T) {
+	expectValue(t, "errors", "invalid-config=true invalid-id=true invalid-expires=true driver-not-found=true invalid-type=true lock-not-held=true")
+}
+
+func TestSessionDemoRecoverableErrors(t *testing.T) {
+	expectValue(t, "recoverable-errors", "recovered=6 fatal=true")
+}
+
+func TestSessionDemoLaravelCompatibility(t *testing.T) {
+	expectValue(t, "laravel-compatibility", "mapped=19 blocking=true")
+}
+
 func TestSessionDemoRejectsUnknownScenario(t *testing.T) {
 	if _, err := sessiondemo.Run("no-such-case"); err == nil || !strings.Contains(err.Error(), `unknown scenario "no-such-case"`) {
 		t.Fatalf("session demo unknown scenario error = %v, want unknown scenario error", err)
