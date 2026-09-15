@@ -40,7 +40,7 @@ Demo 项目主要承担四件事：
 
 ## Catalog 进度地图
 
-Catalog 当前覆盖 **29 个模块、1432 个条目**：已实现 1159 个、计划中 270 个、手工验证 3 个。以下是 README 更新时的快照；`app/demo/catalog/` 是唯一数据源，实时进度以 `demo:list` 输出为准。
+Catalog 当前覆盖 **29 个模块、1432 个条目**：已实现 1221 个、计划中 208 个、手工验证 3 个。以下是 README 更新时的快照；`app/demo/catalog/` 是唯一数据源，实时进度以 `demo:list` 输出为准。
 
 | 模块 | 覆盖范围 | 进度 | 剩余 | 状态 |
 |---|---|---:|---:|---|
@@ -71,7 +71,7 @@ Catalog 当前覆盖 **29 个模块、1432 个条目**：已实现 1159 个、�
 | `session` | 服务端 Session 存储 | 50/50 | 0 | 已实现 |
 | `starter` | 生成应用的起始模板 | 0/1 | — | 手工验证 |
 | `support` | 通用框架辅助函数 | 0/1 | 1 | 计划中 |
-| `timer` | 定时任务定义 | 0/62 | 62 | 计划中 |
+| `timer` | 定时任务定义 | 62/62 | 0 | 已实现 |
 | `translation` | 应用翻译与复数处理 | 39/39 | 0 | 已实现 |
 
 在工作区根目录查看实时地图与条目明细：
@@ -145,6 +145,10 @@ go run ./demo demo:ratelimit hashed-key
 go run ./demo demo:ratelimit cache-errors
 go run ./demo demo:ratelimit redis-store --store=redis
 go run ./demo demo:ratelimit redis-errors --store=redis
+go run ./demo demo:timer list
+go run ./demo demo:timer architecture
+go run ./demo demo:timer every --json
+go run ./demo demo:timer weekly-on
 ```
 
 在 `demo/` 中运行本地 OSS HTTP 集成验收（不需要云端凭证）：

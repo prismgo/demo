@@ -41,7 +41,7 @@ The Demo project has four main responsibilities:
 
 ## Catalog Progress Map
 
-The catalog currently covers **29 modules and 1432 entries**: 1159 implemented, 270 planned, and 3 manually verified. The table below is a snapshot taken when this README was updated. `app/demo/catalog/` is the single source of truth; use `demo:list` for live progress.
+The catalog currently covers **29 modules and 1432 entries**: 1221 implemented, 208 planned, and 3 manually verified. The table below is a snapshot taken when this README was updated. `app/demo/catalog/` is the single source of truth; use `demo:list` for live progress.
 
 | Module | Coverage | Progress | Remaining | Status |
 |---|---|---:|---:|---|
@@ -72,7 +72,7 @@ The catalog currently covers **29 modules and 1432 entries**: 1159 implemented, 
 | `session` | Server-side session storage | 50/50 | 0 | Implemented |
 | `starter` | Generated application starter | 0/1 | — | Manual |
 | `support` | General framework helpers | 0/1 | 1 | Planned |
-| `timer` | Scheduled task definitions | 0/62 | 62 | Planned |
+| `timer` | Scheduled task definitions | 62/62 | 0 | Implemented |
 | `translation` | Application translation and pluralization | 39/39 | 0 | Implemented |
 
 From the workspace root, inspect the live map and entry details with:
@@ -146,6 +146,10 @@ go run ./demo demo:ratelimit hashed-key
 go run ./demo demo:ratelimit cache-errors
 go run ./demo demo:ratelimit redis-store --store=redis
 go run ./demo demo:ratelimit redis-errors --store=redis
+go run ./demo demo:timer list
+go run ./demo demo:timer architecture
+go run ./demo demo:timer every --json
+go run ./demo demo:timer weekly-on
 ```
 
 Run the local OSS HTTP integration check from `demo/` without cloud credentials:

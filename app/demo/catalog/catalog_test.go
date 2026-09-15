@@ -270,8 +270,8 @@ func TestCatalogEntries(t *testing.T) {
 		"timezone", "debug-logging", "overlap-cache", "exception-config",
 		"command", "command-validation", "call", "every", "second-frequencies", "minute-frequencies",
 		"hourly", "hourly-at", "hour-steps", "daily", "daily-at", "twice-daily", "twice-daily-at", "at",
-		"weekly", "weekly-on", "weekday-groups", "named-weekdays", "days",
-		"monthly", "monthly-on", "twice-monthly", "last-day-of-month", "days-of-month",
+		"weekly", "weekly-on", "weekday-groups", "named-weekdays", "days", "monthly",
+		"monthly-on", "twice-monthly", "last-day-of-month", "days-of-month",
 		"quarterly", "quarterly-on", "yearly", "yearly-on",
 		"without-overlapping", "cross-process-overlap", "start", "stop", "summary",
 		"task-error", "task-panic", "task-success", "exception-reporter",
@@ -279,9 +279,16 @@ func TestCatalogEntries(t *testing.T) {
 		"time-parsing", "offset-parsing", "weekday-parsing",
 		"timer-type", "resolved-command", "command-resolver", "new-schedule", "name", "description", "defaults", "standalone",
 	} {
-		if item, ok := Find("timer", slug); !ok || item.Status != StatusPlanned {
-			t.Fatalf("timer catalog entry %q = %#v, %v; want planned", slug, item, ok)
+		if item, ok := Find("timer", slug); !ok || item.Status != StatusImplemented {
+			t.Fatalf("timer catalog entry %q = %#v, %v; want implemented", slug, item, ok)
 		}
+	}
+	if got := Filter("timer", "", StatusPlanned); len(got) != 0 {
+		t.Fatalf("planned timer entries = %d, want 0", len(got))
+	}
+	item, ok := Find("timer", "cross-process-overlap")
+	if !ok || item.Level != LevelIntegration || len(item.Requirements) != 1 || item.Requirements[0] != "redis" {
+		t.Fatalf("timer cross-process-overlap entry = %#v, %v; want integration requiring redis", item, ok)
 	}
 	for _, slug := range []string{
 		"oss-prerequisites",
@@ -429,11 +436,11 @@ func TestCatalogFeatureSummaries(t *testing.T) {
 	if !ok {
 		t.Fatal("SummaryFor(timer) found = false")
 	}
-	if timer.Implemented != 0 || timer.Planned != 62 || timer.Manual != 0 || timer.Total != 62 || timer.Remaining != 62 {
-		t.Fatalf("timer summary = %#v, want implemented=0 planned=62 manual=0 total=62 remaining=62", timer)
+	if timer.Implemented != 62 || timer.Planned != 0 || timer.Manual != 0 || timer.Total != 62 || timer.Remaining != 0 {
+		t.Fatalf("timer summary = %#v, want implemented=62 planned=0 manual=0 total=62 remaining=0", timer)
 	}
-	if timer.Status != FeatureStatusPlanned || timer.Since != SinceInitial {
-		t.Fatalf("timer status/since = %q/%q, want %q/%q", timer.Status, timer.Since, FeatureStatusPlanned, SinceInitial)
+	if timer.Status != FeatureStatusImplemented || timer.Since != SinceInitial {
+		t.Fatalf("timer status/since = %q/%q, want %q/%q", timer.Status, timer.Since, FeatureStatusImplemented, SinceInitial)
 	}
 
 	ratelimit, ok := SummaryFor("ratelimit")

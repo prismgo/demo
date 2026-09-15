@@ -31,5 +31,6 @@ func CommandFactories() []console.CommandFactory {
 		func() console.Command { return demo.NewRouteCommand() },
 		func() console.Command { return demo.NewProviderCommand() },
 		func() console.Command { return demo.NewRateLimitCommand() },
+		func() console.Command { return demo.NewTimerCommand() },
 	}
 }
