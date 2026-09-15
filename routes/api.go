@@ -2,6 +2,7 @@ package routes
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 	"time"
 
@@ -31,6 +32,109 @@ func Register(app Dependencies) {
 
 	registerSessionDemoRoutes()
 	registerRedisDemoRoutes()
+	registerRouteDemoRoutes()
+}
+
+// registerRouteDemoRoutes mounts the documented prefix, constraint, naming, binding and resource flow.
+func registerRouteDemoRoutes() {
+	route.Prefix("/api/route-demo").Name("route-demo.").Group(func() {
+		route.Get("/users/{id}", routeDemoUser).WhereNumber("id").Name("users.show")
+		route.Bind("post", bindRouteDemoPost)
+		route.Get("/posts/{post}", routeDemoShowPost).Name("posts.show")
+		route.ApiResource("photos", routeDemoPhotoController{})
+		route.Get("/meta/{id}", routeDemoMeta).WhereNumber("id").Name("meta.show")
+		route.Redirect("/legacy", "/api/route-demo/posts/7")
+	})
+}
+
+// routeDemoMeta echoes the injected current-route metadata and its generated named URL.
+func routeDemoMeta(c *gin.Context) {
+	value, ok := c.Get("route.current")
+	if !ok {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "current route missing"})
+		return
+	}
+	info, ok := value.(route.RouteInfo)
+	if !ok {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "current route type mismatch"})
+		return
+	}
+	generated, err := route.URL("route-demo.meta.show", map[string]any{"id": c.Param("id")})
+	if err != nil {
+		_ = c.Error(err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "url generation failed"})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{
+		"name":     info.Name,
+		"uri":      info.URI,
+		"gin_path": info.GinPath,
+		"url":      generated,
+	})
+}
+
+// routeDemoUser echoes the constrained parameter and the URL generated from its route name.
+func routeDemoUser(c *gin.Context) {
+	id := c.Param("id")
+	generated, err := route.URL("route-demo.users.show", map[string]any{"id": id})
+	if err != nil {
+		_ = c.Error(err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "url generation failed"})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"id": id, "url": generated})
+}
+
+// routeDemoPost is the object produced by the route demo post binder.
+type routeDemoPost struct {
+	ID    string `json:"id"`
+	Title string `json:"title"`
+}
+
+// bindRouteDemoPost resolves the post parameter into a demo object, failing on the zero id.
+func bindRouteDemoPost(_ *gin.Context, value string) (any, error) {
+	if value == "0" {
+		return nil, fmt.Errorf("post %s not found", value)
+	}
+	return &routeDemoPost{ID: value, Title: "post-" + value}, nil
+}
+
+// routeDemoShowPost echoes the bound post object.
+func routeDemoShowPost(c *gin.Context) {
+	value, ok := c.Get("post")
+	if !ok {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "post not bound"})
+		return
+	}
+	post, ok := value.(*routeDemoPost)
+	if !ok {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "post type mismatch"})
+		return
+	}
+	c.JSON(http.StatusOK, post)
+}
+
+// routeDemoPhotoController implements the API resource actions used by the HTTP smoke test.
+type routeDemoPhotoController struct{}
+
+func (routeDemoPhotoController) Index(c *gin.Context) {
+	c.String(http.StatusOK, "photos.index")
+}
+
+func (routeDemoPhotoController) Store(c *gin.Context) {
+	c.String(http.StatusOK, "photos.store")
+}
+
+func (routeDemoPhotoController) Show(c *gin.Context) {
+	c.String(http.StatusOK, "photos.show:"+c.Param("photo"))
+}
+
+func (routeDemoPhotoController) Update(c *gin.Context) {
+	c.String(http.StatusOK, "photos.update:"+c.Param("photo"))
+}
+
+func (routeDemoPhotoController) Destroy(c *gin.Context) {
+	c.String(http.StatusOK, "photos.destroy:"+c.Param("photo"))
 }
 
 // registerRedisDemoRoutes mounts the documented Facade client flow for smoke testing.

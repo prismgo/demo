@@ -236,8 +236,8 @@ func TestCatalogEntries(t *testing.T) {
 		"resolve", "reset", "clone", "add", "router-group", "route-scope-bindings", "registrar-scope-bindings", "registrar-overrides", "facade-contract",
 		"provider-registration", "provider-preserves-router", "provider-singleton", "best-practices",
 	} {
-		if item, ok := Find("route", slug); !ok || item.Status != StatusPlanned {
-			t.Fatalf("route catalog entry %q = %#v, %v; want planned", slug, item, ok)
+		if item, ok := Find("route", slug); !ok || item.Status != StatusImplemented {
+			t.Fatalf("route catalog entry %q = %#v, %v; want implemented", slug, item, ok)
 		}
 	}
 	for _, slug := range []string{
@@ -462,11 +462,11 @@ func TestCatalogFeatureSummaries(t *testing.T) {
 	if !ok {
 		t.Fatal("SummaryFor(route) found = false")
 	}
-	if routeSummary.Implemented != 0 || routeSummary.Planned != 87 || routeSummary.Manual != 0 || routeSummary.Total != 87 || routeSummary.Remaining != 87 {
-		t.Fatalf("route summary = %#v, want implemented=0 planned=87 manual=0 total=87 remaining=87", routeSummary)
+	if routeSummary.Implemented != 87 || routeSummary.Planned != 0 || routeSummary.Manual != 0 || routeSummary.Total != 87 || routeSummary.Remaining != 0 {
+		t.Fatalf("route summary = %#v, want implemented=87 planned=0 manual=0 total=87 remaining=0", routeSummary)
 	}
-	if routeSummary.Status != FeatureStatusPlanned || routeSummary.Since != SinceInitial {
-		t.Fatalf("route status/since = %q/%q, want %q/%q", routeSummary.Status, routeSummary.Since, FeatureStatusPlanned, SinceInitial)
+	if routeSummary.Status != FeatureStatusImplemented || routeSummary.Since != SinceInitial {
+		t.Fatalf("route status/since = %q/%q, want %q/%q", routeSummary.Status, routeSummary.Since, FeatureStatusImplemented, SinceInitial)
 	}
 
 	schemaSummary, ok := SummaryFor("schema")

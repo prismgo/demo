@@ -54,6 +54,7 @@ func TestRegisterAddsHealthAndWelcomeRoutes(t *testing.T) {
 
 	assertSessionDemoFlow(t, engine)
 	assertRouteRegistered(t, engine, http.MethodGet, "/api/redis-demo/counter")
+	assertRouteRegistered(t, engine, http.MethodGet, "/api/route-demo/meta/:id")
 }
 
 // assertRouteRegistered verifies a mounted route path is present.
