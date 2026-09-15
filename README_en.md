@@ -41,7 +41,7 @@ The Demo project has four main responsibilities:
 
 ## Catalog Progress Map
 
-The catalog currently covers **29 modules and 1432 entries**: 1085 implemented, 344 planned, and 3 manually verified. The table below is a snapshot taken when this README was updated. `app/demo/catalog/` is the single source of truth; use `demo:list` for live progress.
+The catalog currently covers **29 modules and 1432 entries**: 1159 implemented, 270 planned, and 3 manually verified. The table below is a snapshot taken when this README was updated. `app/demo/catalog/` is the single source of truth; use `demo:list` for live progress.
 
 | Module | Coverage | Progress | Remaining | Status |
 |---|---|---:|---:|---|
@@ -64,7 +64,7 @@ The catalog currently covers **29 modules and 1432 entries**: 1085 implemented, 
 | `lifecycle` | Application bootstrap and shutdown | 57/57 | 0 | Implemented |
 | `logger` | Multi-channel application logging | 40/40 | 0 | Implemented |
 | `queue` | Queues, jobs, and workers | 59/59 | 0 | Implemented |
-| `ratelimit` | Request and action rate limiting | 0/74 | 74 | Planned |
+| `ratelimit` | Request and action rate limiting | 74/74 | 0 | Implemented |
 | `redis` | Redis connections and operations | 93/93 | 0 | Implemented |
 | `route` | HTTP route registration | 87/87 | 0 | Implemented |
 | `schema` | Database schema and migration builder | 0/143 | 143 | Planned |
@@ -131,6 +131,21 @@ go run ./demo demo:provider list
 go run ./demo demo:provider singleton --json
 go run ./demo demo:provider deferred-resolution --json
 go run ./demo demo:provider terminate-order
+go run ./demo demo:ratelimit list
+go run ./demo demo:ratelimit architecture
+go run ./demo demo:ratelimit per-minute --json
+go run ./demo demo:ratelimit store-resolution
+go run ./demo demo:ratelimit quick-start
+go run ./demo demo:ratelimit throttle
+go run ./demo demo:ratelimit throttle-for
+go run ./demo demo:ratelimit success-headers
+go run ./demo demo:ratelimit route-compatibility
+go run ./demo demo:ratelimit hit --json
+go run ./demo demo:ratelimit cache-layout
+go run ./demo demo:ratelimit hashed-key
+go run ./demo demo:ratelimit cache-errors
+go run ./demo demo:ratelimit redis-store --store=redis
+go run ./demo demo:ratelimit redis-errors --store=redis
 ```
 
 Run the local OSS HTTP integration check from `demo/` without cloud credentials:
@@ -138,6 +153,8 @@ Run the local OSS HTTP integration check from `demo/` without cloud credentials:
 ```bash
 PRISMGO_FILESYSTEM_LOCAL_OSS_TEST=1 go test ./app/demo/filesystem -run TestFilesystemDemoLocalOSSIntegration -count=1
 ```
+
+Of the `ratelimit` scenarios, 72 are compile-level, hermetic, or scenario and need no external services by default; `redis-store` and `redis-errors` are integration. After loading `demo/.dev/runtime/test.env`, run `go test ./app/demo/ratelimit -run 'TestRateLimitDemoRedis(Store|Errors)' -count=1`, or set `CACHE_LIMITER_DRIVER=redis` plus the Redis connection variables and run `go run ./demo demo:ratelimit redis-store --store=redis`.
 
 Status meanings: `Implemented` means every entry in the module is complete; `In progress` means some entries are complete; `Planned` means no entries are implemented yet; `Manual` means an external workflow such as the installer or Lens performs verification, so it is not counted as remaining work.
 

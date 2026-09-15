@@ -40,7 +40,7 @@ Demo 项目主要承担四件事：
 
 ## Catalog 进度地图
 
-Catalog 当前覆盖 **29 个模块、1432 个条目**：已实现 1085 个、计划中 344 个、手工验证 3 个。以下是 README 更新时的快照；`app/demo/catalog/` 是唯一数据源，实时进度以 `demo:list` 输出为准。
+Catalog 当前覆盖 **29 个模块、1432 个条目**：已实现 1159 个、计划中 270 个、手工验证 3 个。以下是 README 更新时的快照；`app/demo/catalog/` 是唯一数据源，实时进度以 `demo:list` 输出为准。
 
 | 模块 | 覆盖范围 | 进度 | 剩余 | 状态 |
 |---|---|---:|---:|---|
@@ -63,7 +63,7 @@ Catalog 当前覆盖 **29 个模块、1432 个条目**：已实现 1085 个、�
 | `lifecycle` | 应用启动与关闭 | 57/57 | 0 | 已实现 |
 | `logger` | 多通道应用日志 | 40/40 | 0 | 已实现 |
 | `queue` | 队列、任务与 Worker | 59/59 | 0 | 已实现 |
-| `ratelimit` | 请求与操作限流 | 0/74 | 74 | 计划中 |
+| `ratelimit` | 请求与操作限流 | 74/74 | 0 | 已实现 |
 | `redis` | Redis 连接与操作 | 93/93 | 0 | 已实现 |
 | `route` | HTTP 路由注册 | 87/87 | 0 | 已实现 |
 | `schema` | 数据库 Schema 与迁移构建器 | 0/143 | 143 | 计划中 |
@@ -130,6 +130,21 @@ go run ./demo demo:provider list
 go run ./demo demo:provider singleton --json
 go run ./demo demo:provider deferred-resolution --json
 go run ./demo demo:provider terminate-order
+go run ./demo demo:ratelimit list
+go run ./demo demo:ratelimit architecture
+go run ./demo demo:ratelimit per-minute --json
+go run ./demo demo:ratelimit store-resolution
+go run ./demo demo:ratelimit quick-start
+go run ./demo demo:ratelimit throttle
+go run ./demo demo:ratelimit throttle-for
+go run ./demo demo:ratelimit success-headers
+go run ./demo demo:ratelimit route-compatibility
+go run ./demo demo:ratelimit hit --json
+go run ./demo demo:ratelimit cache-layout
+go run ./demo demo:ratelimit hashed-key
+go run ./demo demo:ratelimit cache-errors
+go run ./demo demo:ratelimit redis-store --store=redis
+go run ./demo demo:ratelimit redis-errors --store=redis
 ```
 
 在 `demo/` 中运行本地 OSS HTTP 集成验收（不需要云端凭证）：
@@ -137,6 +152,8 @@ go run ./demo demo:provider terminate-order
 ```bash
 PRISMGO_FILESYSTEM_LOCAL_OSS_TEST=1 go test ./app/demo/filesystem -run TestFilesystemDemoLocalOSSIntegration -count=1
 ```
+
+`ratelimit` 的 72 个场景为编译级、hermetic 或 scenario，默认不依赖外部服务；`redis-store` 与 `redis-errors` 为 integration，加载 `demo/.dev/runtime/test.env` 后运行 `go test ./app/demo/ratelimit -run 'TestRateLimitDemoRedis(Store|Errors)' -count=1`，或设置 `CACHE_LIMITER_DRIVER=redis` 与 Redis 连接变量后执行 `go run ./demo demo:ratelimit redis-store --store=redis`。
 
 状态含义：`已实现` 表示模块全部条目已落地；`进行中` 表示部分条目已落地；`计划中` 表示尚无已实现条目；`手工验证` 表示由安装器、Lens 等外部流程验证，因此不计入“剩余”数量。
 

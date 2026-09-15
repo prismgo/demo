@@ -191,8 +191,8 @@ func TestCatalogEntries(t *testing.T) {
 		"cache-layout", "fixed-window", "middleware-key",
 		"cache-errors", "redis-errors", "counter-type-error", "error-policy", "laravel-compatibility",
 	} {
-		if item, ok := Find("ratelimit", slug); !ok || item.Status != StatusPlanned {
-			t.Fatalf("ratelimit catalog entry %q = %#v, %v; want planned", slug, item, ok)
+		if item, ok := Find("ratelimit", slug); !ok || item.Status != StatusImplemented {
+			t.Fatalf("ratelimit catalog entry %q = %#v, %v; want implemented", slug, item, ok)
 		}
 	}
 	for _, slug := range []string{
@@ -440,11 +440,11 @@ func TestCatalogFeatureSummaries(t *testing.T) {
 	if !ok {
 		t.Fatal("SummaryFor(ratelimit) found = false")
 	}
-	if ratelimit.Implemented != 0 || ratelimit.Planned != 74 || ratelimit.Manual != 0 || ratelimit.Total != 74 || ratelimit.Remaining != 74 {
-		t.Fatalf("ratelimit summary = %#v, want implemented=0 planned=74 manual=0 total=74 remaining=74", ratelimit)
+	if ratelimit.Implemented != 74 || ratelimit.Planned != 0 || ratelimit.Manual != 0 || ratelimit.Total != 74 || ratelimit.Remaining != 0 {
+		t.Fatalf("ratelimit summary = %#v, want implemented=74 planned=0 manual=0 total=74 remaining=0", ratelimit)
 	}
-	if ratelimit.Status != FeatureStatusPlanned || ratelimit.Since != SinceInitial {
-		t.Fatalf("ratelimit status/since = %q/%q, want %q/%q", ratelimit.Status, ratelimit.Since, FeatureStatusPlanned, SinceInitial)
+	if ratelimit.Status != FeatureStatusImplemented || ratelimit.Since != SinceInitial {
+		t.Fatalf("ratelimit status/since = %q/%q, want %q/%q", ratelimit.Status, ratelimit.Since, FeatureStatusImplemented, SinceInitial)
 	}
 
 	redis, ok := SummaryFor("redis")

@@ -30,5 +30,6 @@ func CommandFactories() []console.CommandFactory {
 		func() console.Command { return demo.NewLifecycleCommand() },
 		func() console.Command { return demo.NewRouteCommand() },
 		func() console.Command { return demo.NewProviderCommand() },
+		func() console.Command { return demo.NewRateLimitCommand() },
 	}
 }
