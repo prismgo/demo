@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	"prismgo-demo/app/http/controllers"
+	"prismgo-demo/app/providers"
 	_ "prismgo-demo/config"
 
 	"github.com/gin-gonic/gin"
@@ -17,7 +18,7 @@ import (
 
 func TestRegisterAddsHealthAndWelcomeRoutes(t *testing.T) {
 	gin.SetMode(gin.TestMode)
-	app := foundation.Configure(t.TempDir()).Create()
+	app := foundation.Configure(t.TempDir()).WithProviders(providers.AppServiceProvider{}).Create()
 	defer func() {
 		if err := app.CloseContext(context.Background()); err != nil {
 			t.Fatalf("close app: %v", err)
@@ -55,6 +56,18 @@ func TestRegisterAddsHealthAndWelcomeRoutes(t *testing.T) {
 	assertSessionDemoFlow(t, engine)
 	assertRouteRegistered(t, engine, http.MethodGet, "/api/redis-demo/counter")
 	assertRouteRegistered(t, engine, http.MethodGet, "/api/route-demo/meta/:id")
+
+	greeting := performRequest(engine, http.MethodGet, "/api/provider-demo/greeting")
+	if greeting.Code != http.StatusOK {
+		t.Fatalf("provider greeting status = %d, want %d", greeting.Code, http.StatusOK)
+	}
+	var greetingBody map[string]string
+	if err := json.Unmarshal(greeting.Body.Bytes(), &greetingBody); err != nil {
+		t.Fatalf("decode provider greeting payload: %v", err)
+	}
+	if greetingBody["message"] != "hello from provider" {
+		t.Fatalf("provider greeting message = %q, want %q", greetingBody["message"], "hello from provider")
+	}
 }
 
 // assertRouteRegistered verifies a mounted route path is present.

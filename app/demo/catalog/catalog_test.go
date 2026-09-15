@@ -84,8 +84,8 @@ func TestCatalogEntries(t *testing.T) {
 		"deferrable-contract", "provides", "deferred-resolution", "deferred-map-cleanup", "deferred-late-boot", "deferred-empty", "deferred-conflict", "deferred-termination",
 		"terminable-contract", "worker-lifecycle", "terminate-order", "terminate-eligibility", "terminate-context", "closer-order", "full-lifecycle",
 	} {
-		if item, ok := Find("service-provider", slug); !ok || item.Status != StatusPlanned {
-			t.Fatalf("service-provider catalog entry %q = %#v, %v; want planned", slug, item, ok)
+		if item, ok := Find("service-provider", slug); !ok || item.Status != StatusImplemented {
+			t.Fatalf("service-provider catalog entry %q = %#v, %v; want implemented", slug, item, ok)
 		}
 	}
 	for _, slug := range []string{
@@ -484,11 +484,11 @@ func TestCatalogFeatureSummaries(t *testing.T) {
 	if !ok {
 		t.Fatal("SummaryFor(service-provider) found = false")
 	}
-	if serviceProvider.Implemented != 0 || serviceProvider.Planned != 42 || serviceProvider.Manual != 0 || serviceProvider.Total != 42 || serviceProvider.Remaining != 42 {
-		t.Fatalf("service-provider summary = %#v, want implemented=0 planned=42 manual=0 total=42 remaining=42", serviceProvider)
+	if serviceProvider.Implemented != 42 || serviceProvider.Planned != 0 || serviceProvider.Manual != 0 || serviceProvider.Total != 42 || serviceProvider.Remaining != 0 {
+		t.Fatalf("service-provider summary = %#v, want implemented=42 planned=0 manual=0 total=42 remaining=0", serviceProvider)
 	}
-	if serviceProvider.Status != FeatureStatusPlanned || serviceProvider.Since != SinceInitial {
-		t.Fatalf("service-provider status/since = %q/%q, want %q/%q", serviceProvider.Status, serviceProvider.Since, FeatureStatusPlanned, SinceInitial)
+	if serviceProvider.Status != FeatureStatusImplemented || serviceProvider.Since != SinceInitial {
+		t.Fatalf("service-provider status/since = %q/%q, want %q/%q", serviceProvider.Status, serviceProvider.Since, FeatureStatusImplemented, SinceInitial)
 	}
 
 	commands, ok := SummaryFor("commands")

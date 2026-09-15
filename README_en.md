@@ -41,7 +41,7 @@ The Demo project has four main responsibilities:
 
 ## Catalog Progress Map
 
-The catalog currently covers **29 modules and 1432 entries**: 1043 implemented, 386 planned, and 3 manually verified. The table below is a snapshot taken when this README was updated. `app/demo/catalog/` is the single source of truth; use `demo:list` for live progress.
+The catalog currently covers **29 modules and 1432 entries**: 1085 implemented, 344 planned, and 3 manually verified. The table below is a snapshot taken when this README was updated. `app/demo/catalog/` is the single source of truth; use `demo:list` for live progress.
 
 | Module | Coverage | Progress | Remaining | Status |
 |---|---|---:|---:|---|
@@ -68,7 +68,7 @@ The catalog currently covers **29 modules and 1432 entries**: 1043 implemented, 
 | `redis` | Redis connections and operations | 93/93 | 0 | Implemented |
 | `route` | HTTP route registration | 87/87 | 0 | Implemented |
 | `schema` | Database schema and migration builder | 0/143 | 143 | Planned |
-| `service-provider` | Service provider registration and lifecycle | 0/42 | 42 | Planned |
+| `service-provider` | Service provider registration and lifecycle | 42/42 | 0 | Implemented |
 | `session` | Server-side session storage | 50/50 | 0 | Implemented |
 | `starter` | Generated application starter | 0/1 | — | Manual |
 | `support` | General framework helpers | 0/1 | 1 | Planned |
@@ -127,6 +127,10 @@ go run ./demo demo:route list-command --json
 go run ./demo demo:route throttle-route
 go run ./demo demo:route provider-singleton
 go run ./demo demo:route best-practices --json
+go run ./demo demo:provider list
+go run ./demo demo:provider singleton --json
+go run ./demo demo:provider deferred-resolution --json
+go run ./demo demo:provider terminate-order
 ```
 
 Run the local OSS HTTP integration check from `demo/` without cloud credentials:
@@ -248,6 +252,8 @@ The `session` `redis-driver` and `redis-lock` scenarios also use real Redis. Loa
 The `redis` connection, command, connection-management, event, container-integration, and cache/queue/horizon Redis integration scenarios use real Redis. Load `demo/.dev/runtime/test.env` and run `go test ./app/demo/redis -run 'TestRedisDemo' -v` (integration cases skip explicitly when `PRISMGO_REDIS_TEST_URL` is absent), or execute `go run ./demo demo:redis list` and `go run ./demo demo:redis strings --json`. Integration scenarios derive host/port/database from `PRISMGO_REDIS_TEST_URL`, resolve connections through the Facade, use unique `prismgo_demo_redis_*`, `prismgo_demo_redis_cache_*`, `prismgo_demo_redis_queue_*`, and `prismgo_demo_redis_horizon_*` prefixes, and delete their keys when they finish. Configuration, connection-lifecycle, container-resolution, and `horizon-config` scenarios such as `config`, `url`, `manager`, `purge`, `close`, `provider-registration`, `container-factory`, and `event-sensitive-parameters` are hermetic and need no Redis. `horizon-config` parses the `horizon` block through an explicit ConfigReader, while the remaining Horizon scenarios read and write a real Redis Store; cache and queue scenarios run under `CACHE_STORE=redis` and `QUEUE_CONNECTION=redis` to verify the driver, TTL, atomic/bulk/tagged operations, ready list, delayed zset, blocking pop, and failed-job storage.
 
 The 87 `route` scenarios are compile-level or hermetic and need no external services. Run `go run ./demo demo:route list` to see the entries, or execute `go run ./demo demo:route facade --json`, `go run ./demo demo:route url-escaping`, and `go run ./demo demo:route api-resource --json`; the third batch of rate limiting and debugging scenarios can be checked with `go run ./demo demo:route throttle-route`, `go run ./demo demo:route list-command --json`, and `go run ./demo demo:route provider-singleton`. After `go run ./demo serve`, request `/api/route-demo/users/42` to verify real HTTP server mounting, the `WhereNumber` constraint, and named-route URL generation (while `/api/route-demo/users/abc` returns 404), `/api/route-demo/posts/7` to verify parameter binding, `/api/route-demo/photos/9` to verify API resource routes, `/api/route-demo/meta/42` to verify `route.current` injection with named-route URL generation, and `/api/route-demo/legacy` to verify the redirect.
+
+The 42 `service-provider` scenarios are compile-level, hermetic, or scenario and need no external services. Run `go run ./demo demo:provider list` to see the entries, or verify registration order, deferred loading, and terminable providers with `go run ./demo demo:provider singleton --json`, `go run ./demo demo:provider commands`, `go run ./demo demo:provider default-order`, `go run ./demo demo:provider deferred-resolution --json`, `go run ./demo demo:provider terminate-order --json`, and `go run ./demo demo:provider full-lifecycle`. After `go run ./demo serve`, request `/api/provider-demo/greeting` to verify a service bound by `AppServiceProvider.Register` is still resolvable at request time, returning `{"message":"hello from provider"}`.
 
 The `commands` `fresh-drop-types` scenario uses real PostgreSQL. Run `./demo/dev up postgres`, load `demo/.dev/runtime/test.env`, then run `go test ./app/demo/commands -run TestCommandsDemoPostgresIntegration -v`. The test creates an isolated `prismgo_commands_` schema, verifies that the enum and table are removed, then drops that schema.
 

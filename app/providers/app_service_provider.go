@@ -12,6 +12,9 @@ import (
 	"prismgo-demo/app/services"
 )
 
+// DemoGreetingKey is the container key used by the provider demo HTTP smoke endpoint.
+const DemoGreetingKey = "demo.provider.greeting"
+
 // AppServiceProvider registers application-wide services.
 type AppServiceProvider struct{}
 
@@ -35,6 +38,9 @@ func (p AppServiceProvider) Register(app provider.Application) error {
 				return nil, fmt.Errorf("demo provider: %s has type %T", repositories.OrderRepositoryKey, raw)
 			}
 			return services.NewOrderService(orders), nil
+		}},
+		{DemoGreetingKey, func(container.Resolver) (any, error) {
+			return "hello from provider", nil
 		}},
 	}
 	for _, binding := range bindings {

@@ -29,5 +29,6 @@ func CommandFactories() []console.CommandFactory {
 		func() console.Command { return demo.NewRedisCommand() },
 		func() console.Command { return demo.NewLifecycleCommand() },
 		func() console.Command { return demo.NewRouteCommand() },
+		func() console.Command { return demo.NewProviderCommand() },
 	}
 }

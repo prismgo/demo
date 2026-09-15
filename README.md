@@ -40,7 +40,7 @@ Demo 项目主要承担四件事：
 
 ## Catalog 进度地图
 
-Catalog 当前覆盖 **29 个模块、1432 个条目**：已实现 1043 个、计划中 386 个、手工验证 3 个。以下是 README 更新时的快照；`app/demo/catalog/` 是唯一数据源，实时进度以 `demo:list` 输出为准。
+Catalog 当前覆盖 **29 个模块、1432 个条目**：已实现 1085 个、计划中 344 个、手工验证 3 个。以下是 README 更新时的快照；`app/demo/catalog/` 是唯一数据源，实时进度以 `demo:list` 输出为准。
 
 | 模块 | 覆盖范围 | 进度 | 剩余 | 状态 |
 |---|---|---:|---:|---|
@@ -67,7 +67,7 @@ Catalog 当前覆盖 **29 个模块、1432 个条目**：已实现 1043 个、�
 | `redis` | Redis 连接与操作 | 93/93 | 0 | 已实现 |
 | `route` | HTTP 路由注册 | 87/87 | 0 | 已实现 |
 | `schema` | 数据库 Schema 与迁移构建器 | 0/143 | 143 | 计划中 |
-| `service-provider` | Service Provider 注册与生命周期 | 0/42 | 42 | 计划中 |
+| `service-provider` | Service Provider 注册与生命周期 | 42/42 | 0 | 已实现 |
 | `session` | 服务端 Session 存储 | 50/50 | 0 | 已实现 |
 | `starter` | 生成应用的起始模板 | 0/1 | — | 手工验证 |
 | `support` | 通用框架辅助函数 | 0/1 | 1 | 计划中 |
@@ -126,6 +126,10 @@ go run ./demo demo:route list-command --json
 go run ./demo demo:route throttle-route
 go run ./demo demo:route provider-singleton
 go run ./demo demo:route best-practices --json
+go run ./demo demo:provider list
+go run ./demo demo:provider singleton --json
+go run ./demo demo:provider deferred-resolution --json
+go run ./demo demo:provider terminate-order
 ```
 
 在 `demo/` 中运行本地 OSS HTTP 集成验收（不需要云端凭证）：
@@ -247,6 +251,8 @@ GOWORK=off go test . ./app/... ./bootstrap/... ./config/... ./database/... ./rou
 `redis` 的连接、命令、连接管理、事件、容器集成，以及 cache/queue/horizon 的 Redis 集成场景使用真实 Redis。加载 `demo/.dev/runtime/test.env` 后运行 `go test ./app/demo/redis -run 'TestRedisDemo' -v`（无 `PRISMGO_REDIS_TEST_URL` 时集成用例明确跳过），或执行 `go run ./demo demo:redis list` 与 `go run ./demo demo:redis strings --json`；集成场景从 `PRISMGO_REDIS_TEST_URL` 推导 host/port/database，证明默认连接与 `cache` 连接指向真实服务，通过 Facade 解析连接并分别使用唯一 `prismgo_demo_redis_*`、`prismgo_demo_redis_cache_*`、`prismgo_demo_redis_queue_*`、`prismgo_demo_redis_horizon_*` 前缀清理键。`redis` 的配置、连接生命周期、容器解析与 `horizon-config` 场景（`config`、`url`、`manager`、`purge`、`close`、`provider-registration`、`container-factory`、`event-sensitive-parameters` 等）为 hermetic，不需要 Redis。`horizon-config` 通过显式 ConfigReader 解析 `horizon` 配置，其余 Horizon 场景直接读写真实 Redis Store；cache/queue 场景分别在 `CACHE_STORE=redis`、`QUEUE_CONNECTION=redis` 下验证驱动、TTL、原子/批量/标签操作、ready list、delayed zset、阻塞 pop 与失败任务存储。
 
 `route` 的 87 个场景为编译级或 hermetic，不依赖任何外部服务。运行 `go run ./demo demo:route list` 查看条目，或直接执行 `go run ./demo demo:route facade --json`、`go run ./demo demo:route url-escaping`、`go run ./demo demo:route api-resource --json`；第三批限流与调试场景可用 `go run ./demo demo:route throttle-route`、`go run ./demo demo:route list-command --json`、`go run ./demo demo:route provider-singleton` 验证。启动 `go run ./demo serve` 后请求 `/api/route-demo/users/42` 可验证真实 HTTP Server 挂载、`WhereNumber` 约束与命名路由 URL 生成（`/api/route-demo/users/abc` 返回 404），请求 `/api/route-demo/posts/7` 验证参数绑定、`/api/route-demo/photos/9` 验证 API 资源路由、`/api/route-demo/meta/42` 验证 `route.current` 注入与命名 URL 生成、`/api/route-demo/legacy` 验证重定向。
+
+`service-provider` 的 42 个场景为编译级、hermetic 或 scenario，不依赖任何外部服务。运行 `go run ./demo demo:provider list` 查看条目，或用 `go run ./demo demo:provider singleton --json`、`go run ./demo demo:provider commands`、`go run ./demo demo:provider default-order`、`go run ./demo demo:provider deferred-resolution --json`、`go run ./demo demo:provider terminate-order --json`、`go run ./demo demo:provider full-lifecycle` 验证注册顺序、延迟加载与可终止提供者。启动 `go run ./demo serve` 后请求 `/api/provider-demo/greeting` 可验证 `AppServiceProvider.Register` 写入容器的服务在请求期仍可解析，返回 `{"message":"hello from provider"}`。
 
 `commands` 的 `fresh-drop-types` 场景使用真实 PostgreSQL。执行 `./demo/dev up postgres`、加载 `demo/.dev/runtime/test.env` 后运行 `go test ./app/demo/commands -run TestCommandsDemoPostgresIntegration -v`；测试创建独立的 `prismgo_commands_` schema，验证枚举类型和表被清除后删除该 schema。
 

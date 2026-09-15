@@ -7,8 +7,10 @@ import (
 	"time"
 
 	"prismgo-demo/app/http/controllers"
+	"prismgo-demo/app/providers"
 
 	"github.com/gin-gonic/gin"
+	"github.com/prismgo/framework/container"
 	"github.com/prismgo/framework/http/middleware"
 	"github.com/prismgo/framework/redis"
 	"github.com/prismgo/framework/route"
@@ -33,6 +35,25 @@ func Register(app Dependencies) {
 	registerSessionDemoRoutes()
 	registerRedisDemoRoutes()
 	registerRouteDemoRoutes()
+	registerProviderDemoRoutes()
+}
+
+// registerProviderDemoRoutes mounts the provider-bound service smoke endpoint.
+func registerProviderDemoRoutes() {
+	route.Prefix("/api/provider-demo").Group(func() {
+		route.Get("/greeting", providerDemoGreeting)
+	})
+}
+
+// providerDemoGreeting resolves the service bound by AppServiceProvider.Register.
+func providerDemoGreeting(c *gin.Context) {
+	message, err := container.Make[string](providers.DemoGreetingKey)
+	if err != nil {
+		_ = c.Error(err)
+		c.JSON(http.StatusServiceUnavailable, gin.H{"error": "provider service unavailable"})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"message": message})
 }
 
 // registerRouteDemoRoutes mounts the documented prefix, constraint, naming, binding and resource flow.
