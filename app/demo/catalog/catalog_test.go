@@ -129,7 +129,7 @@ func TestCatalogEntries(t *testing.T) {
 			t.Fatalf("event catalog entry %q = %#v, %v; want %s", slug, item, ok, want)
 		}
 	}
-	for _, slug := range []string{
+	for index, slug := range []string{
 		"application-entry", "run-context",
 		"base-providers", "default-providers", "extension-providers", "application-providers", "exception-handler",
 		"provider-layering", "register-phase", "boot-phase", "booted-runner-order",
@@ -145,8 +145,12 @@ func TestCatalogEntries(t *testing.T) {
 		"console-application-starting-event", "console-command-starting-event", "console-command-finished-event",
 		"listeners", "payload-boundaries",
 	} {
-		if item, ok := Find("lifecycle", slug); !ok || item.Status != StatusPlanned {
-			t.Fatalf("lifecycle catalog entry %q = %#v, %v; want planned", slug, item, ok)
+		want := StatusPlanned
+		if index < 57 {
+			want = StatusImplemented
+		}
+		if item, ok := Find("lifecycle", slug); !ok || item.Status != want {
+			t.Fatalf("lifecycle catalog entry %q = %#v, %v; want %s", slug, item, ok, want)
 		}
 	}
 	for _, slug := range []string{
@@ -403,11 +407,11 @@ func TestCatalogFeatureSummaries(t *testing.T) {
 	if !ok {
 		t.Fatal("SummaryFor(lifecycle) found = false")
 	}
-	if lifecycle.Implemented != 0 || lifecycle.Planned != 57 || lifecycle.Manual != 0 || lifecycle.Total != 57 || lifecycle.Remaining != 57 {
-		t.Fatalf("lifecycle summary = %#v, want implemented=0 planned=57 manual=0 total=57 remaining=57", lifecycle)
+	if lifecycle.Implemented != 57 || lifecycle.Planned != 0 || lifecycle.Manual != 0 || lifecycle.Total != 57 || lifecycle.Remaining != 0 {
+		t.Fatalf("lifecycle summary = %#v, want implemented=57 planned=0 manual=0 total=57 remaining=0", lifecycle)
 	}
-	if lifecycle.Status != FeatureStatusPlanned || lifecycle.Since != SinceInitial {
-		t.Fatalf("lifecycle status/since = %q/%q, want %q/%q", lifecycle.Status, lifecycle.Since, FeatureStatusPlanned, SinceInitial)
+	if lifecycle.Status != FeatureStatusImplemented || lifecycle.Since != SinceInitial {
+		t.Fatalf("lifecycle status/since = %q/%q, want %q/%q", lifecycle.Status, lifecycle.Since, FeatureStatusImplemented, SinceInitial)
 	}
 
 	logger, ok := SummaryFor("logger")
