@@ -94,6 +94,46 @@ func runIntegration(name string) (string, error) {
 		return disableEventsScenario()
 	case "enable-events":
 		return enableEventsScenario()
+	case "cache-driver":
+		return cacheDriverScenario()
+	case "cache-basic":
+		return cacheBasicScenario()
+	case "cache-ttl":
+		return cacheTTLScenario()
+	case "cache-atomic":
+		return cacheAtomicScenario()
+	case "cache-bulk":
+		return cacheBulkScenario()
+	case "cache-tags":
+		return cacheTagsScenario()
+	case "cache-flush":
+		return cacheFlushScenario()
+	case "queue-driver":
+		return queueDriverScenario()
+	case "queue-ready":
+		return queueReadyScenario()
+	case "queue-delayed":
+		return queueDelayedScenario()
+	case "queue-blocking-pop":
+		return queueBlockingPopScenario()
+	case "queue-failed":
+		return queueFailedScenario()
+	case "horizon-processes":
+		return horizonProcessesScenario()
+	case "horizon-control":
+		return horizonControlScenario()
+	case "horizon-metrics":
+		return horizonMetricsScenario()
+	case "horizon-queue-lengths":
+		return horizonQueueLengthsScenario()
+	case "horizon-summaries":
+		return horizonSummariesScenario()
+	case "horizon-job-diagnostics":
+		return horizonJobDiagnosticsScenario()
+	case "horizon-observability":
+		return horizonObservabilityScenario()
+	case "horizon-orphans":
+		return horizonOrphansScenario()
 	default:
 		return "", fmt.Errorf("unknown redis scenario %q", name)
 	}
@@ -512,12 +552,19 @@ func liveClient(name ...string) (goredis.UniversalClient, func(), error) {
 	return client, cleanup, nil
 }
 
+// redisConnectionClient resolves one Redis connection client from the current application.
+func redisConnectionClient(name string) (goredis.UniversalClient, error) {
+	return redis.Client(name)
+}
+
 // liveOptions customizes the isolated Application used by integration scenarios.
 type liveOptions struct {
 	// cacheDatabase overrides the logical database of the cache connection.
 	cacheDatabase *int
 	// configure allows a scenario to adjust the Application builder before boot.
 	configure func(*foundation.Builder)
+	// env adds scenario-specific environment overrides after the Redis connection variables.
+	env map[string]string
 }
 
 // openLive boots an application whose Redis connections point at PRISMGO_REDIS_TEST_URL.
@@ -554,6 +601,9 @@ func openLiveWith(opts liveOptions) (app *foundation.Application, cleanup func()
 		"SESSION_DRIVER":   "file",
 	}
 	for key, value := range redisEnv {
+		env[key] = value
+	}
+	for key, value := range opts.env {
 		env[key] = value
 	}
 	restore := setScenarioEnv(env)

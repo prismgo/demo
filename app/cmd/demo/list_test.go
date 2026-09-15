@@ -23,7 +23,7 @@ func TestDemoListCommandShowsFeatureOverview(t *testing.T) {
 		"PrismGo Framework: v0.2.2 (local workspace)",
 		"Feature", "Description", "Since", "Progress", "Remaining", "Status",
 		"Queues, jobs, and workers", "59/59", "implemented",
-		"Modules: 29 | Implemented: 923/1432 | Planned: 506 | Manual: 3",
+		"Modules: 29 | Implemented: 956/1432 | Planned: 473 | Manual: 3",
 		"go run ./demo demo:show <feature>",
 	} {
 		if !strings.Contains(output.String(), expected) {
@@ -52,8 +52,8 @@ func TestDemoListCommandJSONAndFeatureStatusFilter(t *testing.T) {
 	if result.Framework != "v0.2.2" {
 		t.Fatalf("framework = %q, want v0.2.2", result.Framework)
 	}
-	if len(result.Features) != 16 || result.Features[0].Feature != "cache" || result.Features[1].Feature != "commands" || result.Features[2].Feature != "config" || result.Features[3].Feature != "console" || result.Features[4].Feature != "container" || result.Features[5].Feature != "cookie" || result.Features[6].Feature != "event" || result.Features[7].Feature != "exception" || result.Features[8].Feature != "filesystem" || result.Features[9].Feature != "horizon" || result.Features[10].Feature != "http-server" || result.Features[11].Feature != "lifecycle" || result.Features[12].Feature != "logger" || result.Features[13].Feature != "queue" || result.Features[14].Feature != "session" || result.Features[15].Feature != "translation" {
-		t.Fatalf("features = %#v, want cache, commands, config, console, container, cookie, event, exception, filesystem, horizon, http-server, lifecycle, logger, queue, session, and translation implemented", result.Features)
+	if len(result.Features) != 17 || result.Features[0].Feature != "cache" || result.Features[1].Feature != "commands" || result.Features[2].Feature != "config" || result.Features[3].Feature != "console" || result.Features[4].Feature != "container" || result.Features[5].Feature != "cookie" || result.Features[6].Feature != "event" || result.Features[7].Feature != "exception" || result.Features[8].Feature != "filesystem" || result.Features[9].Feature != "horizon" || result.Features[10].Feature != "http-server" || result.Features[11].Feature != "lifecycle" || result.Features[12].Feature != "logger" || result.Features[13].Feature != "queue" || result.Features[14].Feature != "redis" || result.Features[15].Feature != "session" || result.Features[16].Feature != "translation" {
+		t.Fatalf("features = %#v, want cache, commands, config, console, container, cookie, event, exception, filesystem, horizon, http-server, lifecycle, logger, queue, redis, session, and translation implemented", result.Features)
 	}
 	if strings.Contains(output.String(), "\x1b[") {
 		t.Fatalf("JSON contains ANSI decoration: %q", output.String())
@@ -111,8 +111,8 @@ func TestDemoShowCommandJSONAndFilters(t *testing.T) {
 	if err := json.Unmarshal(output.Bytes(), &result); err != nil {
 		t.Fatalf("decode JSON: %v\n%s", err, output.String())
 	}
-	if result.Framework != "v0.2.2" || len(result.Entries) != 62 {
-		t.Fatalf("detail output framework/entries = %q/%d, want v0.2.2/62", result.Framework, len(result.Entries))
+	if result.Framework != "v0.2.2" || len(result.Entries) != 42 {
+		t.Fatalf("detail output framework/entries = %q/%d, want v0.2.2/42", result.Framework, len(result.Entries))
 	}
 	for _, item := range result.Entries {
 		if item.Level != catalog.LevelIntegration || item.Status != catalog.StatusPlanned || item.Since != catalog.SinceInitial {

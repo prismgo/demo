@@ -41,7 +41,7 @@ The Demo project has four main responsibilities:
 
 ## Catalog Progress Map
 
-The catalog currently covers **29 modules and 1432 entries**: 923 implemented, 506 planned, and 3 manually verified. The table below is a snapshot taken when this README was updated. `app/demo/catalog/` is the single source of truth; use `demo:list` for live progress.
+The catalog currently covers **29 modules and 1432 entries**: 956 implemented, 473 planned, and 3 manually verified. The table below is a snapshot taken when this README was updated. `app/demo/catalog/` is the single source of truth; use `demo:list` for live progress.
 
 | Module | Coverage | Progress | Remaining | Status |
 |---|---|---:|---:|---|
@@ -65,7 +65,7 @@ The catalog currently covers **29 modules and 1432 entries**: 923 implemented, 5
 | `logger` | Multi-channel application logging | 40/40 | 0 | Implemented |
 | `queue` | Queues, jobs, and workers | 59/59 | 0 | Implemented |
 | `ratelimit` | Request and action rate limiting | 0/74 | 74 | Planned |
-| `redis` | Redis connections and operations | 60/93 | 33 | In progress |
+| `redis` | Redis connections and operations | 93/93 | 0 | Implemented |
 | `route` | HTTP route registration | 0/87 | 87 | Planned |
 | `schema` | Database schema and migration builder | 0/143 | 143 | Planned |
 | `service-provider` | Service provider registration and lifecycle | 0/42 | 42 | Planned |
@@ -106,6 +106,9 @@ go run ./demo demo:redis default-connection --json
 go run ./demo demo:redis connection-reuse --json
 go run ./demo demo:redis command-executed-event --json
 go run ./demo demo:redis connection-listener --json
+go run ./demo demo:redis cache-flush --json
+go run ./demo demo:redis queue-ready --json
+go run ./demo demo:redis horizon-metrics --json
 go run ./demo demo:lifecycle list
 go run ./demo demo:lifecycle run-context --json
 go run ./demo demo:commands list
@@ -232,7 +235,7 @@ The `commands` queue scenarios use real Redis. Run `./demo/dev up redis`, load `
 
 The `session` `redis-driver` and `redis-lock` scenarios also use real Redis. Load `demo/.dev/runtime/test.env` and run `go test ./app/demo/session -run 'TestSessionDemoRedis(Driver|Lock)' -v`, or execute `go run ./demo demo:session redis-driver --connection=redis` and `go run ./demo demo:session redis-lock --connection=redis`. The scenarios use a unique `prismgo_demo_session_*` prefix and delete their keys when they finish.
 
-The `redis` connection, command, connection-management, and event scenarios use real Redis. Load `demo/.dev/runtime/test.env` and run `go test ./app/demo/redis -run 'TestRedisDemo' -v` (integration cases skip explicitly when `PRISMGO_REDIS_TEST_URL` is absent), or execute `go run ./demo demo:redis list` and `go run ./demo demo:redis strings --json`. Integration scenarios derive host/port/database from `PRISMGO_REDIS_TEST_URL`, resolve connections through the Facade, use a unique `prismgo_demo_redis_*` prefix, and delete their keys when they finish. Configuration and connection-lifecycle scenarios such as `config`, `url`, `manager`, `purge`, `close`, and `event-sensitive-parameters` are hermetic and need no Redis.
+The `redis` connection, command, connection-management, event, container-integration, and cache/queue/horizon Redis integration scenarios use real Redis. Load `demo/.dev/runtime/test.env` and run `go test ./app/demo/redis -run 'TestRedisDemo' -v` (integration cases skip explicitly when `PRISMGO_REDIS_TEST_URL` is absent), or execute `go run ./demo demo:redis list` and `go run ./demo demo:redis strings --json`. Integration scenarios derive host/port/database from `PRISMGO_REDIS_TEST_URL`, resolve connections through the Facade, use unique `prismgo_demo_redis_*`, `prismgo_demo_redis_cache_*`, `prismgo_demo_redis_queue_*`, and `prismgo_demo_redis_horizon_*` prefixes, and delete their keys when they finish. Configuration, connection-lifecycle, container-resolution, and `horizon-config` scenarios such as `config`, `url`, `manager`, `purge`, `close`, `provider-registration`, `container-factory`, and `event-sensitive-parameters` are hermetic and need no Redis. `horizon-config` parses the `horizon` block through an explicit ConfigReader, while the remaining Horizon scenarios read and write a real Redis Store; cache and queue scenarios run under `CACHE_STORE=redis` and `QUEUE_CONNECTION=redis` to verify the driver, TTL, atomic/bulk/tagged operations, ready list, delayed zset, blocking pop, and failed-job storage.
 
 The `commands` `fresh-drop-types` scenario uses real PostgreSQL. Run `./demo/dev up postgres`, load `demo/.dev/runtime/test.env`, then run `go test ./app/demo/commands -run TestCommandsDemoPostgresIntegration -v`. The test creates an isolated `prismgo_commands_` schema, verifies that the enum and table are removed, then drops that schema.
 

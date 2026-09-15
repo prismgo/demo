@@ -40,7 +40,7 @@ Demo 项目主要承担四件事：
 
 ## Catalog 进度地图
 
-Catalog 当前覆盖 **29 个模块、1432 个条目**：已实现 923 个、计划中 506 个、手工验证 3 个。以下是 README 更新时的快照；`app/demo/catalog/` 是唯一数据源，实时进度以 `demo:list` 输出为准。
+Catalog 当前覆盖 **29 个模块、1432 个条目**：已实现 956 个、计划中 473 个、手工验证 3 个。以下是 README 更新时的快照；`app/demo/catalog/` 是唯一数据源，实时进度以 `demo:list` 输出为准。
 
 | 模块 | 覆盖范围 | 进度 | 剩余 | 状态 |
 |---|---|---:|---:|---|
@@ -64,7 +64,7 @@ Catalog 当前覆盖 **29 个模块、1432 个条目**：已实现 923 个、计
 | `logger` | 多通道应用日志 | 40/40 | 0 | 已实现 |
 | `queue` | 队列、任务与 Worker | 59/59 | 0 | 已实现 |
 | `ratelimit` | 请求与操作限流 | 0/74 | 74 | 计划中 |
-| `redis` | Redis 连接与操作 | 60/93 | 33 | 进行中 |
+| `redis` | Redis 连接与操作 | 93/93 | 0 | 已实现 |
 | `route` | HTTP 路由注册 | 0/87 | 87 | 计划中 |
 | `schema` | 数据库 Schema 与迁移构建器 | 0/143 | 143 | 计划中 |
 | `service-provider` | Service Provider 注册与生命周期 | 0/42 | 42 | 计划中 |
@@ -105,6 +105,9 @@ go run ./demo demo:redis default-connection --json
 go run ./demo demo:redis connection-reuse --json
 go run ./demo demo:redis command-executed-event --json
 go run ./demo demo:redis connection-listener --json
+go run ./demo demo:redis cache-flush --json
+go run ./demo demo:redis queue-ready --json
+go run ./demo demo:redis horizon-metrics --json
 go run ./demo demo:lifecycle list
 go run ./demo demo:lifecycle run-context --json
 go run ./demo demo:commands list
@@ -231,7 +234,7 @@ GOWORK=off go test . ./app/... ./bootstrap/... ./config/... ./database/... ./rou
 
 `session` 的 `redis-driver` 与 `redis-lock` 场景同样使用真实 Redis。加载 `demo/.dev/runtime/test.env` 后运行 `go test ./app/demo/session -run 'TestSessionDemoRedis(Driver|Lock)' -v`，或执行 `go run ./demo demo:session redis-driver --connection=redis` 与 `go run ./demo demo:session redis-lock --connection=redis`；场景使用唯一 `prismgo_demo_session_*` 前缀并在结束时清理键。
 
-`redis` 的连接、命令、连接管理与事件场景使用真实 Redis。加载 `demo/.dev/runtime/test.env` 后运行 `go test ./app/demo/redis -run 'TestRedisDemo' -v`（无 `PRISMGO_REDIS_TEST_URL` 时集成用例明确跳过），或执行 `go run ./demo demo:redis list` 与 `go run ./demo demo:redis strings --json`；集成场景从 `PRISMGO_REDIS_TEST_URL` 推导 host/port/database，证明默认连接与 `cache` 连接指向真实服务，通过 Facade 解析连接并使用唯一 `prismgo_demo_redis_*` 前缀清理键。`redis` 的配置与连接生命周期场景（`config`、`url`、`manager`、`purge`、`close`、`event-sensitive-parameters` 等）为 hermetic，不需要 Redis。
+`redis` 的连接、命令、连接管理、事件、容器集成，以及 cache/queue/horizon 的 Redis 集成场景使用真实 Redis。加载 `demo/.dev/runtime/test.env` 后运行 `go test ./app/demo/redis -run 'TestRedisDemo' -v`（无 `PRISMGO_REDIS_TEST_URL` 时集成用例明确跳过），或执行 `go run ./demo demo:redis list` 与 `go run ./demo demo:redis strings --json`；集成场景从 `PRISMGO_REDIS_TEST_URL` 推导 host/port/database，证明默认连接与 `cache` 连接指向真实服务，通过 Facade 解析连接并分别使用唯一 `prismgo_demo_redis_*`、`prismgo_demo_redis_cache_*`、`prismgo_demo_redis_queue_*`、`prismgo_demo_redis_horizon_*` 前缀清理键。`redis` 的配置、连接生命周期、容器解析与 `horizon-config` 场景（`config`、`url`、`manager`、`purge`、`close`、`provider-registration`、`container-factory`、`event-sensitive-parameters` 等）为 hermetic，不需要 Redis。`horizon-config` 通过显式 ConfigReader 解析 `horizon` 配置，其余 Horizon 场景直接读写真实 Redis Store；cache/queue 场景分别在 `CACHE_STORE=redis`、`QUEUE_CONNECTION=redis` 下验证驱动、TTL、原子/批量/标签操作、ready list、delayed zset、阻塞 pop 与失败任务存储。
 
 `commands` 的 `fresh-drop-types` 场景使用真实 PostgreSQL。执行 `./demo/dev up postgres`、加载 `demo/.dev/runtime/test.env` 后运行 `go test ./app/demo/commands -run TestCommandsDemoPostgresIntegration -v`；测试创建独立的 `prismgo_commands_` schema，验证枚举类型和表被清除后删除该 schema。
 

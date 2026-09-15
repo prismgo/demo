@@ -84,6 +84,32 @@ func run(name string) (string, error) {
 		return closeCancellationScenario()
 	case "event-sensitive-parameters":
 		return eventSensitiveParametersScenario()
+	case "facade-manager":
+		return facadeManagerScenario()
+	case "manager-close-option":
+		return managerCloseOptionScenario()
+	case "manager-contract":
+		return managerContractScenario()
+	case "connection-contract":
+		return connectionContractScenario()
+	case "event-aliases":
+		return eventAliasesScenario()
+	case "event-wrappers":
+		return eventWrappersScenario()
+	case "provider-registration":
+		return providerRegistrationScenario()
+	case "provider-event-bridge":
+		return providerEventBridgeScenario()
+	case "container-factory":
+		return containerFactoryScenario()
+	case "container-connection":
+		return containerConnectionScenario()
+	case "container-named-connection":
+		return containerNamedConnectionScenario()
+	case "lifecycle-close":
+		return lifecycleCloseScenario()
+	case "horizon-config":
+		return horizonConfigScenario()
 	default:
 		return "", fmt.Errorf("unknown scenario %q", name)
 	}
