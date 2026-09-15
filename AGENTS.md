@@ -64,14 +64,14 @@ GOWORK=off go test . ./app/... ./bootstrap/... ./config/... ./database/... ./rou
 
 ## 发布上线流程（framework 与 prismgo）
 
-发布通过 push `vX.Y.Z` tag 触发各仓的 GitHub Actions（Goreleaser）；`framework/` 与 `prismgo/` 是独立仓库，须分别提交、分别打 tag。统一顺序为“先验证、再提交推送、最后打 tag”。
+发布通过 push `vX.Y.Z` tag 触发各仓的 GitHub Actions（Goreleaser）；`framework/` 与 `prismgo/` 是独立仓库，须分别提交、分别打 tag。两个仓库统一按“验证 → 提交推送 → 等用户确认 Actions 通过 → 打 tag 发布”执行，提交推送后不得立即打 tag。
 
 ### framework 发布
 
 1. 全量验证：`cd framework && go test ./...`（有跨组件风险时 `make ci`），并确认工作区干净。
 2. 改版本号：把 `framework/version/version.go` 的 `const Framework` 设为 `x.y.z`。Release workflow 强制 `tag 去掉 v` 必须等于该常量，否则校验失败并自动删除 tag。
 3. 提交推送：`gofmt` 后提交（`bump version to x.y.z`）并 `git push origin main`。
-4. 打 tag 发布：`git tag vx.y.z && git push origin vx.y.z`，触发 Goreleaser。
+4. 等待确认：push 后不要立即打 tag；等用户在 GitHub 验证 Actions 通过并明确通知发布，收到确认后再 `git tag vx.y.z && git push origin vx.y.z`，触发 Goreleaser。
 5. 校验：`https://github.com/prismgo/framework/releases.atom` 出现该 tag，且模块代理已索引（`https://proxy.golang.org/github.com/prismgo/framework/@v/vx.y.z.mod`）。
 
 ### prismgo 发布
@@ -81,7 +81,7 @@ GOWORK=off go test . ./app/... ./bootstrap/... ./config/... ./database/... ./rou
 3. 复核 `go.mod`：`go` 指令保持 1.25+，关键间接依赖未被顶到需要更高工具链。
 4. 运行验证：`GOWORK=off go run ./` 正常，且 `GOWORK=off go build ./...`、`go vet ./...`、`go test ./...` 通过。
 5. 提交推送：按仓库习惯提交（`chore(deps): ...`）并 `git push origin main`。
-6. 打 tag 发布：`git tag vx.y.z && git push origin vx.y.z`，触发 Goreleaser；校验 `https://github.com/prismgo/prismgo/releases.atom`。
+6. 等待确认：push 后不要立即打 tag；等用户在 GitHub 验证 Actions 通过并明确通知发布，收到确认后再 `git tag vx.y.z && git push origin vx.y.z` 触发 Goreleaser，并校验 `https://github.com/prismgo/prismgo/releases.atom`。
 
 ### 发布铁律与教训
 
@@ -89,6 +89,7 @@ GOWORK=off go test . ./app/... ./bootstrap/... ./config/... ./database/... ./rou
 |---|---|
 | 已发布版本不可变 | Go module 代理对已缓存版本只读：一旦 `proxy.golang.org/.../@v/vX.Y.Z.info` 固定了 `Origin.Hash`，重打或移动 tag 不会改变 `go get` 结果。发错版本只能新发 patch（如 v0.3.1），禁止复用或移动已发布 tag。 |
 | 先推送再打 tag | tag 必须指向已 push 到 `main` 的提交；未推送就发布会造成 Release 与源码不一致。 |
+| 待确认再发布 | push 后不得立即打 tag，须等用户验证 GitHub Actions 通过并明确通知发布后再 tag。 |
 | 版本号先对齐 | framework 打 tag 前必须已把 `version.Framework` 改为对应版本，否则 workflow 校验失败并自动删 tag。 |
 | 警惕 go 指令漂移 | 依赖升级（含 dependabot）可能因某依赖要求更高工具链而自动抬高 `go` 指令（例如 x/term v0.46 要求 go 1.26）；合并前需确认符合项目 Go 版本策略。 |
 | 发布通道 | 发布由 tag push 触发云端 Goreleaser，本地无需 `gh` 或 token；若要修改或删除已发布的 Release，需在 GitHub UI 或用带 token 的 API 操作。 |
