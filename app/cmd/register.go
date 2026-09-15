@@ -26,6 +26,7 @@ func CommandFactories() []console.CommandFactory {
 		func() console.Command { return demo.NewCommandsCommand() },
 		func() console.Command { return demo.NewHTTPServerCommand() },
 		func() console.Command { return demo.NewSessionCommand() },
+		func() console.Command { return demo.NewRedisCommand() },
 		func() console.Command { return demo.NewLifecycleCommand() },
 	}
 }

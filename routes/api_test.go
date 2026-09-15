@@ -53,6 +53,18 @@ func TestRegisterAddsHealthAndWelcomeRoutes(t *testing.T) {
 	}
 
 	assertSessionDemoFlow(t, engine)
+	assertRouteRegistered(t, engine, http.MethodGet, "/api/redis-demo/counter")
+}
+
+// assertRouteRegistered verifies a mounted route path is present.
+func assertRouteRegistered(t *testing.T, engine *gin.Engine, method string, path string) {
+	t.Helper()
+	for _, registered := range engine.Routes() {
+		if registered.Method == method && registered.Path == path {
+			return
+		}
+	}
+	t.Fatalf("route %s %s is not registered; routes = %#v", method, path, engine.Routes())
 }
 
 // assertSessionDemoFlow drives the /api/session-demo group across three requests.

@@ -1,12 +1,15 @@
 package routes
 
 import (
+	"context"
 	"net/http"
+	"time"
 
 	"prismgo-demo/app/http/controllers"
 
 	"github.com/gin-gonic/gin"
 	"github.com/prismgo/framework/http/middleware"
+	"github.com/prismgo/framework/redis"
 	"github.com/prismgo/framework/route"
 	"github.com/prismgo/framework/session"
 )
@@ -27,6 +30,37 @@ func Register(app Dependencies) {
 	}
 
 	registerSessionDemoRoutes()
+	registerRedisDemoRoutes()
+}
+
+// registerRedisDemoRoutes mounts the documented Facade client flow for smoke testing.
+func registerRedisDemoRoutes() {
+	route.Prefix("/api/redis-demo").Group(func() {
+		route.Get("/counter", redisDemoCounter)
+	})
+}
+
+// redisDemoCounter increments a demo key through the Facade client and returns the value.
+func redisDemoCounter(c *gin.Context) {
+	client, err := redis.Client()
+	if err != nil {
+		_ = c.Error(err)
+		c.JSON(http.StatusServiceUnavailable, gin.H{"error": "redis unavailable"})
+		return
+	}
+	ctx, cancel := context.WithTimeout(c.Request.Context(), 2*time.Second)
+	defer cancel()
+	key := "prismgo_demo_http:counter"
+	value, err := client.Incr(ctx, key).Result()
+	if err != nil {
+		_ = c.Error(err)
+		c.JSON(http.StatusServiceUnavailable, gin.H{"error": "redis command failed"})
+		return
+	}
+	if err := client.Expire(ctx, key, time.Minute).Err(); err != nil {
+		_ = c.Error(err)
+	}
+	c.JSON(http.StatusOK, gin.H{"counter": value})
 }
 
 // registerSessionDemoRoutes mounts the documented StartSession flow for smoke testing.

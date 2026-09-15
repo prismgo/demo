@@ -195,7 +195,7 @@ func TestCatalogEntries(t *testing.T) {
 			t.Fatalf("ratelimit catalog entry %q = %#v, %v; want planned", slug, item, ok)
 		}
 	}
-	for _, slug := range []string{
+	for index, slug := range []string{
 		"architecture", "config", "client-identifiers", "named-config", "address-precedence", "database-precedence", "authentication",
 		"url", "tls", "client-name", "timeouts", "max-retries", "environment",
 		"client", "named-client", "connection", "strings", "hashes", "lists", "sets", "sorted-sets", "counters", "keys", "native-client",
@@ -213,8 +213,12 @@ func TestCatalogEntries(t *testing.T) {
 		"horizon-job-diagnostics", "horizon-observability", "horizon-orphans",
 		"facade-manager", "manager-close-option", "manager-contract", "connection-contract", "event-aliases", "event-wrappers",
 	} {
-		if item, ok := Find("redis", slug); !ok || item.Status != StatusPlanned {
-			t.Fatalf("redis catalog entry %q = %#v, %v; want planned", slug, item, ok)
+		want := StatusPlanned
+		if index < 60 {
+			want = StatusImplemented
+		}
+		if item, ok := Find("redis", slug); !ok || item.Status != want {
+			t.Fatalf("redis catalog entry %q = %#v, %v; want %s", slug, item, ok, want)
 		}
 	}
 	for _, slug := range []string{
@@ -299,8 +303,8 @@ func TestCatalogEntries(t *testing.T) {
 			t.Fatalf("filesystem catalog entry %q = %#v, %v; want implemented", slug, item, ok)
 		}
 	}
-	if got := Filter("redis", LevelIntegration, StatusPlanned); len(got) != 54 {
-		t.Fatalf("redis integration filter returned %d entries, want 54", len(got))
+	if got := Filter("redis", LevelIntegration, StatusPlanned); len(got) != 20 {
+		t.Fatalf("redis integration filter returned %d entries, want 20", len(got))
 	}
 	if got := Filter("queue", "", StatusImplemented); len(got) != 59 {
 		t.Fatalf("implemented queue entries = %d, want 59", len(got))
@@ -451,11 +455,11 @@ func TestCatalogFeatureSummaries(t *testing.T) {
 	if !ok {
 		t.Fatal("SummaryFor(redis) found = false")
 	}
-	if redis.Implemented != 0 || redis.Planned != 93 || redis.Manual != 0 || redis.Total != 93 || redis.Remaining != 93 {
-		t.Fatalf("redis summary = %#v, want implemented=0 planned=93 manual=0 total=93 remaining=93", redis)
+	if redis.Implemented != 60 || redis.Planned != 33 || redis.Manual != 0 || redis.Total != 93 || redis.Remaining != 33 {
+		t.Fatalf("redis summary = %#v, want implemented=60 planned=33 manual=0 total=93 remaining=33", redis)
 	}
-	if redis.Status != FeatureStatusPlanned || redis.Since != SinceInitial {
-		t.Fatalf("redis status/since = %q/%q, want %q/%q", redis.Status, redis.Since, FeatureStatusPlanned, SinceInitial)
+	if redis.Status != FeatureStatusInProgress || redis.Since != SinceInitial {
+		t.Fatalf("redis status/since = %q/%q, want %q/%q", redis.Status, redis.Since, FeatureStatusInProgress, SinceInitial)
 	}
 
 	routeSummary, ok := SummaryFor("route")

@@ -4,10 +4,10 @@ import "testing"
 
 func TestCommandFactoriesIncludeDemoCommands(t *testing.T) {
 	factories := CommandFactories()
-	if len(factories) != 17 {
-		t.Fatalf("CommandFactories() returned %d factories, want 17", len(factories))
+	if len(factories) != 18 {
+		t.Fatalf("CommandFactories() returned %d factories, want 18", len(factories))
 	}
-	wanted := map[string]bool{"demo:list": false, "demo:show": false, "demo:queue": false, "demo:cache": false, "demo:filesystem": false, "demo:event": false, "demo:config": false, "demo:container": false, "demo:cookie": false, "demo:exception": false, "demo:logger": false, "demo:translation": false, "demo:console": false, "demo:commands": false, "demo:http-server": false, "demo:session": false, "demo:lifecycle": false}
+	wanted := map[string]bool{"demo:list": false, "demo:show": false, "demo:queue": false, "demo:cache": false, "demo:filesystem": false, "demo:event": false, "demo:config": false, "demo:container": false, "demo:cookie": false, "demo:exception": false, "demo:logger": false, "demo:translation": false, "demo:console": false, "demo:commands": false, "demo:http-server": false, "demo:session": false, "demo:redis": false, "demo:lifecycle": false}
 	for _, factory := range factories {
 		command := factory()
 		if command != nil {
