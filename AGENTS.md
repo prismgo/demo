@@ -64,7 +64,9 @@ GOWORK=off go test . ./app/... ./bootstrap/... ./config/... ./database/... ./rou
 
 ## 发布上线流程（framework 与 prismgo）
 
-发布通过 push `vX.Y.Z` tag 触发各仓的 GitHub Actions（Goreleaser）；`framework/` 与 `prismgo/` 是独立仓库，须分别提交、分别打 tag。两个仓库统一按“验证 → 提交推送 → 等用户确认 Actions 通过 → 打 tag 发布”执行，提交推送后不得立即打 tag。
+发布通过 push `vX.Y.Z` tag 触发各仓的 GitHub Actions（Goreleaser）；`framework/` 与 `prismgo/` 是独立仓库，须分别提交、分别打 tag。
+
+本流程仅在用户明确要求发布新版本时启动。日常提交推送（修 bug、升依赖、改 CI 等）与发布无关：不得检测 tag 或 Release 状态，不得主动提醒或建议打 tag，也不要输出“按发布铁律本次不打 tag”这类发布确认。只有用户明确说“发布新版本”时，才按“验证 → 提交推送 → 等用户确认 Actions 通过 → 打 tag 发布”执行，且提交推送后不得立即打 tag。
 
 ### framework 发布
 
@@ -87,9 +89,10 @@ GOWORK=off go test . ./app/... ./bootstrap/... ./config/... ./database/... ./rou
 
 | 规则 | 要求 |
 |---|---|
+| 按需发布 | 只有用户明确要求发布新版本时才进入发布流程并检查 tag/Release；日常提交推送不得检测 tag、不得主动提醒或建议发布。 |
 | 已发布版本不可变 | Go module 代理对已缓存版本只读：一旦 `proxy.golang.org/.../@v/vX.Y.Z.info` 固定了 `Origin.Hash`，重打或移动 tag 不会改变 `go get` 结果。发错版本只能新发 patch（如 v0.3.1），禁止复用或移动已发布 tag。 |
 | 先推送再打 tag | tag 必须指向已 push 到 `main` 的提交；未推送就发布会造成 Release 与源码不一致。 |
-| 待确认再发布 | push 后不得立即打 tag，须等用户验证 GitHub Actions 通过并明确通知发布后再 tag。 |
+| 待确认再发布 | 进入发布流程后，push 后不得立即打 tag，须等用户验证 GitHub Actions 通过并明确通知发布后再 tag。 |
 | 版本号先对齐 | framework 打 tag 前必须已把 `version.Framework` 改为对应版本，否则 workflow 校验失败并自动删 tag。 |
 | 警惕 go 指令漂移 | 依赖升级（含 dependabot）可能因某依赖要求更高工具链而自动抬高 `go` 指令（例如 x/term v0.46 要求 go 1.26）；合并前需确认符合项目 Go 版本策略。 |
 | 发布通道 | 发布由 tag push 触发云端 Goreleaser，本地无需 `gh` 或 token；若要修改或删除已发布的 Release，需在 GitHub UI 或用带 token 的 API 操作。 |
