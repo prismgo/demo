@@ -41,7 +41,7 @@ The Demo project has four main responsibilities:
 
 ## Catalog Progress Map
 
-The catalog currently covers **29 modules and 1432 entries**: 1221 implemented, 208 planned, and 3 manually verified. The table below is a snapshot taken when this README was updated. `app/demo/catalog/` is the single source of truth; use `demo:list` for live progress.
+The catalog currently covers **29 modules and 1432 entries**: 1281 implemented, 148 planned, and 3 manually verified. The table below is a snapshot taken when this README was updated. `app/demo/catalog/` is the single source of truth; use `demo:list` for live progress.
 
 | Module | Coverage | Progress | Remaining | Status |
 |---|---|---:|---:|---|
@@ -67,7 +67,7 @@ The catalog currently covers **29 modules and 1432 entries**: 1221 implemented, 
 | `ratelimit` | Request and action rate limiting | 74/74 | 0 | Implemented |
 | `redis` | Redis connections and operations | 93/93 | 0 | Implemented |
 | `route` | HTTP route registration | 87/87 | 0 | Implemented |
-| `schema` | Database schema and migration builder | 0/143 | 143 | Planned |
+| `schema` | Database schema and migration builder | 60/143 | 83 | In progress |
 | `service-provider` | Service provider registration and lifecycle | 42/42 | 0 | Implemented |
 | `session` | Server-side session storage | 50/50 | 0 | Implemented |
 | `starter` | Generated application starter | 0/1 | — | Manual |
@@ -150,6 +150,14 @@ go run ./demo demo:timer list
 go run ./demo demo:timer architecture
 go run ./demo demo:timer every --json
 go run ./demo demo:timer weekly-on
+go run ./demo demo:schema list
+go run ./demo demo:schema architecture
+go run ./demo demo:schema create --json
+go run ./demo demo:schema change-column
+go run ./demo demo:schema drop-all-tables
+go run ./demo demo:schema morphs --json
+go run ./demo demo:schema soft-deletes
+go run ./demo demo:schema enum-set
 ```
 
 Run the local OSS HTTP integration check from `demo/` without cloud credentials:
@@ -159,6 +167,8 @@ PRISMGO_FILESYSTEM_LOCAL_OSS_TEST=1 go test ./app/demo/filesystem -run TestFiles
 ```
 
 Of the `ratelimit` scenarios, 72 are compile-level, hermetic, or scenario and need no external services by default; `redis-store` and `redis-errors` are integration. After loading `demo/.dev/runtime/test.env`, run `go test ./app/demo/ratelimit -run 'TestRateLimitDemoRedis(Store|Errors)' -count=1`, or set `CACHE_LIMITER_DRIVER=redis` plus the Redis connection variables and run `go run ./demo demo:ratelimit redis-store --store=redis`.
+
+Of the `schema` module, 60 scenarios are implemented. `architecture`, `sqlite-extension`, `sqlite-connection-scope`, `create-dialect-options`, and `drop-all-types` are compile-level; `drop-all-tables` and `drop-all-views` run against a throwaway SQLite database; the remaining hermetic scenarios assert `Blueprint` definitions and column metadata on isolated SQLite, covering integer families, string and text families, UUID/ULID, JSON, enum/set, spatial and vector types, date/time families, foreign IDs, polymorphic columns, and the nullable/not-null modifiers. `default-*`, `morph-*`, `explicit-tag-precedence`, `change-column`, and `raw` are integration scenarios that need real MySQL (SQLite ignores lengths and precision). Column-type scenarios additionally assert exact DDL on MySQL: after loading `demo/.dev/runtime/test.env`, run `go test ./app/demo/schema -count=1 -v`, where `TestSchemaDemoMySQLColumnTypes` checks real MySQL types such as `varchar(120)`, `decimal(10,2) unsigned`, `enum(...)`, and indexes. `spatial-types` (`geography`) and `vector` are asserted on SQLite only because the current MySQL server rejects those column definitions; the plain indexes created by `soft-deletes`, `morphs`, and `nullable-morphs` rely on the MySQL follow-up `ALTER TABLE ... ADD INDEX` statements fixed alongside this batch.
 
 Status meanings: `Implemented` means every entry in the module is complete; `In progress` means some entries are complete; `Planned` means no entries are implemented yet; `Manual` means an external workflow such as the installer or Lens performs verification, so it is not counted as remaining work.
 

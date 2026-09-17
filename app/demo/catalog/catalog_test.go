@@ -240,6 +240,20 @@ func TestCatalogEntries(t *testing.T) {
 			t.Fatalf("route catalog entry %q = %#v, %v; want implemented", slug, item, ok)
 		}
 	}
+	schemaImplemented := map[string]bool{
+		"architecture": true, "sqlite-extension": true, "sqlite-connection-scope": true,
+		"default-string-length": true, "default-time-precision": true, "default-morph-key-type": true, "morph-using-uuids": true, "morph-using-ulids": true, "explicit-tag-precedence": true,
+		"bind": true, "new": true, "named-connection": true, "facade": true,
+		"create": true, "create-validation": true, "create-dialect-options": true, "table": true, "add-column": true, "change-column": true, "rename-column": true, "drop-column": true, "drop-columns": true, "raw": true,
+		"rename": true, "drop": true, "builder-drop-columns": true, "drop-all-tables": true, "drop-all-views": true, "drop-all-types": true,
+		"id":         true,
+		"increments": true, "signed-integers": true, "unsigned-integers": true, "string-char": true, "text-types": true,
+		"uuid-ulid": true, "network-addresses": true, "remember-token": true, "boolean": true, "floating-point": true,
+		"decimal": true, "date": true, "datetime": true, "time": true, "timestamp": true, "year": true,
+		"timestamps": true, "nullable-timestamps": true, "soft-deletes": true, "binary": true, "json": true,
+		"enum-set": true, "spatial-types": true, "vector": true, "foreign-id": true, "foreign-id-for": true,
+		"morphs": true, "nullable-morphs": true, "nullable": true, "not-null": true,
+	}
 	for _, slug := range []string{
 		"architecture", "sqlite-extension", "sqlite-connection-scope",
 		"default-string-length", "default-time-precision", "default-morph-key-type", "morph-using-uuids", "morph-using-ulids", "explicit-tag-precedence",
@@ -261,8 +275,12 @@ func TestCatalogEntries(t *testing.T) {
 		"create-database", "drop-database", "ensure-extension", "ensure-vector-extension",
 		"sync-models", "sync-models-columns", "sync-models-defaults", "sync-models-boundaries", "dialect-compatibility", "laravel-compatibility",
 	} {
-		if item, ok := Find("schema", slug); !ok || item.Status != StatusPlanned {
-			t.Fatalf("schema catalog entry %q = %#v, %v; want planned", slug, item, ok)
+		want := StatusPlanned
+		if schemaImplemented[slug] {
+			want = StatusImplemented
+		}
+		if item, ok := Find("schema", slug); !ok || item.Status != want {
+			t.Fatalf("schema catalog entry %q = %#v, %v; want status %q", slug, item, ok, want)
 		}
 	}
 	for _, slug := range []string{
@@ -480,11 +498,11 @@ func TestCatalogFeatureSummaries(t *testing.T) {
 	if !ok {
 		t.Fatal("SummaryFor(schema) found = false")
 	}
-	if schemaSummary.Implemented != 0 || schemaSummary.Planned != 143 || schemaSummary.Manual != 0 || schemaSummary.Total != 143 || schemaSummary.Remaining != 143 {
-		t.Fatalf("schema summary = %#v, want implemented=0 planned=143 manual=0 total=143 remaining=143", schemaSummary)
+	if schemaSummary.Implemented != 60 || schemaSummary.Planned != 83 || schemaSummary.Manual != 0 || schemaSummary.Total != 143 || schemaSummary.Remaining != 83 {
+		t.Fatalf("schema summary = %#v, want implemented=60 planned=83 manual=0 total=143 remaining=83", schemaSummary)
 	}
-	if schemaSummary.Status != FeatureStatusPlanned || schemaSummary.Since != SinceInitial {
-		t.Fatalf("schema status/since = %q/%q, want %q/%q", schemaSummary.Status, schemaSummary.Since, FeatureStatusPlanned, SinceInitial)
+	if schemaSummary.Status != FeatureStatusInProgress || schemaSummary.Since != SinceInitial {
+		t.Fatalf("schema status/since = %q/%q, want %q/%q", schemaSummary.Status, schemaSummary.Since, FeatureStatusInProgress, SinceInitial)
 	}
 
 	serviceProvider, ok := SummaryFor("service-provider")

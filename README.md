@@ -40,7 +40,7 @@ Demo 项目主要承担四件事：
 
 ## Catalog 进度地图
 
-Catalog 当前覆盖 **29 个模块、1432 个条目**：已实现 1221 个、计划中 208 个、手工验证 3 个。以下是 README 更新时的快照；`app/demo/catalog/` 是唯一数据源，实时进度以 `demo:list` 输出为准。
+Catalog 当前覆盖 **29 个模块、1432 个条目**：已实现 1281 个、计划中 148 个、手工验证 3 个。以下是 README 更新时的快照；`app/demo/catalog/` 是唯一数据源，实时进度以 `demo:list` 输出为准。
 
 | 模块 | 覆盖范围 | 进度 | 剩余 | 状态 |
 |---|---|---:|---:|---|
@@ -66,7 +66,7 @@ Catalog 当前覆盖 **29 个模块、1432 个条目**：已实现 1221 个、�
 | `ratelimit` | 请求与操作限流 | 74/74 | 0 | 已实现 |
 | `redis` | Redis 连接与操作 | 93/93 | 0 | 已实现 |
 | `route` | HTTP 路由注册 | 87/87 | 0 | 已实现 |
-| `schema` | 数据库 Schema 与迁移构建器 | 0/143 | 143 | 计划中 |
+| `schema` | 数据库 Schema 与迁移构建器 | 60/143 | 83 | 进行中 |
 | `service-provider` | Service Provider 注册与生命周期 | 42/42 | 0 | 已实现 |
 | `session` | 服务端 Session 存储 | 50/50 | 0 | 已实现 |
 | `starter` | 生成应用的起始模板 | 0/1 | — | 手工验证 |
@@ -149,6 +149,14 @@ go run ./demo demo:timer list
 go run ./demo demo:timer architecture
 go run ./demo demo:timer every --json
 go run ./demo demo:timer weekly-on
+go run ./demo demo:schema list
+go run ./demo demo:schema architecture
+go run ./demo demo:schema create --json
+go run ./demo demo:schema change-column
+go run ./demo demo:schema drop-all-tables
+go run ./demo demo:schema morphs --json
+go run ./demo demo:schema soft-deletes
+go run ./demo demo:schema enum-set
 ```
 
 在 `demo/` 中运行本地 OSS HTTP 集成验收（不需要云端凭证）：
@@ -158,6 +166,8 @@ PRISMGO_FILESYSTEM_LOCAL_OSS_TEST=1 go test ./app/demo/filesystem -run TestFiles
 ```
 
 `ratelimit` 的 72 个场景为编译级、hermetic 或 scenario，默认不依赖外部服务；`redis-store` 与 `redis-errors` 为 integration，加载 `demo/.dev/runtime/test.env` 后运行 `go test ./app/demo/ratelimit -run 'TestRateLimitDemoRedis(Store|Errors)' -count=1`，或设置 `CACHE_LIMITER_DRIVER=redis` 与 Redis 连接变量后执行 `go run ./demo demo:ratelimit redis-store --store=redis`。
+
+`schema` 已实现 60 个场景。`architecture`、`sqlite-extension`、`sqlite-connection-scope`、`create-dialect-options`、`drop-all-types` 为编译级；`drop-all-tables` 与 `drop-all-views` 在独立 SQLite 临时库上验证；其余 hermetic 场景在隔离 SQLite 上用 `Blueprint` 定义与字段元数据断言，包括整数族、字符串与文本族、UUID/ULID、JSON、枚举/集合、空间与向量类型、时间族、外键 ID、多态字段、nullable/not-null 等。`default-*`、`morph-*`、`explicit-tag-precedence`、`change-column`、`raw` 为 integration，需真实 MySQL（SQLite 忽略长度与精度）。列类型场景在 MySQL 下额外断言精确 DDL：加载 `demo/.dev/runtime/test.env` 后运行 `go test ./app/demo/schema -count=1 -v`，其中 `TestSchemaDemoMySQLColumnTypes` 会校验 `varchar(120)`、`decimal(10,2) unsigned`、`enum(...)`、索引等真实 MySQL 类型。`spatial-types`（`geography`）与 `vector` 只做 SQLite 断言，因为当前 MySQL 服务端拒绝这两类列定义；`soft-deletes`、`morphs`、`nullable-morphs` 的普通索引依赖框架本次同步修复的 MySQL 建表后补发 `ALTER TABLE ... ADD INDEX`。
 
 状态含义：`已实现` 表示模块全部条目已落地；`进行中` 表示部分条目已落地；`计划中` 表示尚无已实现条目；`手工验证` 表示由安装器、Lens 等外部流程验证，因此不计入“剩余”数量。
 
