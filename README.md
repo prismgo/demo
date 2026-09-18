@@ -40,7 +40,7 @@ Demo 项目主要承担四件事：
 
 ## Catalog 进度地图
 
-Catalog 当前覆盖 **29 个模块、1432 个条目**：已实现 1281 个、计划中 148 个、手工验证 3 个。以下是 README 更新时的快照；`app/demo/catalog/` 是唯一数据源，实时进度以 `demo:list` 输出为准。
+Catalog 当前覆盖 **29 个模块、1432 个条目**：已实现 1364 个、计划中 65 个、手工验证 3 个。以下是 README 更新时的快照；`app/demo/catalog/` 是唯一数据源，实时进度以 `demo:list` 输出为准。
 
 | 模块 | 覆盖范围 | 进度 | 剩余 | 状态 |
 |---|---|---:|---:|---|
@@ -66,7 +66,7 @@ Catalog 当前覆盖 **29 个模块、1432 个条目**：已实现 1281 个、�
 | `ratelimit` | 请求与操作限流 | 74/74 | 0 | 已实现 |
 | `redis` | Redis 连接与操作 | 93/93 | 0 | 已实现 |
 | `route` | HTTP 路由注册 | 87/87 | 0 | 已实现 |
-| `schema` | 数据库 Schema 与迁移构建器 | 60/143 | 83 | 进行中 |
+| `schema` | 数据库 Schema 与迁移构建器 | 143/143 | 0 | 已实现 |
 | `service-provider` | Service Provider 注册与生命周期 | 42/42 | 0 | 已实现 |
 | `session` | 服务端 Session 存储 | 50/50 | 0 | 已实现 |
 | `starter` | 生成应用的起始模板 | 0/1 | — | 手工验证 |
@@ -157,6 +157,20 @@ go run ./demo demo:schema drop-all-tables
 go run ./demo demo:schema morphs --json
 go run ./demo demo:schema soft-deletes
 go run ./demo demo:schema enum-set
+go run ./demo demo:schema unsigned
+go run ./demo demo:schema default
+go run ./demo demo:schema drop-morphs
+go run ./demo demo:schema unique-index
+go run ./demo demo:schema index
+go run ./demo demo:schema foreign-dialect
+go run ./demo demo:schema drop-foreign
+go run ./demo demo:schema tables
+go run ./demo demo:schema has-columns
+go run ./demo demo:schema columns
+go run ./demo demo:schema indexes
+go run ./demo demo:schema when-missing-column
+go run ./demo demo:schema sync-models
+go run ./demo demo:schema create-database
 ```
 
 在 `demo/` 中运行本地 OSS HTTP 集成验收（不需要云端凭证）：
@@ -167,7 +181,7 @@ PRISMGO_FILESYSTEM_LOCAL_OSS_TEST=1 go test ./app/demo/filesystem -run TestFiles
 
 `ratelimit` 的 72 个场景为编译级、hermetic 或 scenario，默认不依赖外部服务；`redis-store` 与 `redis-errors` 为 integration，加载 `demo/.dev/runtime/test.env` 后运行 `go test ./app/demo/ratelimit -run 'TestRateLimitDemoRedis(Store|Errors)' -count=1`，或设置 `CACHE_LIMITER_DRIVER=redis` 与 Redis 连接变量后执行 `go run ./demo demo:ratelimit redis-store --store=redis`。
 
-`schema` 已实现 60 个场景。`architecture`、`sqlite-extension`、`sqlite-connection-scope`、`create-dialect-options`、`drop-all-types` 为编译级；`drop-all-tables` 与 `drop-all-views` 在独立 SQLite 临时库上验证；其余 hermetic 场景在隔离 SQLite 上用 `Blueprint` 定义与字段元数据断言，包括整数族、字符串与文本族、UUID/ULID、JSON、枚举/集合、空间与向量类型、时间族、外键 ID、多态字段、nullable/not-null 等。`default-*`、`morph-*`、`explicit-tag-precedence`、`change-column`、`raw` 为 integration，需真实 MySQL（SQLite 忽略长度与精度）。列类型场景在 MySQL 下额外断言精确 DDL：加载 `demo/.dev/runtime/test.env` 后运行 `go test ./app/demo/schema -count=1 -v`，其中 `TestSchemaDemoMySQLColumnTypes` 会校验 `varchar(120)`、`decimal(10,2) unsigned`、`enum(...)`、索引等真实 MySQL 类型。`spatial-types`（`geography`）与 `vector` 只做 SQLite 断言，因为当前 MySQL 服务端拒绝这两类列定义；`soft-deletes`、`morphs`、`nullable-morphs` 的普通索引依赖框架本次同步修复的 MySQL 建表后补发 `ALTER TABLE ... ADD INDEX`。
+`schema` 已实现 143 个场景，覆盖 catalog 全部条目。`architecture`、`sqlite-extension`、`sqlite-connection-scope`、`create-dialect-options`、`drop-all-types`、`stored-as`、`virtual-as`、`from`、`instant`、`lock`、`change-semantics`、`metadata-types`、`foreign-key-toggle-dialects`、`sync-models-boundaries`、`dialect-compatibility`、`laravel-compatibility`、`ensure-extension`、`ensure-vector-extension` 为编译级；`drop-all-tables` 与 `drop-all-views` 在独立 SQLite 临时库上验证；其余 hermetic 场景在隔离 SQLite 上用 `Blueprint` 定义与字段/索引元数据断言，包括整数族、字符串与文本族、UUID/ULID、JSON、枚举/集合、空间与向量类型、时间族、外键 ID、多态字段、nullable/not-null，以及字段修饰符、删除约定字段、索引创建，和索引删除、表/视图/Schema/类型/字段元数据检查，以及最后一批新增的字段/索引元数据与命名列表（`columns`、`column-type`、`has-index`、`indexes`）、字段与索引条件执行（`when-has-column`、`when-missing-column`、`when-missing-index`）、SyncModels 过渡场景（`sync-models`、`sync-models-columns`、`sync-models-defaults`）。`default-*`、`morph-*`、`explicit-tag-precedence`、`change-column`、`raw`、`unique-modifier`、`comment`、`first`、`after`、`charset`、`collation`、`use-current`、`use-current-on-update`、`invisible`、`drop-constrained-foreign-id`、`rename-index`、`drop-primary`、`foreign-keys`、`disable-foreign-keys`、`enable-foreign-keys`、`without-foreign-keys`、`create-database`、`drop-database` 为 integration，需真实 MySQL（SQLite 忽略长度、精度与未命名的内联唯一约束，且无法重命名索引或删除主键；`create-database`/`drop-database` 使用本地测试环境专门授权的 `prismgo_schema_demo_test` 一次性库）。外键场景 `constrained`、`constrained-explicit`、`foreign`、`foreign-actions`、`cascade-actions`、`restrict-actions`、`null-actions`、`no-action-actions`、`foreign-name`、`drop-foreign` 同样需要真实 MySQL，`foreign-dialect` 按方言验证外键 SQL 边界（MySQL 生成约束，SQLite 在 `CREATE TABLE` 中跳过）；`fulltext-index`、`spatial-index` 在 SQLite 降级为普通索引，`index-naming` 校验默认命名与超过 64 字符时的 SHA1 截断。列类型场景在 MySQL 下额外断言精确 DDL：加载 `demo/.dev/runtime/test.env` 后运行 `go test ./app/demo/schema -count=1 -v`，其中 `TestSchemaDemoMySQLColumnTypes` 会校验 `varchar(120)`、`decimal(10,2) unsigned`、`enum(...)`、索引、注释、`INVISIBLE`、`ON UPDATE CURRENT_TIMESTAMP`、字符集与排序规则等真实 MySQL 属性。SQLite 集成验收通过 `PRISMGO_SQLITE_TEST_DSN` 指向真实 SQLite 服务：加载 `demo/.dev/runtime/test.env` 后运行 `go test ./app/demo/schema -run TestSchemaDemoSQLiteIntegration -count=1`，其中 `...Batch` 接受两方言通用场景，`...DialectBoundary` 断言 MySQL 专属场景在 SQLite 明确报错，`...ColumnUnique` 校验字段级 `.Unique()` 在 SQLite 注册具名唯一索引并强制唯一。`spatial-types`（`geography`）与 `vector` 只做 SQLite 断言，因为当前 MySQL 服务端拒绝这两类列定义；`soft-deletes`、`morphs`、`nullable-morphs` 的普通索引依赖框架建表后补发 `ALTER TABLE ... ADD INDEX`。前批同时修复了框架两处 MySQL 列定义缺陷：把 `CHARACTER SET` / `COLLATE` 移到数据类型之后（原先追加在 `NOT NULL` 之后会被 MySQL 拒绝），并让字段级 `.Unique()` 生成按默认规则命名的唯一索引，使 `Unique(false)` 能按名删除。
 
 状态含义：`已实现` 表示模块全部条目已落地；`进行中` 表示部分条目已落地；`计划中` 表示尚无已实现条目；`手工验证` 表示由安装器、Lens 等外部流程验证，因此不计入“剩余”数量。
 

@@ -253,6 +253,23 @@ func TestCatalogEntries(t *testing.T) {
 		"timestamps": true, "nullable-timestamps": true, "soft-deletes": true, "binary": true, "json": true,
 		"enum-set": true, "spatial-types": true, "vector": true, "foreign-id": true, "foreign-id-for": true,
 		"morphs": true, "nullable-morphs": true, "nullable": true, "not-null": true,
+		"unsigned": true, "auto-increment": true, "primary-modifier": true, "unique-modifier": true, "index-modifier": true,
+		"default": true, "comment": true, "first": true, "after": true, "charset": true, "collation": true,
+		"use-current": true, "use-current-on-update": true, "invisible": true,
+		"stored-as": true, "virtual-as": true, "from": true, "instant": true, "lock": true, "change-semantics": true,
+		"drop-remember-token": true, "drop-timestamps": true, "drop-timestamps-tz": true, "drop-soft-deletes": true, "drop-soft-deletes-tz": true,
+		"drop-morphs": true, "drop-constrained-foreign-id": true, "drop-foreign-id-for": true,
+		"primary-index": true, "unique-index": true,
+		"index": true, "fulltext-index": true, "spatial-index": true, "named-indexes": true, "index-naming": true, "rename-index": true,
+		"drop-index": true, "drop-unique": true, "drop-primary": true, "drop-fulltext": true, "drop-spatial-index": true,
+		"constrained": true, "constrained-explicit": true, "foreign": true, "foreign-actions": true, "cascade-actions": true,
+		"restrict-actions": true, "null-actions": true, "no-action-actions": true, "foreign-name": true, "foreign-dialect": true, "drop-foreign": true,
+		"table-view-existence": true, "tables": true, "table-listing": true, "views": true, "schemas": true, "types": true, "schema-filter": true, "has-columns": true,
+		"columns": true, "column-type": true, "has-index": true, "indexes": true, "foreign-keys": true, "metadata-types": true,
+		"when-has-column": true, "when-missing-column": true, "when-missing-index": true,
+		"disable-foreign-keys": true, "enable-foreign-keys": true, "without-foreign-keys": true, "foreign-key-toggle-dialects": true,
+		"create-database": true, "drop-database": true, "ensure-extension": true, "ensure-vector-extension": true,
+		"sync-models": true, "sync-models-columns": true, "sync-models-defaults": true, "sync-models-boundaries": true, "dialect-compatibility": true, "laravel-compatibility": true,
 	}
 	for _, slug := range []string{
 		"architecture", "sqlite-extension", "sqlite-connection-scope",
@@ -498,11 +515,11 @@ func TestCatalogFeatureSummaries(t *testing.T) {
 	if !ok {
 		t.Fatal("SummaryFor(schema) found = false")
 	}
-	if schemaSummary.Implemented != 60 || schemaSummary.Planned != 83 || schemaSummary.Manual != 0 || schemaSummary.Total != 143 || schemaSummary.Remaining != 83 {
-		t.Fatalf("schema summary = %#v, want implemented=60 planned=83 manual=0 total=143 remaining=83", schemaSummary)
+	if schemaSummary.Implemented != 143 || schemaSummary.Planned != 0 || schemaSummary.Manual != 0 || schemaSummary.Total != 143 || schemaSummary.Remaining != 0 {
+		t.Fatalf("schema summary = %#v, want implemented=143 planned=0 manual=0 total=143 remaining=0", schemaSummary)
 	}
-	if schemaSummary.Status != FeatureStatusInProgress || schemaSummary.Since != SinceInitial {
-		t.Fatalf("schema status/since = %q/%q, want %q/%q", schemaSummary.Status, schemaSummary.Since, FeatureStatusInProgress, SinceInitial)
+	if schemaSummary.Status != FeatureStatusImplemented || schemaSummary.Since != SinceInitial {
+		t.Fatalf("schema status/since = %q/%q, want %q/%q", schemaSummary.Status, schemaSummary.Since, FeatureStatusImplemented, SinceInitial)
 	}
 
 	serviceProvider, ok := SummaryFor("service-provider")

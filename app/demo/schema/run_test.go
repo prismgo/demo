@@ -280,3 +280,265 @@ func TestSchemaDemoID(t *testing.T) {
 	newApplication(t)
 	expectValue(t, "id", "default=id named=custom_id primary=true")
 }
+
+func TestSchemaDemoStoredAs(t *testing.T) {
+	expectValue(t, "stored-as", "stored_as=placeholder compiled=false")
+}
+
+func TestSchemaDemoVirtualAs(t *testing.T) {
+	expectValue(t, "virtual-as", "virtual_as=placeholder compiled=false")
+}
+
+func TestSchemaDemoFrom(t *testing.T) {
+	expectValue(t, "from", "from=compatibility affects_sql=false")
+}
+
+func TestSchemaDemoInstant(t *testing.T) {
+	expectValue(t, "instant", "instant=compatibility affects_sql=false")
+}
+
+func TestSchemaDemoLock(t *testing.T) {
+	expectValue(t, "lock", "lock=compatibility affects_sql=false")
+}
+
+func TestSchemaDemoChangeSemantics(t *testing.T) {
+	expectValue(t, "change-semantics", "change=modify_column idempotency=caller")
+}
+
+func TestSchemaDemoUnsigned(t *testing.T) {
+	newApplication(t)
+	expectValue(t, "unsigned", "count=integer total=integer")
+}
+
+func TestSchemaDemoAutoIncrement(t *testing.T) {
+	newApplication(t)
+	expectValue(t, "auto-increment", "auto_increment=true generated=true")
+}
+
+func TestSchemaDemoPrimaryModifier(t *testing.T) {
+	newApplication(t)
+	expectValue(t, "primary-modifier", "code_primary=true label_primary=false")
+}
+
+func TestSchemaDemoIndexModifier(t *testing.T) {
+	newApplication(t)
+	expectValue(t, "index-modifier", "index=true removed=true")
+}
+
+func TestSchemaDemoDefault(t *testing.T) {
+	newApplication(t)
+	expectValue(t, "default", "nickname='guest' enabled=1 sort=0 created_at=CURRENT_TIMESTAMP payload=")
+}
+
+func TestSchemaDemoDropRememberToken(t *testing.T) {
+	newApplication(t)
+	expectValue(t, "drop-remember-token", "before=true after=false")
+}
+
+func TestSchemaDemoDropTimestamps(t *testing.T) {
+	newApplication(t)
+	expectValue(t, "drop-timestamps", "before=true after=false")
+}
+
+func TestSchemaDemoDropTimestampsTz(t *testing.T) {
+	newApplication(t)
+	expectValue(t, "drop-timestamps-tz", "before=true after=false")
+}
+
+func TestSchemaDemoDropSoftDeletes(t *testing.T) {
+	newApplication(t)
+	expectValue(t, "drop-soft-deletes", "before=true column_after=false index_after=false")
+}
+
+func TestSchemaDemoDropSoftDeletesTz(t *testing.T) {
+	newApplication(t)
+	expectValue(t, "drop-soft-deletes-tz", "before=true column_after=false index_after=false")
+}
+
+func TestSchemaDemoDropMorphs(t *testing.T) {
+	newApplication(t)
+	expectValue(t, "drop-morphs", "before=true columns_after=false index_after=false")
+}
+
+func TestSchemaDemoDropForeignIDFor(t *testing.T) {
+	newApplication(t)
+	expectValue(t, "drop-foreign-id-for", "before=true after=false")
+}
+
+func TestSchemaDemoPrimaryIndex(t *testing.T) {
+	newApplication(t)
+	expectValue(t, "primary-index", "primary=true")
+}
+
+func TestSchemaDemoUniqueIndex(t *testing.T) {
+	newApplication(t)
+	expectValue(t, "unique-index", "unique=true")
+}
+
+func TestSchemaDemoIndex(t *testing.T) {
+	newApplication(t)
+	expectValue(t, "index", "index=true name=schema_demo_index_status_index")
+}
+
+func TestSchemaDemoFulltextIndex(t *testing.T) {
+	newApplication(t)
+	expectValue(t, "fulltext-index", "index=true name=schema_demo_fulltext_index_body_fulltext")
+}
+
+func TestSchemaDemoSpatialIndex(t *testing.T) {
+	newApplication(t)
+	expectValue(t, "spatial-index", "index=true name=schema_demo_spatial_index_location_spatial")
+}
+
+func TestSchemaDemoNamedIndexes(t *testing.T) {
+	newApplication(t)
+	expectValue(t, "named-indexes", "unique=true index=true")
+}
+
+func TestSchemaDemoIndexNaming(t *testing.T) {
+	newApplication(t)
+	expectValue(t, "index-naming", "short=true trimmed=true")
+}
+
+func TestSchemaDemoDropIndex(t *testing.T) {
+	newApplication(t)
+	expectValue(t, "drop-index", "before=true after=false")
+}
+
+func TestSchemaDemoDropUnique(t *testing.T) {
+	newApplication(t)
+	expectValue(t, "drop-unique", "before=true after=false")
+}
+
+func TestSchemaDemoDropFulltext(t *testing.T) {
+	newApplication(t)
+	expectValue(t, "drop-fulltext", "before=true after=false")
+}
+
+func TestSchemaDemoDropSpatialIndex(t *testing.T) {
+	newApplication(t)
+	expectValue(t, "drop-spatial-index", "before=true after=false")
+}
+
+func TestSchemaDemoForeignKeyDialect(t *testing.T) {
+	newApplication(t)
+	expectValue(t, "foreign-dialect", "dialect=sqlite foreign_keys=0")
+}
+
+func TestSchemaDemoTableViewExistence(t *testing.T) {
+	newApplication(t)
+	expectValue(t, "table-view-existence", "table=true view=true")
+}
+
+func TestSchemaDemoTables(t *testing.T) {
+	newApplication(t)
+	expectValue(t, "tables", "found=true schema_set=true filtered=true")
+}
+
+func TestSchemaDemoTableListing(t *testing.T) {
+	newApplication(t)
+	expectValue(t, "table-listing", "qualified=true bare=true")
+}
+
+func TestSchemaDemoViews(t *testing.T) {
+	newApplication(t)
+	expectValue(t, "views", "found=true definition=true")
+}
+
+func TestSchemaDemoSchemas(t *testing.T) {
+	newApplication(t)
+	expectValue(t, "schemas", "count_positive=true name_set=true")
+}
+
+func TestSchemaDemoTypes(t *testing.T) {
+	newApplication(t)
+	expectValue(t, "types", "count=0 empty=true")
+}
+
+func TestSchemaDemoSchemaFilter(t *testing.T) {
+	newApplication(t)
+	expectValue(t, "schema-filter", "string=true slice=true nil=true")
+}
+
+func TestSchemaDemoHasColumns(t *testing.T) {
+	newApplication(t)
+	expectValue(t, "has-columns", "all=true missing=false empty=true")
+}
+
+func TestSchemaDemoColumns(t *testing.T) {
+	newApplication(t)
+	expectValue(t, "columns", "count=3 names=true nullable=true primary=true")
+}
+
+func TestSchemaDemoColumnType(t *testing.T) {
+	newApplication(t)
+	expectValue(t, "column-type", "short=text full=text missing_error=true")
+}
+
+func TestSchemaDemoHasIndex(t *testing.T) {
+	newApplication(t)
+	expectValue(t, "has-index", "name=true columns=true type=true wrong_type=false missing=false")
+}
+
+func TestSchemaDemoIndexes(t *testing.T) {
+	newApplication(t)
+	expectValue(t, "indexes", "names=true unique=true plain=true")
+}
+
+func TestSchemaDemoMetadataTypes(t *testing.T) {
+	expectValue(t, "metadata-types", "schema=SchemaInfo table=TableInfo view=ViewInfo type=TypeInfo column=ColumnInfo index=IndexInfo foreign=ForeignKeyInfo")
+}
+
+func TestSchemaDemoWhenHasColumn(t *testing.T) {
+	newApplication(t)
+	expectValue(t, "when-has-column", "executed=true added=true absent_executed=false")
+}
+
+func TestSchemaDemoWhenMissingColumn(t *testing.T) {
+	newApplication(t)
+	expectValue(t, "when-missing-column", "present_executed=false missing_executed=true added=true")
+}
+
+func TestSchemaDemoWhenMissingIndex(t *testing.T) {
+	newApplication(t)
+	expectValue(t, "when-missing-index", "existing_executed=false missing_executed=true created=true")
+}
+
+func TestSchemaDemoForeignKeyToggleDialects(t *testing.T) {
+	expectValue(t, "foreign-key-toggle-dialects", "mysql=SET FOREIGN_KEY_CHECKS sqlite=PRAGMA foreign_keys")
+}
+
+func TestSchemaDemoEnsureExtension(t *testing.T) {
+	expectValue(t, "ensure-extension", "extension=postgis mysql=unsupported sqlite=unsupported")
+}
+
+func TestSchemaDemoEnsureVectorExtension(t *testing.T) {
+	expectValue(t, "ensure-vector-extension", "extension=vector mysql=unsupported sqlite=unsupported")
+}
+
+func TestSchemaDemoSyncModels(t *testing.T) {
+	newApplication(t)
+	expectValue(t, "sync-models", "created=true columns=2")
+}
+
+func TestSchemaDemoSyncModelsColumns(t *testing.T) {
+	newApplication(t)
+	expectValue(t, "sync-models-columns", "created=true added=true")
+}
+
+func TestSchemaDemoSyncModelsDefaults(t *testing.T) {
+	newApplication(t)
+	expectValue(t, "sync-models-defaults", "default=active options=ENGINE=InnoDB DEFAULT CHARSET=utf8mb4")
+}
+
+func TestSchemaDemoSyncModelsBoundaries(t *testing.T) {
+	expectValue(t, "sync-models-boundaries", "entry=SyncModels creates_tables=true adds_columns=true drops_columns=false auto_migrate=false")
+}
+
+func TestSchemaDemoDialectCompatibility(t *testing.T) {
+	expectValue(t, "dialect-compatibility", "shared=create,index,drop-index mysql_only=rename-index,drop-primary,create-database,sync-models sqlite_only=sqlite-extension")
+}
+
+func TestSchemaDemoLaravelCompatibility(t *testing.T) {
+	expectValue(t, "laravel-compatibility", "create=Schema::create table=Schema::table checks=Schema::hasTable columns=Schema::hasColumn indexes=Schema::hasIndex drop=Schema::dropIfExists")
+}
