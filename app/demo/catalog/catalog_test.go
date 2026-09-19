@@ -12,8 +12,8 @@ func TestCatalogEntries(t *testing.T) {
 	if err := Validate(entries); err != nil {
 		t.Fatalf("validate catalog entries: %v", err)
 	}
-	if len(entries) != 1432 {
-		t.Fatalf("catalog has %d entries, want 1432", len(entries))
+	if len(entries) != 1443 {
+		t.Fatalf("catalog has %d entries, want 1443", len(entries))
 	}
 	if item, ok := Find("commands", "list"); !ok || item.Status != StatusImplemented {
 		t.Fatalf("implemented demo:list entry = %#v, %v", item, ok)
@@ -173,6 +173,15 @@ func TestCatalogEntries(t *testing.T) {
 		item, ok := Find("session", slug)
 		if !ok || item.Level != LevelIntegration || len(item.Requirements) != 1 || item.Requirements[0] != "redis" {
 			t.Fatalf("session Redis entry %q = %#v, %v; want integration requiring redis", slug, item, ok)
+		}
+	}
+	for _, slug := range []string{
+		"introduction", "how-facades-work", "core-facade-resolve", "list",
+		"cache-facade", "config-facade", "route-facade", "logger-facade",
+		"database-facade", "filesystem-facade", "class-reference", "laravel-mapping",
+	} {
+		if item, ok := Find("facade", slug); !ok || item.Status != StatusImplemented {
+			t.Fatalf("facade catalog entry %q = %#v, %v; want implemented", slug, item, ok)
 		}
 	}
 	for _, slug := range []string{
@@ -383,6 +392,11 @@ func TestCatalogFeatureSummaries(t *testing.T) {
 	containerSummary, ok := SummaryFor("container")
 	if !ok || containerSummary.Implemented != 47 || containerSummary.Planned != 0 || containerSummary.Manual != 0 || containerSummary.Total != 47 || containerSummary.Remaining != 0 || containerSummary.Status != FeatureStatusImplemented {
 		t.Fatalf("container summary = %#v, found=%v; want 47 implemented and no planned or manual entries", containerSummary, ok)
+	}
+
+	facadeSummary, ok := SummaryFor("facade")
+	if !ok || facadeSummary.Implemented != 12 || facadeSummary.Planned != 0 || facadeSummary.Manual != 0 || facadeSummary.Total != 12 || facadeSummary.Remaining != 0 || facadeSummary.Status != FeatureStatusImplemented {
+		t.Fatalf("facade summary = %#v, found=%v; want 12 implemented and no planned or manual entries", facadeSummary, ok)
 	}
 
 	config, ok := SummaryFor("config")
