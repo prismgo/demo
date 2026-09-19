@@ -7,7 +7,7 @@
 
 **PrismGo - Write Go Like Laravel**
 
-[![Go Version](https://img.shields.io/badge/Go-1.25+-00ADD8?style=flat&logo=go)](https://go.dev/)
+[![Go Version](https://img.shields.io/badge/Go-1.26+-00ADD8?style=flat&logo=go)](https://go.dev/)
 [![Module](https://img.shields.io/badge/module-github.com%2Fprismgo%2Fframework-blue)](https://github.com/prismgo/framework)
 [![Coverage](https://codecov.io/gh/prismgo/framework/branch/main/graph/badge.svg)](https://codecov.io/gh/prismgo/framework)
 [![Latest Version](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fproxy.golang.org%2Fgithub.com%2Fprismgo%2Fframework%2F%40latest&query=%24.Version&label=version)](https://pkg.go.dev/github.com/prismgo/framework?tab=versions)
@@ -192,7 +192,7 @@ PrismGo local development uses three sibling repositories. **`demo/`, `framework
 
 ### Installation and Initialization
 
-Initialization requires Go 1.25+, Git, GitHub SSH access, and `flock`. Docker Engine and Compose v2 are also required when running databases, Redis, or RabbitMQ.
+Initialization requires Go 1.26+, Git, GitHub SSH access, and `flock`. Docker Engine and Compose v2 are also required when running databases, Redis, or RabbitMQ.
 
 Create an empty workspace directory and clone only the Demo repository. Its directory name must be `demo`:
 

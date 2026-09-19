@@ -6,7 +6,7 @@
 
 **PrismGo —— 像写 Laravel 一样写 Go**
 
-[![Go Version](https://img.shields.io/badge/Go-1.25+-00ADD8?style=flat&logo=go)](https://go.dev/)
+[![Go Version](https://img.shields.io/badge/Go-1.26+-00ADD8?style=flat&logo=go)](https://go.dev/)
 [![Module](https://img.shields.io/badge/module-github.com%2Fprismgo%2Fframework-blue)](https://github.com/prismgo/framework)
 [![Coverage](https://codecov.io/gh/prismgo/framework/branch/main/graph/badge.svg)](https://codecov.io/gh/prismgo/framework)
 [![Latest Version](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fproxy.golang.org%2Fgithub.com%2Fprismgo%2Fframework%2F%40latest&query=%24.Version&label=version)](https://pkg.go.dev/github.com/prismgo/framework?tab=versions)
@@ -191,7 +191,7 @@ PrismGo 本地开发采用三仓并列结构。**`demo/`、`framework/`、`docs/
 
 ### 安装与初始化
 
-初始化需要 Go 1.25+、Git、GitHub SSH 访问权限和 `flock`。如需启动数据库、Redis 或 RabbitMQ，还需要 Docker Engine 与 Compose v2。
+初始化需要 Go 1.26+、Git、GitHub SSH 访问权限和 `flock`。如需启动数据库、Redis 或 RabbitMQ，还需要 Docker Engine 与 Compose v2。
 
 先创建一个空的工作区目录，只克隆 Demo 仓库；目录名必须是 `demo`：
 

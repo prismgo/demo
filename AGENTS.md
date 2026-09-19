@@ -80,7 +80,7 @@ GOWORK=off go test . ./app/... ./bootstrap/... ./config/... ./database/... ./rou
 
 1. 升级框架依赖：`cd prismgo && GOWORK=off go get github.com/prismgo/framework@vx.y.z`。
 2. 清理依赖：`GOWORK=off go mod tidy`，移除已摘出为扩展包的 oss/rabbitmq 等未用间接依赖。
-3. 复核 `go.mod`：`go` 指令保持 1.25+，关键间接依赖未被顶到需要更高工具链。
+3. 复核 `go.mod`：`go` 指令保持 1.26+，关键间接依赖未被顶到需要更高工具链。
 4. 运行验证：`GOWORK=off go run ./` 正常，且 `GOWORK=off go build ./...`、`go vet ./...`、`go test ./...` 通过。
 5. 提交推送：按仓库习惯提交（`chore(deps): ...`）并 `git push origin main`。
 6. 等待确认：push 后不要立即打 tag；等用户在 GitHub 验证 Actions 通过并明确通知发布，收到确认后再 `git tag vx.y.z && git push origin vx.y.z` 触发 Goreleaser，并校验 `https://github.com/prismgo/prismgo/releases.atom`。
